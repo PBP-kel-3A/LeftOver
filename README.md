@@ -22,7 +22,7 @@ Memiliki seluruh akses Guest, serta dapat mengelola pantry, mencari resep berdas
 ## Public API yang digunakan
 https://www.themealdb.com/api.php
 
-##Daftar Modul
+## Daftar Modul
 1. Katalog Resep 
 Menjadi etalase utama pencarian resep masakan di aplikasi. Menampilkan daftar resep masakan yang ditarik dari Public API, di sini akan dilakukan juga filter resep makanan sesuai dengan ketersediaan bahan makanan yang dimiliki oleh user.
 2. Pantry Tracker
