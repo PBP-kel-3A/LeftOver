@@ -35,11 +35,11 @@ Pengguna yang sudah login dapat menulis ulasan pengalaman memasak dan memberikan
 Tempat menyimpan koleksi masakan yang disukai. Pengguna dapat menghapus suatu resep dari resep favoritnya jika diinginkan.
 
 ## Pembagian
-Katalog Resep (Raffa Zia Arya Putra - 2506619285)
-Pantry Tracker (Zulfa Rahmi Nasution - 2506598324)
-Smart Shopping List (Karyn Isabelle Dexter - 2506656860)
-Ulasan & Rating (Elisia Catherine - 2506533570)
-Resep Favorit (Alya Tsabita Imani - 2506620192)
+1. Katalog Resep (Raffa Zia Arya Putra - 2506619285)
+2. Pantry Tracker (Zulfa Rahmi Nasution - 2506598324)
+3. Smart Shopping List (Karyn Isabelle Dexter - 2506656860)
+4. Ulasan & Rating (Elisia Catherine - 2506533570)
+5. Resep Favorit (Alya Tsabita Imani - 2506620192)
 
 ## Link Figma
 https://www.figma.com/design/MVE4zOAzM8PyQj1AfHIKZM/LeftOver?node-id=1-2&t=YFxZ7RLrrGsnCGk6-1
