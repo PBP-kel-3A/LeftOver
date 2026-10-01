@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Katalog Resep - LeftOver</title>
+</head>
+
+<body>
+
+    <h1>Katalog Resep</h1>
+
+    {% if recipes %}
+
+        {% for recipe in recipes %}
+
+            <article>
+                <img
+                    src="{{ recipe.image_url }}"
+                    alt="{{ recipe.name }}"
+                    width="200"
+                >
+
+                <h2>{{ recipe.name }}</h2>
+
+                <p>
+                    Kategori: {{ recipe.category }}
+                </p>
+
+                <p>
+                    Asal: {{ recipe.area }}
+                </p>
+            </article>
+
+        {% endfor %}
+
+    {% else %}
+
+        <p>Belum ada resep.</p>
+
+    {% endif %}
+
+</body>
+</html>
