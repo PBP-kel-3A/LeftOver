@@ -1,0 +1,57 @@
+{% load static %}
+
+<nav class="navbar">
+    <div class="navbar-container">
+
+        <!-- Logo -->
+        <a href="{% url 'main:landing' %}" class="navbar-brand">
+            <img
+                src="{% static 'img/Logo.png' %}"
+                alt="LeftOver Logo"
+                class="navbar-logo"
+            >
+
+            <img
+                src="{% static 'img/TextLogo.png' %}"
+                alt="LeftOver"
+                class="navbar-text-logo"
+            >
+        </a>
+
+        <!-- Navigation -->
+        <div class="navbar-links">
+
+            <a href="{% url 'main:landing' %}">
+                Home
+            </a>
+
+            <a href="{% url 'recipes:recipe_list' %}">
+                Katalog Resep
+            </a>
+
+            <a href="#" class="nav-dropdown">
+                <span>Dapur Saya</span>
+                <span class="nav-arrow"></span>
+            </a>
+
+            <a href="#">
+                Favorite
+            </a>
+
+        </div>
+
+        <!-- Authentication -->
+        <div class="navbar-auth">
+
+            <a href="#" class="nav-login">
+                Login
+            </a>
+
+            <a href="#" class="nav-register">
+                Register
+            </a>
+
+        </div>
+
+    </div>
+</nav>
