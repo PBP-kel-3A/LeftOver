@@ -1,0 +1,383 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+    LeftOver - Kurangi Food Waste
+{% endblock %}
+
+{% block content %}
+
+<section class="hero">
+
+    <div class="hero-container">
+
+        <!-- LEFT CONTENT -->
+        <div class="hero-content">
+
+            <h1 class="hero-title">
+                Punya sisa bahan
+                dapur?
+                <span>Jangan buang dulu!</span>
+            </h1>
+
+            <p class="hero-description">
+                LeftOver membantu mahasiswa, anak kos, dan keluarga
+                menyulap sisa telur, sayur, atau bumbu dapur menjadi
+                hidangan lezat hangat, hemat pengeluaran, dan ramah lingkungan.
+            </p>
+
+            <!-- Search -->
+            <div class="hero-search">
+
+                <span class="search-icon">⌕</span>
+
+                <input
+                    type="text"
+                    placeholder="Cari bahan yang anda: ayam, bawang, ..."
+                >
+
+                <a href="{% url 'recipes:recipe_list' %}" class="search-button">
+                    Cari resep sekarang
+                    <span>→</span>
+                </a>
+
+            </div>
+
+            <!-- Popular Ingredients -->
+            <div class="popular-ingredients">
+
+                <span class="popular-label">
+                    Bahan populer :
+                </span>
+
+                <a href="#" class="ingredient-pill">
+                    🥚 Telur
+                </a>
+
+                <a href="#" class="ingredient-pill">
+                    🍗 Ayam
+                </a>
+
+                <a href="#" class="ingredient-pill">
+                    🧅 Bawang
+                </a>
+
+                <a href="#" class="ingredient-pill">
+                    🥔 Kentang
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <!-- RIGHT CONTENT -->
+        <div class="hero-visual">
+
+            <!-- Nanti di sini gambar makanan dari Figma -->
+            <div class="hero-food-image">
+                <img src="{% static 'img/Hero.png' %}" alt="LeftOver Food">
+            </div>
+
+            <!-- Statistics -->
+            <div class="stat-card stat-card-top">
+
+                <p>Total bahan diselamatkan</p>
+
+                <h2>1.482 kg</h2>
+
+                <span>
+                    Oleh 840+ mahasiswa & keluarga
+                </span>
+
+            </div>
+
+            <div class="stat-card stat-card-bottom">
+
+                <p>Resep Tersedia</p>
+
+                <h2>350+ Resep</h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<section class="features">
+
+    <div class="features-container">
+
+        <div class="features-heading">
+
+            <span class="section-badge">
+                Fitur Utama LeftOver
+            </span>
+
+            <h2>
+                Dirancang Ramah Kantong & Bebas Limbah
+            </h2>
+
+            <p>
+                Tiga pilar pintar untuk menjaga dapur
+                tetap efisien setiap hari.
+            </p>
+
+        </div>
+
+
+        <div class="features-grid">
+
+            <!-- Feature 1 -->
+            <article class="feature-card">
+
+                <div class="feature-icon">
+                    <img src="{% static 'img/Recipe.png' %}" alt="">
+                </div>
+
+                <h3>
+                    Katalog Resep
+                </h3>
+
+                <p>
+                    Integrasi TheMealDB API & kreasi komunitas.
+                    Tulis resep kreasi Anda sendiri atau filter
+                    berdasarkan bahan sisa.
+                </p>
+
+                <a href="{% url 'recipes:recipe_list' %}"
+                   class="feature-button">
+
+                    Jelajahi Resep →
+                    
+                </a>
+
+            </article>
+
+
+            <!-- Feature 2 -->
+            <article class="feature-card">
+
+                <div class="feature-icon">
+                    <img src="{% static 'img/Pantry.png' %}" alt="">
+                </div>
+
+                <h3>
+                    Pantry Tracker
+                </h3>
+
+                <p>
+                    Pantau stok dan tanggal kedaluwarsa dengan
+                    indikator warna pintar untuk membantu
+                    mengelola bahan makanan.
+                </p>
+
+                <a href="#" class="feature-button">
+                    Cek Dapur →
+                </a>
+
+            </article>
+
+
+            <!-- Feature 3 -->
+            <article class="feature-card">
+
+                <div class="feature-icon">
+                    <img src="{% static 'img/Shoping.png' %}" alt="">
+                </div>
+
+                <h3>
+                    Smart Shopping List
+                </h3>
+
+                <p>
+                    Coret barang belanjaan secara instan dan
+                    pindahkan langsung ke stok dapur tanpa
+                    reload.
+                </p>
+
+                <a href="#" class="feature-button">
+                    Kelola Belanjaan →
+                </a>
+
+            </article>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<section class="recommendation">
+
+    <div class="recommendation-container">
+
+        {% if user.is_authenticated %}
+
+            <!-- Logged-in User -->
+
+            <div class="recommendation-header">
+
+                <div>
+                    <h2>
+                        Rekomendasi Berdasarkan Dapurmu
+                    </h2>
+
+                    <p>
+                        Temukan resep yang cocok dengan bahan
+                        yang kamu punya.
+                    </p>
+                </div>
+
+                <a href="{% url 'recipes:recipe_list' %}"
+                   class="recommendation-link">
+                    Lihat semua resep →
+                </a>
+
+            </div>
+
+
+            <div class="recipe-preview-grid">
+
+                <!-- Recipe Card 1 -->
+                <article class="recipe-card">
+
+                    <div class="recipe-image">
+                        <span>Recipe Image</span>
+                    </div>
+
+                    <div class="recipe-card-content">
+
+                        <div class="recipe-meta">
+                            <span>★ 4.9</span>
+                            <span>15 Menit</span>
+                        </div>
+
+                        <h3>
+                            Nasi Goreng Kampung Sisa Dapur
+                        </h3>
+
+                        <p>
+                            Penyelamat nasi keras malam ini
+                            dengan bahan sederhana.
+                        </p>
+
+                        <div class="recipe-tag">
+                            ✓ Bahan tersedia
+                        </div>
+
+                        <a href="#" class="recipe-button">
+                            Lihat Resep →
+                        </a>
+
+                    </div>
+
+                </article>
+
+
+                <!-- Recipe Card 2 -->
+                <article class="recipe-card">
+
+                    <div class="recipe-image">
+                        <span>Recipe Image</span>
+                    </div>
+
+                    <div class="recipe-card-content">
+
+                        <div class="recipe-meta">
+                            <span>★ 4.8</span>
+                            <span>12 Menit</span>
+                        </div>
+
+                        <h3>
+                            Tumis Tahu Telur Saus Tiram
+                        </h3>
+
+                        <p>
+                            Kombinasi tahu dan telur yang
+                            sederhana dan praktis.
+                        </p>
+
+                        <div class="recipe-tag warning">
+                            ⚠ Kurang 1 bahan
+                        </div>
+
+                        <a href="#" class="recipe-button">
+                            Lihat Resep →
+                        </a>
+
+                    </div>
+
+                </article>
+
+
+                <!-- Recipe Card 3 -->
+                <article class="recipe-card">
+
+                    <div class="recipe-image">
+                        <span>Recipe Image</span>
+                    </div>
+
+                    <div class="recipe-card-content">
+
+                        <div class="recipe-meta">
+                            <span>★ 4.7</span>
+                            <span>20 Menit</span>
+                        </div>
+
+                        <h3>
+                            Sup Ayam Sayur Bening
+                        </h3>
+
+                        <p>
+                            Sup sederhana dengan sayuran
+                            yang ada di dapur.
+                        </p>
+
+                        <div class="recipe-tag">
+                            ✓ Bahan tersedia
+                        </div>
+
+                        <a href="#" class="recipe-button">
+                            Lihat Resep →
+                        </a>
+
+                    </div>
+
+                </article>
+
+            </div>
+
+        {% else %}
+
+            <!-- Guest -->
+
+            <div class="recommendation-guest">
+
+                <h2>
+                    Rekomendasi Resep
+                </h2>
+
+                <p>
+                    Temukan berbagai resep lezat berdasarkan
+                    bahan yang kamu punya.
+                </p>
+
+                <a href="{% url 'recipes:recipe_list' %}"
+                   class="recommendation-link">
+                    Jelajahi resep →
+                </a>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</section>
+
+{% endblock %}
