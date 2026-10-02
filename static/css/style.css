@@ -88,12 +88,13 @@ a {
    ========================= */
 
 .navbar {
-    position: absolute;
+    position: sticky;
     top: 24px;
     left: 0;
     right: 0;
 
     z-index: 100;
+    margin-bottom: -48px;
 }
 
 .navbar-container {
