@@ -44,4 +44,7 @@ Tempat menyimpan koleksi masakan yang disukai. Pengguna dapat menghapus suatu re
 ## Link Figma
 https://www.figma.com/design/MVE4zOAzM8PyQj1AfHIKZM/LeftOver?node-id=1-2&t=YFxZ7RLrrGsnCGk6-1
 
+## Link PWS
+https://raffa-zia-leftover.pws.cs.ui.ac.id
+
 
