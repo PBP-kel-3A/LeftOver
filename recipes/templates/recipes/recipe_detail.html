@@ -96,6 +96,28 @@
                         {{ recipe.instructions }}
                     </p>
                 </div>
+                {% if recipe.youtube_url %}
+                    <div class="mt-10">
+                        <h2 class="text-xl font-bold text-[#26382D]">
+                            Tutorial Video
+                        </h2>
+
+                        <p class="mt-2 text-sm text-[#65756A]">
+                            Lihat tutorial pembuatan resep ini melalui video.
+                        </p>
+
+                        <a
+                            href="{{ recipe.youtube_url }}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="mt-4 inline-flex items-center rounded-xl bg-[#315D47]
+                                px-5 py-3 text-sm font-semibold text-white
+                                transition hover:bg-[#1F4934]"
+                        >
+                            ▶ Watch Tutorial
+                        </a>
+                    </div>
+                {% endif %}
 
             </div>
 
