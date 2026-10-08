@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}{{ recipe.name }} - LeftOver{% endblock %}
+
+{% block extra_css %}
+<script src="https://cdn.tailwindcss.com"></script>
+{% endblock %}
+
+{% block content %}
+
+<section class="min-h-screen bg-[#F5F1E3] px-6 py-12">
+    <div class="mx-auto max-w-5xl">
+
+        <!-- Back -->
+        <a
+            href="{% url 'recipes:recipe_list' %}"
+            class="mb-6 inline-flex items-center text-sm font-semibold text-[#315D47] hover:text-[#1F4934]"
+        >
+            ← Kembali ke katalog
+        </a>
+
+        <!-- Recipe Card -->
+        <article class="overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-black/5">
+
+            <!-- Image -->
+            {% if recipe.image_url %}
+                <img
+                    src="{{ recipe.image_url }}"
+                    alt="{{ recipe.name }}"
+                    class="h-72 w-full object-cover md:h-96"
+                >
+            {% endif %}
+
+            <div class="p-6 md:p-10">
+
+                <!-- Title -->
+                <h1 class="text-3xl font-bold text-[#26382D] md:text-4xl">
+                    {{ recipe.name }}
+                </h1>
+
+                <!-- Metadata -->
+                <div class="mt-4 flex flex-wrap gap-2">
+
+                    {% if recipe.category %}
+                        <span class="rounded-full bg-[#E5EEE6] px-3 py-1 text-sm font-medium text-[#315D47]">
+                            {{ recipe.category }}
+                        </span>
+                    {% endif %}
+
+                    {% if recipe.area %}
+                        <span class="rounded-full bg-[#F1EBDD] px-3 py-1 text-sm font-medium text-[#75664D]">
+                            {{ recipe.area }}
+                        </span>
+                    {% endif %}
+
+                </div>
+
+                <!-- Ingredients -->
+                <div class="mt-8">
+                    <h2 class="text-xl font-bold text-[#26382D]">
+                        Ingredients
+                    </h2>
+
+                    <div class="mt-4 space-y-2">
+
+                        {% for item in recipe.recipe_ingredients.all %}
+
+                            <div class="flex justify-between border-b border-gray-100 py-2">
+                                <span class="text-[#26382D]">
+                                    {{ item.ingredient.name }}
+                                </span>
+
+                                <span class="text-sm text-[#65756A]">
+                                    {{ item.measure }}
+                                </span>
+                            </div>
+
+                        {% empty %}
+
+                            <p class="text-sm text-[#65756A]">
+                                Belum ada informasi bahan.
+                            </p>
+
+                        {% endfor %}
+
+                    </div>
+                </div>
+
+                <!-- Instructions -->
+                <div class="mt-8">
+                    <h2 class="text-xl font-bold text-[#26382D]">
+                        Instructions
+                    </h2>
+
+                    <p class="mt-4 whitespace-pre-line leading-relaxed text-[#65756A]">
+                        {{ recipe.instructions }}
+                    </p>
+                </div>
+
+            </div>
+
+        </article>
+
+    </div>
+</section>
+
+{% endblock %}
