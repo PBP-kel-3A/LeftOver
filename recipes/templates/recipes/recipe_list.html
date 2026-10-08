@@ -8,6 +8,92 @@
 
 {% block extra_js %}
 <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const input = document.getElementById("ingredient-input");
+        const hiddenInput = document.getElementById("ingredients");
+        const chipsContainer = document.getElementById("ingredient-chips");
+
+        let ingredients = [];
+
+        function renderChips() {
+            chipsContainer.querySelectorAll(".ingredient-chip").forEach(
+                chip => chip.remove()
+            );
+
+            ingredients.forEach(function (ingredient) {
+                const chip = document.createElement("span");
+
+                chip.className =
+                    "ingredient-chip inline-flex items-center gap-1 " +
+                    "rounded-full bg-[#E6F0E9] px-3 py-1 " +
+                    "text-sm font-medium text-[#315D47]";
+
+                chip.innerHTML = `
+                    <span>${ingredient}</span>
+                    <button
+                        type="button"
+                        class="remove-ingredient text-[#315D47] hover:text-[#1F4934]"
+                        aria-label="Hapus ${ingredient}"
+                    >
+                        ×
+                    </button>
+                `;
+
+                chip.querySelector(".remove-ingredient").addEventListener(
+                    "click",
+                    function () {
+                        ingredients = ingredients.filter(
+                            item => item !== ingredient
+                        );
+
+                        updateHiddenInput();
+                        renderChips();
+                    }
+                );
+
+                chipsContainer.insertBefore(chip, input);
+            });
+        }
+
+        function updateHiddenInput() {
+            hiddenInput.value = ingredients.join(",");
+        }
+
+        input.addEventListener("keydown", function (event) {
+            if (event.key !== "Enter") {
+                return;
+            }
+
+            event.preventDefault();
+
+            const ingredient = input.value.trim();
+
+            if (!ingredient) {
+                return;
+            }
+
+            if (!ingredients.includes(ingredient)) {
+                ingredients.push(ingredient);
+            }
+
+            input.value = "";
+
+            updateHiddenInput();
+            renderChips();
+        });
+
+        document
+            .getElementById("recipe-filter-form")
+            .addEventListener("reset", function () {
+                ingredients = [];
+                input.value = "";
+                updateHiddenInput();
+                renderChips();
+            });
+    });
+</script>
 {% endblock %}
 
 {% block content %}
@@ -108,22 +194,44 @@
                 <!-- Ingredients -->
                 <div>
                     <label
-                        for="ingredients"
+                        for="ingredient-input"
                         class="mb-2 block text-sm font-semibold text-[#26382D]"
                     >
-                        Bahan yang tersedia (>2 bahan pisahkan dengan ",")
+                        Bahan yang tersedia
                     </label>
 
+                    <div
+                        id="ingredient-chips-container"
+                        class="min-h-[48px] w-full rounded-xl border border-gray-200
+                            bg-white px-3 py-2
+                            focus-within:border-[#315D47]
+                            focus-within:ring-2 focus-within:ring-[#315D47]/20"
+                    >
+                        <div
+                            id="ingredient-chips"
+                            class="flex flex-wrap items-center gap-2"
+                        >
+                            <input
+                                type="text"
+                                id="ingredient-input"
+                                placeholder="Ketik bahan lalu tekan Enter..."
+                                class="min-w-[180px] flex-1 border-0 px-1 py-1
+                                    text-sm outline-none focus:ring-0"
+                                autocomplete="off"
+                            >
+                        </div>
+                    </div>
+
                     <input
-                        type="text"
+                        type="hidden"
                         id="ingredients"
                         name="ingredients"
                         value="{{ ingredient_query }}"
-                        placeholder="Contoh: chicken, rice, onion"
-                        class="w-full rounded-xl border border-gray-200 px-4 py-3
-                            text-sm outline-none transition
-                            focus:border-[#315D47] focus:ring-2 focus:ring-[#315D47]/20"
                     >
+
+                    <p class="mt-2 text-xs text-[#65756A]">
+                        Tekan Enter untuk menambahkan bahan.
+                    </p>
                 </div>
 
             </div>
