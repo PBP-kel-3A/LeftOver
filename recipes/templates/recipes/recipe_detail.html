@@ -8,15 +8,17 @@
 
 {% block content %}
 
-<section class="min-h-screen bg-[#F5F1E3] px-6 py-12">
+<section class="min-h-screen bg-[#F5F1E3] px-6 pb-12 pt-28">
     <div class="mx-auto max-w-5xl">
 
         <!-- Back -->
         <a
             href="{% url 'recipes:recipe_list' %}"
-            class="mb-6 inline-flex items-center text-sm font-semibold text-[#315D47] hover:text-[#1F4934]"
+            class="mb-6 inline-flex items-center gap-2 text-sm font-semibold
+                text-[#315D47] transition hover:text-[#1F4934]"
         >
-            ← Kembali ke katalog
+            <span class="text-lg">←</span>
+            Kembali ke Katalog
         </a>
 
         <!-- Recipe Card -->
