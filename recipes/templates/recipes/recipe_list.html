@@ -1,45 +1,248 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% extends "base.html" %}
 
-    <title>Katalog Resep - LeftOver</title>
-</head>
+{% block title %}Katalog Resep - LeftOver{% endblock %}
 
-<body>
+{% block extra_css %}
+<script src="https://cdn.tailwindcss.com"></script>
+{% endblock %}
 
-    <h1>Katalog Resep</h1>
+{% block extra_js %}
+<script src="https://unpkg.com/htmx.org@2.0.4"></script>
 
-    {% if recipes %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const input = document.getElementById("ingredient-input");
+        const hiddenInput = document.getElementById("ingredients");
+        const chipsContainer = document.getElementById("ingredient-chips");
 
-        {% for recipe in recipes %}
+        let ingredients = [];
 
-            <article>
-                <img
-                    src="{{ recipe.image_url }}"
-                    alt="{{ recipe.name }}"
-                    width="200"
-                >
+        function renderChips() {
+            chipsContainer.querySelectorAll(".ingredient-chip").forEach(
+                chip => chip.remove()
+            );
 
-                <h2>{{ recipe.name }}</h2>
+            ingredients.forEach(function (ingredient) {
+                const chip = document.createElement("span");
 
-                <p>
-                    Kategori: {{ recipe.category }}
-                </p>
+                chip.className =
+                    "ingredient-chip inline-flex items-center gap-1 " +
+                    "rounded-full bg-[#E6F0E9] px-3 py-1 " +
+                    "text-sm font-medium text-[#315D47]";
 
-                <p>
-                    Asal: {{ recipe.area }}
-                </p>
-            </article>
+                chip.innerHTML = `
+                    <span>${ingredient}</span>
+                    <button
+                        type="button"
+                        class="remove-ingredient text-[#315D47] hover:text-[#1F4934]"
+                        aria-label="Hapus ${ingredient}"
+                    >
+                        ×
+                    </button>
+                `;
 
-        {% endfor %}
+                chip.querySelector(".remove-ingredient").addEventListener(
+                    "click",
+                    function () {
+                        ingredients = ingredients.filter(
+                            item => item !== ingredient
+                        );
 
-    {% else %}
+                        updateHiddenInput();
+                        renderChips();
+                    }
+                );
 
-        <p>Belum ada resep.</p>
+                chipsContainer.insertBefore(chip, input);
+            });
+        }
 
-    {% endif %}
+        function updateHiddenInput() {
+            hiddenInput.value = ingredients.join(",");
+        }
 
-</body>
-</html>
+        input.addEventListener("keydown", function (event) {
+            if (event.key !== "Enter") {
+                return;
+            }
+
+            event.preventDefault();
+
+            const ingredient = input.value.trim();
+
+            if (!ingredient) {
+                return;
+            }
+
+            if (!ingredients.includes(ingredient)) {
+                ingredients.push(ingredient);
+            }
+
+            input.value = "";
+
+            updateHiddenInput();
+            renderChips();
+        });
+
+        document
+            .getElementById("recipe-filter-form")
+            .addEventListener("reset", function () {
+                ingredients = [];
+                input.value = "";
+                updateHiddenInput();
+                renderChips();
+            });
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+
+<section class="min-h-screen bg-[#F5F1E3] px-6 pb-12 pt-28">
+    <div class="mx-auto max-w-7xl">
+
+        <!-- Header -->
+        <div class="mb-10">
+            <p class="mb-2 text-sm font-semibold uppercase tracking-widest text-[#315D47]">
+                LeftOver Recipe Catalog
+            </p>
+
+            <h1 class="text-4xl font-bold tracking-tight text-[#26382D] md:text-5xl">
+                Katalog Resep
+            </h1>
+
+            <p class="mt-3 max-w-2xl text-base leading-relaxed text-[#65756A]">
+                Temukan resep yang bisa membantu kamu mengolah bahan makanan
+                yang masih tersedia di dapur.
+            </p>
+        </div>
+
+        <!-- Search & Filter -->
+        <form
+            id="recipe-filter-form"
+            method="GET"
+            hx-get="{% url 'recipes:recipe_list' %}"
+            hx-target="#recipe-results"
+            hx-trigger="submit"
+            hx-swap="innerHTML"
+            class="mb-10 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-black/5"
+        >
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-[2fr_1fr_2fr_auto]">
+
+                <!-- Search -->
+                <div>
+                    <label
+                        for="search"
+                        class="mb-2 block text-sm font-semibold text-[#26382D]"
+                    >
+                        Cari resep
+                    </label>
+
+                    <input
+                        type="text"
+                        id="search"
+                        name="search"
+                        value="{{ search_query }}"
+                        placeholder="Cari nama, kategori, atau asal resep..."
+                        class="w-full rounded-xl border border-gray-200 px-4 py-3
+                            text-sm outline-none transition
+                            focus:border-[#315D47] focus:ring-2 focus:ring-[#315D47]/20"
+                    >
+                </div>
+
+                <!-- Category -->
+                <div>
+                    <label
+                        for="category"
+                        class="mb-2 block text-sm font-semibold text-[#26382D]"
+                    >
+                        Kategori
+                    </label>
+
+                    <select
+                        id="category"
+                        name="category"
+                        class="w-full rounded-xl border border-gray-200 px-4 py-3
+                            text-sm outline-none transition
+                            focus:border-[#315D47] focus:ring-2 focus:ring-[#315D47]/20"
+                    >
+                        <option value="">Semua kategori</option>
+
+                        {% for category in categories %}
+                            <option
+                                value="{{ category }}"
+                                {% if category == category_query %}selected{% endif %}
+                            >
+                                {{ category }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Button -->
+                <div class="flex items-start pt-7">
+                    <button
+                        type="submit"
+                        class="w-full rounded-xl bg-[#315D47] px-6 py-3
+                            text-sm font-semibold text-white transition
+                            hover:bg-[#1F4934] md:w-auto"
+                    >
+                        Cari
+                    </button>
+                </div>
+
+                <!-- Ingredients -->
+                <div>
+                    <label
+                        for="ingredient-input"
+                        class="mb-2 block text-sm font-semibold text-[#26382D]"
+                    >
+                        Bahan yang tersedia
+                    </label>
+
+                    <div
+                        id="ingredient-chips-container"
+                        class="min-h-[48px] w-full rounded-xl border border-gray-200
+                            bg-white px-3 py-2
+                            focus-within:border-[#315D47]
+                            focus-within:ring-2 focus-within:ring-[#315D47]/20"
+                    >
+                        <div
+                            id="ingredient-chips"
+                            class="flex flex-wrap items-center gap-2"
+                        >
+                            <input
+                                type="text"
+                                id="ingredient-input"
+                                placeholder="Ketik bahan lalu tekan Enter..."
+                                class="min-w-[180px] flex-1 border-0 px-1 py-1
+                                    text-sm outline-none focus:ring-0"
+                                autocomplete="off"
+                            >
+                        </div>
+                    </div>
+
+                    <input
+                        type="hidden"
+                        id="ingredients"
+                        name="ingredients"
+                        value="{{ ingredient_query }}"
+                    >
+
+                    <p class="mt-2 text-xs text-[#65756A]">
+                        Tekan Enter untuk menambahkan bahan.
+                    </p>
+                </div>
+
+            </div>
+        </form>
+
+        <!-- Recipe List -->
+        <div id="recipe-results">
+            {% include "recipes/partials/recipe_cards.html" %}
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}
