@@ -54,6 +54,11 @@ def recipe_list(request):
         "ingredient_query": ingredient_query,
     }
 
+    #Handle TMX request -> dia harusnya akan return only recipe cards
+    if request.headers.get("HX-Request") == "true":
+        return render(request, "recipes/partials/recipe_cards.html", context)
+
+    #Normal request -> dia harusnya ngembaliim complete page
     return render(request, "recipes/recipe_list.html", context)
 
 def recipe_detail(request, pk):
