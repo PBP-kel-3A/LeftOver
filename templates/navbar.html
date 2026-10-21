@@ -42,16 +42,28 @@
 
         <!-- Authentication -->
         <div class="navbar-auth">
-
-            <a href="#" class="nav-login">
-                Login
-            </a>
-
-            <a href="#" class="nav-register">
-                Register
-            </a>
-
+            {% if user.is_authenticated %}
+                <!-- kalau user sudah login: tampilkan nama akun dan tombol logout aja -->
+                <!-- class dari tombolnya disamakan dengan class login-logout -->
+                <span class="nav-login">
+                    Halo, {{ user.username }}
+                </span>
+                
+                <form action="{% url 'main:logout' %}" method="POST" class="inline">
+                    {% csrf_token %}
+                    <button type="submit" class="nav-register">
+                        Logout
+                    </button>
+                </form>
+            {% else %}
+                <!-- kalau user belum login: tampilkan tombol Login dan Register -->
+                <a href="{% url 'main:login' %}" class="nav-login">
+                    Login
+                </a>
+                <a href="{% url 'main:register' %}" class="nav-register">
+                    Register
+                </a>
+            {% endif %}
         </div>
-
     </div>
 </nav>

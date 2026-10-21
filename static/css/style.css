@@ -98,7 +98,7 @@ a {
 }
 
 .navbar-container {
-    max-width: 1120px;
+    width: 90%;
     height: 48px;
 
     margin: 0 auto;
@@ -106,7 +106,8 @@ a {
 
     display: flex;
     align-items: center;
-
+    /* supaya logo dan buttonsnya mentok kiri kanan */
+    justify-content: space-between; 
     background-color: #FFF8E7;
 
     border-radius: 999px;

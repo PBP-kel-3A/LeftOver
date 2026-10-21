@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Register - LeftOver{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-[#F5F1E3] flex items-center justify-center px-4 pt-20 pb-12">
+    <div class="max-w-md w-full bg-white rounded-3xl shadow-sm ring-1 ring-black/5 p-8 md:p-10">
+        
+        <!-- Headingnya -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-extrabold text-[#26382D]">Buat Akun Baru</h1>
+            <p class="text-sm text-[#65756A] mt-2">Yuk, gabung dan mulai bersama LeftOver!</p>
+        </div>
+
+        <!-- Form Register -->
+        <form method="POST" class="space-y-6">
+            {% csrf_token %}
+            
+            {% for field in form %}
+                <div>
+                    <label class="block text-sm font-semibold text-[#26382D] mb-2">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <p class="text-xs text-red-600 mt-1">{{ field.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <!-- tombol untuk submit -->
+            <button type="submit" class="w-full py-3 px-4 rounded-xl bg-[#315D47] text-white font-semibold text-sm transition hover:bg-[#1F4934]">
+                Register
+            </button>
+        </form>
+
+        <!-- link buat ke page login (kalo sudah punya akun) -->
+        <p class="text-center text-sm text-[#65756A] mt-6">
+            Sudah punya akun? 
+            <a href="{% url 'main:login' %}" class="text-[#315D47] font-semibold hover:underline">Masuk di sini</a>
+        </p>
+
+    </div>
+</div>
+{% endblock %}
