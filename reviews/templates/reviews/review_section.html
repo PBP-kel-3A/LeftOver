@@ -1,0 +1,214 @@
+<!-- BAGIAN ULASAN & TIPS MEMASAK -->
+<div class="mt-10 bg-white rounded-3xl p-6 md:p-8 shadow-sm ring-1 ring-black/5">
+    
+    <!-- Header & Tombol Buka Modal -->
+    <div class="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 pb-5 mb-6">
+        <div>
+            <h2 class="text-xl font-extrabold text-[#26382D]">💬 Ulasan Pengguna & Tips Memasak</h2>
+            <p class="text-xs text-[#65756A] mt-1">LeftOver Community</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3">
+            <!-- Tombol Tulis Ulasan -->
+            {% if user.is_authenticated %}
+                <button type="button" onclick="openAddReviewModal()" class="px-4 py-2.5 rounded-xl bg-[#7C1A0F] hover:bg-[#65140B] text-white font-semibold text-xs transition shadow-xs cursor-pointer">
+                    + Tulis Ulasan & Tips
+                </button>
+            {% else %}
+                <a href="{% url 'main:login' %}" class="px-4 py-2.5 rounded-xl bg-[#315D47] text-white font-semibold text-xs transition">
+                    Login untuk Mengulas
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Daftar Ulasan -->
+    <div id="reviewListContainer" class="space-y-4">
+        {% for review in recipe.reviews.all %}
+            <div class="review-item p-5 rounded-2xl border border-gray-100 bg-[#FAF8F5] flex flex-col sm:flex-row justify-between items-start gap-4">
+                <div class="flex-1">
+                    <span class="font-bold text-sm text-[#26382D]">{{ review.user.username }}</span>
+                    
+                    <!-- Tampilan Bintang -->
+                    <div class="flex items-center text-sm my-1 select-none">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= review.rating %}
+                                <span class="text-yellow-400">★</span>
+                            {% else %}
+                                <span class="text-gray-300">★</span>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <!-- Teks Ulasan -->
+                    {% if review.comment %}
+                        <p class="text-sm text-[#26382D]/85 mt-1.5 leading-relaxed">{{ review.comment }}</p>
+                    {% endif %}
+
+                    <!-- Foto Masakan (Jika ada) -->
+                    {% if review.image %}
+                        <div class="mt-3">
+                            <img src="{{ review.image.url }}" alt="Foto ulasan" class="w-32 h-32 object-cover rounded-xl border border-gray-200">
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Waktu & Tombol Edit/Hapus -->
+                <div class="text-right text-xs text-[#65756A] flex items-center gap-3 self-end sm:self-start shrink-0">
+                    <span>{{ review.created_at|timesince }} lalu</span>
+                    {% if user == review.user %}
+                        <button type="button"
+                                data-review-id="{{ review.id }}"
+                                data-rating="{{ review.rating }}"
+                                data-comment="{{ review.comment|default:'' }}"
+                                onclick="openEditReviewModal(this)"
+                                class="text-[#315D47] font-semibold hover:underline cursor-pointer">
+                            Edit
+                        </button>
+                        <button type="button"
+                                data-review-id="{{ review.id }}"
+                                onclick="openDeleteReviewModal(this)"
+                                class="text-red-600 font-semibold hover:underline cursor-pointer">
+                            Hapus
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+        {% empty %}
+            <p class="text-center text-sm text-[#65756A] py-8">Belum ada ulasan untuk resep ini. Jadilah yang pertama memberikan ulasan!</p>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- MODAL POPUP INPUT / EDIT ULASAN -->
+<div id="reviewModal" class="fixed inset-0 bg-black/50 backdrop-blur-xs hidden items-center justify-center z-50 px-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 md:p-7 shadow-2xl border border-[#26382D]/10">
+        <h3 id="reviewModalTitle" class="text-lg font-extrabold text-[#26382D] mb-1">Bagikan Pengalaman Memasak</h3>
+        <p class="text-xs text-[#65756A] mb-5">Berikan penilaian bintang (wajib) serta tips atau foto masakan Anda.</p>
+
+        <form id="reviewForm" method="POST" action="{% url 'reviews:add_review' recipe.id %}" enctype="multipart/form-data" onsubmit="return validateReviewForm()">
+            {% csrf_token %}
+            <input type="hidden" name="rating" id="ratingInput" value="0">
+
+            <!-- Bintang Interaktif -->
+            <div class="mb-4">
+                <label class="block text-xs font-bold text-[#26382D] mb-1.5">Rating Bintang <span class="text-red-500">*</span></label>
+                <div class="flex items-center gap-3">
+                    <div class="flex text-3xl cursor-pointer select-none space-x-1" id="starContainer" onmouseleave="resetStarHover()">
+                        <span onclick="selectStar(1)" onmouseenter="hoverStar(1)" class="star-btn text-gray-300 transition hover:scale-110">★</span>
+                        <span onclick="selectStar(2)" onmouseenter="hoverStar(2)" class="star-btn text-gray-300 transition hover:scale-110">★</span>
+                        <span onclick="selectStar(3)" onmouseenter="hoverStar(3)" class="star-btn text-gray-300 transition hover:scale-110">★</span>
+                        <span onclick="selectStar(4)" onmouseenter="hoverStar(4)" class="star-btn text-gray-300 transition hover:scale-110">★</span>
+                        <span onclick="selectStar(5)" onmouseenter="hoverStar(5)" class="star-btn text-gray-300 transition hover:scale-110">★</span>
+                    </div>
+                    <span id="ratingLabel" class="text-xs font-semibold text-[#65756A]">0 dari 5 Bintang</span>
+                </div>
+                <p id="ratingErrorMsg" class="text-xs text-red-600 mt-1.5 hidden">⚠️ Pilih minimal 1 bintang terlebih dahulu!</p>
+            </div>
+
+            <!-- Komentar -->
+            <div class="mb-4">
+                <label class="block text-xs font-bold text-[#26382D] mb-1.5">Ulasan & Tips (Opsional)</label>
+                <textarea name="comment" id="commentInput" rows="3" placeholder="Tulis tips memasak, rasa, atau bahan substitusi..." class="w-full rounded-2xl border border-gray-200 p-3.5 text-sm text-[#26382D] focus:outline-none focus:border-[#315D47]"></textarea>
+            </div>
+
+            <!-- Upload Foto -->
+            <div class="mb-6">
+                <label class="block text-xs font-bold text-[#26382D] mb-1.5">Foto Hasil Masakan (Opsional)</label>
+                <input type="file" name="image" id="imageInput" accept="image/*" class="w-full text-xs text-[#65756A] file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-[#315D47]/10 file:text-[#315D47] cursor-pointer">
+            </div>
+
+            <div class="flex justify-end gap-2.5">
+                <button type="button" onclick="closeReviewModal()" class="px-5 py-2.5 rounded-xl border border-gray-200 text-xs font-semibold text-[#26382D] cursor-pointer">Batal</button>
+                <button type="submit" class="px-5 py-2.5 rounded-xl bg-[#7C1A0F] hover:bg-[#65140B] text-white text-xs font-semibold transition cursor-pointer">Kirim Ulasan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL KONFIRMASI HAPUS -->
+<div id="deleteReviewModal" class="fixed inset-0 bg-black/50 backdrop-blur-xs hidden items-center justify-center z-50 px-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl border border-[#26382D]/10">
+        <div class="w-12 h-12 rounded-2xl bg-red-50 text-[#7C1A0F] flex items-center justify-center mx-auto mb-3 text-2xl font-bold">⚠️</div>
+        <h3 class="text-lg font-extrabold text-[#26382D] mb-1">Hapus Ulasan</h3>
+        <p class="text-xs text-[#65756A] mb-6">Apakah kamu ingin menghapus ulasan dan penilaian ini?</p>
+
+        <form id="deleteReviewForm" method="POST" action="">
+            {% csrf_token %}
+            <div class="flex justify-center gap-3">
+                <button type="button" onclick="closeDeleteReviewModal()" class="flex-1 py-2.5 rounded-full border border-gray-200 text-xs font-semibold text-[#26382D] cursor-pointer">Batal</button>
+                <button type="submit" class="flex-1 py-2.5 rounded-full bg-[#7C1A0F] hover:bg-[#65140B] text-white text-xs font-semibold transition cursor-pointer">Ya, Lanjutkan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- SCRIPT MODAL & BINTANG -->
+<script>
+    let selectedRating = 0;
+    const addReviewUrl = "{% url 'reviews:add_review' recipe.id %}";
+
+    function renderStars(count) {
+        const stars = document.querySelectorAll('#starContainer .star-btn');
+        stars.forEach((star, idx) => {
+            star.classList.toggle('text-yellow-400', idx < count);
+            star.classList.toggle('text-gray-300', idx >= count);
+        });
+    }
+
+    function selectStar(val) {
+        selectedRating = val;
+        document.getElementById('ratingInput').value = val;
+        document.getElementById('ratingLabel').innerText = val + " dari 5 Bintang";
+        document.getElementById('ratingErrorMsg').classList.add('hidden');
+        renderStars(val);
+    }
+
+    function hoverStar(val) { renderStars(val); }
+    function resetStarHover() { renderStars(selectedRating); }
+
+    function validateReviewForm() {
+        if (selectedRating < 1 || selectedRating > 5) {
+            document.getElementById('ratingErrorMsg').classList.remove('hidden');
+            return false;
+        }
+        return true;
+    }
+
+    function openAddReviewModal() {
+        document.getElementById('reviewModalTitle').innerText = "Bagikan Pengalaman Memasak";
+        document.getElementById('reviewForm').action = addReviewUrl;
+        document.getElementById('commentInput').value = "";
+        document.getElementById('imageInput').value = "";
+        selectStar(0);
+        document.getElementById('ratingErrorMsg').classList.add('hidden');
+        document.getElementById('reviewModal').classList.replace('hidden', 'flex');
+    }
+
+    function openEditReviewModal(btn) {
+        const reviewId = btn.dataset.reviewId;
+        const rating = parseInt(btn.dataset.rating, 10);
+        const comment = btn.dataset.comment || "";
+
+        document.getElementById('reviewModalTitle').innerText = "Edit Ulasan & Tips";
+        document.getElementById('reviewForm').action = `/reviews/edit/${reviewId}/`;
+        document.getElementById('commentInput').value = comment;
+        document.getElementById('imageInput').value = "";
+        selectStar(rating);
+        document.getElementById('reviewModal').classList.replace('hidden', 'flex');
+    }
+
+    function closeReviewModal() {
+        document.getElementById('reviewModal').classList.replace('flex', 'hidden');
+    }
+
+    function openDeleteReviewModal(btn) {
+        const reviewId = btn.dataset.reviewId;
+        document.getElementById('deleteReviewForm').action = `/reviews/delete/${reviewId}/`;
+        document.getElementById('deleteReviewModal').classList.replace('hidden', 'flex');
+    }
+
+    function closeDeleteReviewModal() {
+        document.getElementById('deleteReviewModal').classList.replace('flex', 'hidden');
+    }
+</script>
