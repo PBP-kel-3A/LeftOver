@@ -15,15 +15,25 @@ class Review(models.Model):
     
     # Untuk ulasan teks (opsional)
     comment = models.TextField(blank=True, null=True)
-    
-    # Untuk foto masakan by usernya (opsional)
-    image = models.ImageField(upload_to='review_images/', blank=True, null=True)
 
     # Mengambil jam saat ulasan di post
     created_at = models.DateTimeField(auto_now_add=True)
+
+    # Mengambil jam saat ulasan di edit
+    updated_at = models.DateTimeField(auto_now=True)
+    is_edited = models.BooleanField(default=False)
+
 
     class Meta:
         ordering = ['-created_at']  # Otomatis urut dari yang paling baru di atas
 
     def __str__(self):
         return f"{self.user.username} - {self.rating}★ ({self.recipe})"
+
+# Untuk foto yang diupload bisa >1 foto --> maksimal 3 foto saja
+class ReviewImage(models.Model):
+    review = models.ForeignKey(Review, on_delete=models.CASCADE, related_name='images')
+    image = models.ImageField(upload_to='review_images/')
+
+    def __str__(self):
+        return f"Foto ulasan oleh {self.review.user.username}"

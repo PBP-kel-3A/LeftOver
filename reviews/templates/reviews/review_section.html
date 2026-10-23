@@ -9,7 +9,6 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-3">
-            <!-- Tombol Tulis Ulasan -->
             {% if user.is_authenticated %}
                 <button type="button" onclick="openAddReviewModal()" class="px-4 py-2.5 rounded-xl bg-[#7C1A0F] hover:bg-[#65140B] text-white font-semibold text-xs transition shadow-xs cursor-pointer">
                     + Tulis Ulasan & Tips
@@ -45,17 +44,25 @@
                         <p class="text-sm text-[#26382D]/85 mt-1.5 leading-relaxed">{{ review.comment }}</p>
                     {% endif %}
 
-                    <!-- Foto Masakan (Jika ada) -->
-                    {% if review.image %}
-                        <div class="mt-3">
-                            <img src="{{ review.image.url }}" alt="Foto ulasan" class="w-32 h-32 object-cover rounded-xl border border-gray-200">
+                    <!-- Foto Hasil Masakan (Bisa banyak & klik untuk Lightbox) -->
+                    {% if review.images.all %}
+                        <div class="mt-3 flex flex-wrap gap-2">
+                            {% for img in review.images.all %}
+                                <img src="{{ img.image.url }}" alt="Foto ulasan" onclick="openImageLightbox('{{ img.image.url }}')" class="w-24 h-24 object-cover rounded-xl border border-gray-200 cursor-pointer hover:opacity-90 transition shadow-xs">
+                            {% endfor %}
                         </div>
                     {% endif %}
                 </div>
 
-                <!-- Waktu & Tombol Edit/Hapus -->
+                <!-- Waktu, Label Edited, & Tombol Edit/Hapus -->
                 <div class="text-right text-xs text-[#65756A] flex items-center gap-3 self-end sm:self-start shrink-0">
-                    <span>{{ review.created_at|timesince }} lalu</span>
+                    <div class="flex items-center gap-1.5">
+                        <span>{{ review.updated_at|timesince }} lalu</span>
+                        {% if review.is_edited %}
+                            <span class="italic text-gray-400">(edited)</span>
+                        {% endif %}
+                    </div>
+
                     {% if user == review.user %}
                         <button type="button"
                                 data-review-id="{{ review.id }}"
@@ -112,11 +119,25 @@
                 <textarea name="comment" id="commentInput" rows="3" placeholder="Tulis tips memasak, rasa, atau bahan substitusi..." class="w-full rounded-2xl border border-gray-200 p-3.5 text-sm text-[#26382D] focus:outline-none focus:border-[#315D47]"></textarea>
             </div>
 
-            <!-- Upload Foto -->
-            <div class="mb-6">
-                <label class="block text-xs font-bold text-[#26382D] mb-1.5">Foto Hasil Masakan (Opsional)</label>
-                <input type="file" name="image" id="imageInput" accept="image/*" class="w-full text-xs text-[#65756A] file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-[#315D47]/10 file:text-[#315D47] cursor-pointer">
+            <!-- Upload Foto (Tanpa Teks Nama File Bawaan Browser, Maksimal 3 Foto) -->
+            <div class="mb-4">
+                <label class="block text-xs font-bold text-[#26382D] mb-1.5">Foto Hasil Masakan (Maksimal 3 Foto)</label>
+                
+                <!-- Tombol Kustom pengganti file input standar agar bersih dari nama file -->
+                <div class="flex items-center gap-3">
+                    <label id="pickPhotoLabel" for="imageInput" class="px-4 py-2 rounded-xl bg-[#315D47]/10 text-[#315D47] font-semibold text-xs hover:bg-[#315D47]/20 transition cursor-pointer select-none">
+                        Pilih Foto
+                    </label>
+                    <span id="fileCountLabel" class="text-xs text-[#65756A]">Belum ada foto dipilih</span>
+                </div>
+
+                <!-- Input asli disembunyikan total agar tidak memunculkan teks nama file bawaan -->
+                <input type="file" name="images" id="imageInput" accept="image/*" multiple class="hidden">
+                <p class="text-[11px] text-[#65756A] mt-1.5">Kamu bisa memilih hingga 3 foto sekaligus.</p>
             </div>
+
+            <!-- Container Pratinjau Foto Langsung dengan Tombol Silang (X) -->
+            <div id="imagePreviewContainer" class="mb-6 hidden flex gap-3 flex-wrap"></div>
 
             <div class="flex justify-end gap-2.5">
                 <button type="button" onclick="closeReviewModal()" class="px-5 py-2.5 rounded-xl border border-gray-200 text-xs font-semibold text-[#26382D] cursor-pointer">Batal</button>
@@ -143,10 +164,22 @@
     </div>
 </div>
 
-<!-- SCRIPT MODAL & BINTANG -->
+<!-- MODAL LIGHTBOX FOTO FULL LAYAR -->
+<div id="imageLightboxModal" class="fixed inset-0 bg-black/90 hidden items-center justify-center z-50 p-4" onclick="closeImageLightbox()">
+    <div class="relative max-w-4xl max-h-screen w-full flex items-center justify-center">
+        <button type="button" onclick="closeImageLightbox()" class="absolute top-4 right-4 text-white bg-black/60 hover:bg-black w-10 h-10 rounded-full flex items-center justify-center text-xl font-bold transition cursor-pointer z-10">✕</button>
+        <img id="lightboxImage" src="" alt="Zoomed Foto Ulasan" class="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl">
+    </div>
+</div>
+
+<!-- SCRIPT MODAL, BINTANG, LIVE PREVIEW, & LIGHTBOX -->
+<!-- SCRIPT MODAL, BINTANG, LIVE PREVIEW, & LIGHTBOX -->
 <script>
     let selectedRating = 0;
     const addReviewUrl = "{% url 'reviews:add_review' recipe.id %}";
+
+    // Variabel global untuk menampung daftar file yang sedang di-upload secara akumulatif
+    let dataTransferFiles = new DataTransfer();
 
     function renderStars(count) {
         const stars = document.querySelectorAll('#starContainer .star-btn');
@@ -179,7 +212,16 @@
         document.getElementById('reviewModalTitle').innerText = "Bagikan Pengalaman Memasak";
         document.getElementById('reviewForm').action = addReviewUrl;
         document.getElementById('commentInput').value = "";
-        document.getElementById('imageInput').value = "";
+        
+        // Reset file dan DataTransfer
+        dataTransferFiles = new DataTransfer();
+        document.getElementById('imageInput').files = dataTransferFiles.files;
+
+        updatePickButton();
+        
+        document.getElementById('imagePreviewContainer').innerHTML = "";
+        document.getElementById('imagePreviewContainer').classList.add('hidden');
+        document.getElementById('fileCountLabel').innerText = "Belum ada foto dipilih";
         selectStar(0);
         document.getElementById('ratingErrorMsg').classList.add('hidden');
         document.getElementById('reviewModal').classList.replace('hidden', 'flex');
@@ -193,13 +235,34 @@
         document.getElementById('reviewModalTitle').innerText = "Edit Ulasan & Tips";
         document.getElementById('reviewForm').action = `/reviews/edit/${reviewId}/`;
         document.getElementById('commentInput').value = comment;
-        document.getElementById('imageInput').value = "";
+        
+        // Reset file dan DataTransfer saat edit
+        dataTransferFiles = new DataTransfer();
+        document.getElementById('imageInput').files = dataTransferFiles.files;
+
+        updatePickButton();
+
+        document.getElementById('imagePreviewContainer').innerHTML = "";
+        document.getElementById('imagePreviewContainer').classList.add('hidden');
+        document.getElementById('fileCountLabel').innerText = "Belum ada foto dipilih";
         selectStar(rating);
         document.getElementById('reviewModal').classList.replace('hidden', 'flex');
     }
 
     function closeReviewModal() {
         document.getElementById('reviewModal').classList.replace('flex', 'hidden');
+    }
+
+    // supaya disable kalau yang dipilih udah full --> sudah 3 foto
+    function updatePickButton() {
+        const label = document.getElementById('pickPhotoLabel');
+        const isFull = dataTransferFiles.files.length >= 3;
+
+        label.classList.toggle('opacity-50', isFull);
+        label.classList.toggle('pointer-events-none', isFull);
+        label.classList.toggle('cursor-not-allowed', isFull);
+        label.setAttribute('aria-disabled', isFull);
+        label.innerText = isFull ? 'Maksimal 3 Foto' : 'Pilih Foto';
     }
 
     function openDeleteReviewModal(btn) {
@@ -211,4 +274,104 @@
     function closeDeleteReviewModal() {
         document.getElementById('deleteReviewModal').classList.replace('flex', 'hidden');
     }
+
+    function openImageLightbox(imgSrc) {
+        document.getElementById('lightboxImage').src = imgSrc;
+        document.getElementById('imageLightboxModal').classList.replace('hidden', 'flex');
+    }
+
+    function closeImageLightbox() {
+        document.getElementById('imageLightboxModal').classList.replace('flex', 'hidden');
+    }
+
+    // Script Live Preview & Akumulasi Maksimal 3 Foto Tanpa Ke-replace
+    document.addEventListener("DOMContentLoaded", function () {
+        const imageInput = document.getElementById("imageInput");
+        const previewContainer = document.getElementById("imagePreviewContainer");
+        const fileCountLabel = document.getElementById("fileCountLabel");
+
+        if (imageInput) {
+            imageInput.addEventListener("change", function (event) {
+                const newFiles = Array.from(event.target.files);
+
+                // Cek apakah total file yang sudah ada + file baru melebihi 3
+                if (dataTransferFiles.files.length + newFiles.length > 3) {
+                    alert("Maksimal hanya bisa mengunggah total 3 foto!");
+                    imageInput.value = ""; // Reset input terakhir
+                    return;
+                }
+
+                // Tambahkan file baru ke dalam objek DataTransfer akumulatif
+                newFiles.forEach(file => {
+                    dataTransferFiles.items.add(file);
+                });
+
+                // Sinkronkan kembali ke elemen input asli
+                imageInput.files = dataTransferFiles.files;
+
+                // Render ulang kotak preview
+                renderPreviews();
+            });
+        }
+
+        function renderPreviews() {
+            previewContainer.innerHTML = "";
+            const currentFiles = dataTransferFiles.files;
+            updatePickButton();
+
+            if (currentFiles.length > 0) {
+                previewContainer.classList.remove("hidden");
+                fileCountLabel.innerText = `${currentFiles.length} foto dipilih`;
+
+                Array.from(currentFiles).forEach((file, index) => {
+                    const reader = new FileReader();
+
+                    reader.onload = function (e) {
+                        const wrapper = document.createElement("div");
+                        wrapper.className = "relative w-20 h-20 rounded-xl overflow-hidden border border-gray-200 shadow-xs bg-gray-50";
+
+                        const img = document.createElement("img");
+                        img.src = e.target.result;
+                        img.className = "w-full h-full object-cover";
+
+                        const removeBtn = document.createElement("button");
+                        removeBtn.type = "button";
+                        removeBtn.innerHTML = "✕";
+                        removeBtn.className = "absolute top-1 right-1 bg-black/70 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] hover:bg-black transition cursor-pointer";
+                        
+                        // Fungsi tombol silang untuk menghapus foto spesifik dari antrean
+                        removeBtn.onclick = function () {
+                            const updatedDT = new DataTransfer();
+                            const filesBefore = dataTransferFiles.files;
+
+                            for (let i = 0; i < filesBefore.length; i++) {
+                                if (i !== index) {
+                                    updatedDT.items.add(filesBefore[i]);
+                                }
+                            }
+
+                            dataTransferFiles = updatedDT;
+                            imageInput.files = dataTransferFiles.files;
+                            
+                            renderPreviews(); // Render ulang preview setelah dihapus
+
+                            if (dataTransferFiles.files.length === 0) {
+                                previewContainer.classList.add("hidden");
+                                fileCountLabel.innerText = "Belum ada foto dipilih";
+                            }
+                        };
+
+                        wrapper.appendChild(img);
+                        wrapper.appendChild(removeBtn);
+                        previewContainer.appendChild(wrapper);
+                    };
+
+                    reader.readAsDataURL(file);
+                });
+            } else {
+                previewContainer.classList.add("hidden");
+                fileCountLabel.innerText = "Belum ada foto dipilih";
+            }
+        }
+    });
 </script>
