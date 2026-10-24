@@ -31,7 +31,7 @@
     <!-- Waktu & Tombol -->
     <div class="text-right text-xs text-[#65756A] flex items-center gap-3 self-end sm:self-start shrink-0">
         <div class="flex items-center gap-1.5">
-            <span>{{ review.updated_at|timesince }} ago</span>
+            <span>{{ review.get_time_ago }}</span>
             {% if review.is_edited %}
                 <span class="italic text-gray-400">(edited)</span>
             {% endif %}
