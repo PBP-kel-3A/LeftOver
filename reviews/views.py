@@ -91,7 +91,26 @@ def delete_review(request, review_id):
 
     # Hanya boleh lewat POST supaya tidak terhapus hanya karena membuka sebuah link
     if request.method == 'POST':
+        # Hapus foto-foto terkait dari Cloudinary-nya
+        for img in review.images.all():
+            if img.image:
+                try:
+                    # format URL: https://res.cloudinary.com/.../image/upload/v12345678/folder_name/filename.jpg
+                    url_parts = str(img.image).split('/')
+                    file_with_ext = url_parts[-1]
+                    file_name, _ = file_with_ext.rsplit('.', 1)
+                    
+                    if 'review_images' in str(img.image):
+                        public_id = f"review_images/{file_name}"
+                    else:
+                        public_id = file_name
+                        
+                    cloudinary.uploader.destroy(public_id)
+                except Exception as e:
+                    print(f"Cloudinary deletion error: {e}")
+
+        # Hapus data ulasan dari database (ReviewImage akan ikut terhapus otomatis karena CASCADE)
         review.delete()
         return JsonResponse({'success': True})
-
+        
     return JsonResponse({'success': False, 'error': 'Invalid method'}, status=400)
