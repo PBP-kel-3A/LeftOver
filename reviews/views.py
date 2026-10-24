@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from django.template.loader import render_to_string
 from recipes.models import Recipe
 from .models import Review, ReviewImage
+import cloudinary.uploader 
 
 # Semua tindakan di cakupan "Reviews" hanya bisa dilakukan akun yang sudah login --> @login_required
 # Semua view di bawah mengembalikan JSON untuk dipakai AJAX.
@@ -30,8 +31,14 @@ def add_review(request, recipe_id):
         )
 
         # Maksimal 3 foto per ulasan
+        images = request.FILES.getlist('images')
         for img in images[:3]:
-            ReviewImage.objects.create(review=review, image=img)
+            # Upload ke Cloudinary
+            upload_result = cloudinary.uploader.upload(img)
+            image_url = upload_result.get('secure_url')
+            
+            # Simpan URL Cloudinary ke database
+            ReviewImage.objects.create(review=review, image=image_url)
 
         # Kirim potongan HTML ulasan baru supaya JS bisa langsung menampilkannya
         html = render_to_string('reviews/_review_item.html', {'review': review}, request=request)
@@ -60,14 +67,20 @@ def edit_review(request, review_id):
         images = request.FILES.getlist('images')
         if images:
             current_count = review.images.count()
-            allowed_slots = 3 - current_count
+            allowed_slots = 3 - current_count  # Menghitung sisa slot yang tersedia
+            
             for img in images[:allowed_slots]:
-                ReviewImage.objects.create(review=review, image=img)
+                # Upload ke Cloudinary dan ambil secure_url-nya
+                upload_result = cloudinary.uploader.upload(img)
+                image_url = upload_result.get('secure_url')
+                
+                # Simpan URL Cloudinary ke model ReviewImage
+                ReviewImage.objects.create(review=review, image=image_url)
 
         # Kirim HTML ulasan yang sudah diperbarui untuk menggantikan kartu lama di halaman
         html = render_to_string('reviews/_review_item.html', {'review': review}, request=request)
         return JsonResponse({'success': True, 'html': html})
-
+    
     return JsonResponse({'success': False, 'error': 'Invalid method'}, status=400)
 
 

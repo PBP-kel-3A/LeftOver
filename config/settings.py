@@ -149,6 +149,13 @@ WHITENOISE_USE_FINDERS = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Untuk keperluan upload foto reviews
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+import cloudinary
+import cloudinary.uploader
+import cloudinary.utils
+
+cloudinary.config(
+    cloud_name='okjpcj3h',
+    api_key='256931589853396',
+    api_secret='Hfl2NHgYgb818OYtLUXfKUunhkk',
+    secure=True
+)
