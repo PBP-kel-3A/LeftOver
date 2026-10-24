@@ -33,7 +33,8 @@ class Review(models.Model):
 # Untuk foto yang diupload bisa >1 foto --> maksimal 3 foto saja
 class ReviewImage(models.Model):
     review = models.ForeignKey(Review, on_delete=models.CASCADE, related_name='images')
-    image = models.ImageField(upload_to='review_images/')
+    # Diubah ke URLField untuk menampung link Cloudinary --> sebelumnya ImageField lokal
+    image = models.URLField(max_length=500)
 
     def __str__(self):
         return f"Foto ulasan oleh {self.review.user.username}"
