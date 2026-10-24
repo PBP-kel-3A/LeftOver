@@ -48,7 +48,7 @@
                     {% if review.images.all %}
                         <div class="mt-3 flex flex-wrap gap-2">
                             {% for img in review.images.all %}
-                                <img src="{{ img.image.url }}" alt="Foto ulasan" onclick="openImageLightbox('{{ img.image.url }}')" class="w-24 h-24 object-cover rounded-xl border border-gray-200 cursor-pointer hover:opacity-90 transition shadow-xs">
+                                <img src="{{ img.image }}" alt="Foto ulasan" onclick="openImageLightbox('{{ img.image }}')" class="w-24 h-24 object-cover rounded-xl border border-gray-200 cursor-pointer hover:opacity-90 transition shadow-xs">
                             {% endfor %}
                         </div>
                     {% endif %}
@@ -57,7 +57,7 @@
                 <!-- Waktu, Label Edited, & Tombol Edit/Hapus -->
                 <div class="text-right text-xs text-[#65756A] flex items-center gap-3 self-end sm:self-start shrink-0">
                     <div class="flex items-center gap-1.5">
-                        <span>{{ review.updated_at|timesince }} lalu</span>
+                        <span>{{ review.updated_at|timesince }} ago</span>
                         {% if review.is_edited %}
                             <span class="italic text-gray-400">(edited)</span>
                         {% endif %}
@@ -174,16 +174,12 @@
 
 <!-- SCRIPT MODAL, BINTANG, LIVE PREVIEW, & LIGHTBOX -->
 <script>
-    // ===== State global =====
-    let selectedRating = 0;          // rating bintang yang sedang dipilih di modal
-    let editingReviewId = null;      // null = mode tambah, berisi id = mode edit
-    let deletingReviewId = null;     // id ulasan yang akan dihapus
+    let selectedRating = 0;
+    let editingReviewId = null;
+    let deletingReviewId = null;
     const addReviewUrl = "{% url 'reviews:add_review' recipe.id %}";
-    let dataTransferFiles = new DataTransfer();   // menampung foto yang dipilih (biar bisa nambah bertahap)
+    let dataTransferFiles = new DataTransfer();
 
-    // ===== Bintang =====
-
-    // Warnai bintang sesuai jumlah (kuning = terpilih, abu = belum)
     function renderStars(count) {
         const stars = document.querySelectorAll('#starContainer .star-btn');
         stars.forEach((star, idx) => {
@@ -192,7 +188,6 @@
         });
     }
 
-    // Dipanggil saat bintang diklik
     function selectStar(val) {
         selectedRating = val;
         document.getElementById('ratingInput').value = val;
@@ -201,30 +196,22 @@
         renderStars(val);
     }
 
-    // Efek hover: bintang berubah sementara, balik ke pilihan asli saat mouse keluar
     function hoverStar(val) { renderStars(val); }
     function resetStarHover() { renderStars(selectedRating); }
 
-    // ===== Buka / tutup modal =====
-
-    // Modal tambah ulasan: semua field dikosongkan
     function openAddReviewModal() {
         editingReviewId = null;
         document.getElementById('reviewModalTitle').innerText = "Bagikan Pengalaman Memasak";
         document.getElementById('commentInput').value = "";
 
-        // Reset daftar foto dan pratinjaunya
         dataTransferFiles = new DataTransfer();
         document.getElementById('imageInput').files = dataTransferFiles.files;
-        document.getElementById('imagePreviewContainer').innerHTML = "";
-        document.getElementById('imagePreviewContainer').classList.add('hidden');
-        document.getElementById('fileCountLabel').innerText = "Belum ada foto dipilih";
+        renderPreviews();
 
         selectStar(0);
         document.getElementById('reviewModal').classList.replace('hidden', 'flex');
     }
 
-    // Modal edit ulasan: data lama diambil dari atribut data-* pada tombol Edit
     function openEditReviewModal(btn) {
         editingReviewId = btn.dataset.reviewId;
         const rating = parseInt(btn.dataset.rating, 10);
@@ -233,12 +220,9 @@
         document.getElementById('reviewModalTitle').innerText = "Edit Ulasan & Tips";
         document.getElementById('commentInput').value = comment;
 
-        // Foto lama tidak ditampilkan di modal, jadi bagian foto direset kosong
         dataTransferFiles = new DataTransfer();
         document.getElementById('imageInput').files = dataTransferFiles.files;
-        document.getElementById('imagePreviewContainer').innerHTML = "";
-        document.getElementById('imagePreviewContainer').classList.add('hidden');
-        document.getElementById('fileCountLabel').innerText = "Belum ada foto dipilih";
+        renderPreviews();
 
         selectStar(rating);
         document.getElementById('reviewModal').classList.replace('hidden', 'flex');
@@ -248,7 +232,6 @@
         document.getElementById('reviewModal').classList.replace('flex', 'hidden');
     }
 
-    // Simpan id ulasan yang mau dihapus, lalu tampilkan modal konfirmasi
     function openDeleteReviewModal(btn) {
         deletingReviewId = btn.dataset.reviewId;
         document.getElementById('deleteReviewModal').classList.replace('hidden', 'flex');
@@ -258,7 +241,6 @@
         document.getElementById('deleteReviewModal').classList.replace('flex', 'hidden');
     }
 
-    // ===== Lightbox foto =====
     function openImageLightbox(imgSrc) {
         document.getElementById('lightboxImage').src = imgSrc;
         document.getElementById('imageLightboxModal').classList.replace('hidden', 'flex');
@@ -268,63 +250,107 @@
         document.getElementById('imageLightboxModal').classList.replace('flex', 'hidden');
     }
 
-    // ===== Event listener (jalan setelah halaman selesai dimuat) =====
+    let previewContainer, fileCountLabel, imageInput, pickPhotoLabel;
+
+    function renderPreviews() {
+        if (!previewContainer) return;
+
+        previewContainer.innerHTML = "";
+        const files = dataTransferFiles.files;
+
+        if (files.length > 0) {
+            previewContainer.classList.remove("hidden");
+            fileCountLabel.innerText = `${files.length} foto dipilih`;
+        } else {
+            previewContainer.classList.add("hidden");
+            fileCountLabel.innerText = "Belum ada foto dipilih";
+        }
+
+        // Disable total tombol "Pilih Foto" menggunakan pointer-events-none jika sudah 3 foto
+        if (files.length >= 3) {
+            pickPhotoLabel.classList.add("opacity-50", "cursor-not-allowed", "pointer-events-none");
+            pickPhotoLabel.classList.remove("hover:bg-[#315D47]/20", "cursor-pointer");
+        } else {
+            pickPhotoLabel.classList.remove("opacity-50", "cursor-not-allowed", "pointer-events-none");
+            pickPhotoLabel.classList.add("hover:bg-[#315D47]/20", "cursor-pointer");
+        }
+
+        Array.from(files).forEach((file, index) => {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const wrapper = document.createElement("div");
+                wrapper.className = "relative w-20 h-20 rounded-xl overflow-hidden border border-gray-200 shadow-xs bg-gray-50";
+                
+                wrapper.innerHTML = `
+                    <img src="${e.target.result}" class="w-full h-full object-cover">
+                    <button type="button" 
+                        onclick="removeSelectedImage(${index})" 
+                        class="absolute top-1 right-1 bg-black/60 hover:bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs transition cursor-pointer">
+                        ×
+                    </button>
+                `;
+                previewContainer.appendChild(wrapper);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    window.removeSelectedImage = function(index) {
+        const dt = new DataTransfer();
+        const currentFiles = dataTransferFiles.files;
+
+        for (let i = 0; i < currentFiles.length; i++) {
+            if (i !== index) {
+                dt.items.add(currentFiles[i]);
+            }
+        }
+
+        dataTransferFiles = dt;
+        imageInput.files = dataTransferFiles.files;
+        renderPreviews();
+    };
+
     document.addEventListener("DOMContentLoaded", function () {
-        const imageInput = document.getElementById("imageInput");
-        const previewContainer = document.getElementById("imagePreviewContainer");
-        const fileCountLabel = document.getElementById("fileCountLabel");
+        imageInput = document.getElementById("imageInput");
+        previewContainer = document.getElementById("imagePreviewContainer");
+        fileCountLabel = document.getElementById("fileCountLabel");
+        pickPhotoLabel = document.getElementById("pickPhotoLabel");
         const reviewForm = document.getElementById("reviewForm");
 
-        // --- Pilih foto + pratinjau ---
         if (imageInput) {
             imageInput.addEventListener("change", function (event) {
+                if (dataTransferFiles.files.length >= 3) {
+                    imageInput.value = "";
+                    return;
+                }
+
                 const newFiles = Array.from(event.target.files);
 
-                // Total foto lama + foto baru tidak boleh lebih dari 3
                 if (dataTransferFiles.files.length + newFiles.length > 3) {
                     alert("Maksimal hanya bisa mengunggah 3 foto!");
                     imageInput.value = "";
                     return;
                 }
 
-                // Foto baru ditambahkan ke daftar, bukan menimpa yang sebelumnya
                 newFiles.forEach(file => dataTransferFiles.items.add(file));
                 imageInput.files = dataTransferFiles.files;
 
-                // Gambar ulang semua pratinjau
-                previewContainer.innerHTML = "";
-                previewContainer.classList.remove("hidden");
-                fileCountLabel.innerText = `${dataTransferFiles.files.length} foto dipilih`;
-
-                Array.from(dataTransferFiles.files).forEach((file, index) => {
-                    const reader = new FileReader();
-                    reader.onload = function (e) {
-                        const wrapper = document.createElement("div");
-                        wrapper.className = "relative w-20 h-20 rounded-xl overflow-hidden border border-gray-200 shadow-xs bg-gray-50";
-                        wrapper.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
-                        previewContainer.appendChild(wrapper);
-                    };
-                    reader.readAsDataURL(file);
-                });
+                renderPreviews();
             });
         }
 
-        // --- Submit form tambah / edit ulasan lewat AJAX ---
         if (reviewForm) {
             reviewForm.addEventListener("submit", function (e) {
-                e.preventDefault();   // cegah reload halaman
+                e.preventDefault();
 
-                // Rating wajib minimal 1 bintang
                 if (selectedRating < 1) {
                     document.getElementById('ratingErrorMsg').classList.remove('hidden');
                     return;
                 }
 
-                // FormData otomatis berisi komentar, foto, dan csrf token dari form
                 const formData = new FormData(reviewForm);
                 formData.set('rating', selectedRating);
 
-                // Mode tambah -> URL add_review, mode edit -> URL edit_review
                 let url = addReviewUrl;
                 if (editingReviewId) {
                     url = `/reviews/edit/${editingReviewId}/`;
@@ -340,12 +366,9 @@
                     if (data.success) {
                         closeReviewModal();
                         if (editingReviewId) {
-                            // Edit: ganti kartu lama dengan HTML baru dari server
                             document.getElementById('review-' + editingReviewId).outerHTML = data.html;
                         } else {
-                            // Tambah: sisipkan kartu baru di paling atas daftar
                             document.getElementById('reviewListContainer').insertAdjacentHTML('afterbegin', data.html);
-                            // Sembunyikan teks "Belum ada ulasan" kalau ada
                             document.getElementById('noReviewMsg')?.classList.add('hidden');
                         }
                     } else {
@@ -355,7 +378,6 @@
             });
         }
 
-        // --- Submit konfirmasi hapus lewat AJAX ---
         const deleteForm = document.getElementById("deleteReviewForm");
         if (deleteForm) {
             deleteForm.addEventListener("submit", function (e) {
@@ -368,7 +390,6 @@
                 .then(data => {
                     if (data.success) {
                         closeDeleteReviewModal();
-                        // Hapus kartu ulasan dari halaman
                         document.getElementById('review-' + deletingReviewId).remove();
                     } else {
                         alert("Gagal menghapus ulasan.");

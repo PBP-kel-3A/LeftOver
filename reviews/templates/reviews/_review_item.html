@@ -22,7 +22,7 @@
         {% if review.images.all %}
             <div class="mt-3 flex flex-wrap gap-2">
                 {% for img in review.images.all %}
-                    <img src="{{ img.image.url }}" alt="Foto ulasan" onclick="openImageLightbox(this.src)" class="w-24 h-24 object-cover rounded-xl border border-gray-200 cursor-pointer hover:opacity-90 transition shadow-xs">
+                    <img src="{{ img.image }}" alt="Foto ulasan" onclick="openImageLightbox('{{ img.image }}')" class="w-24 h-24 object-cover rounded-xl border border-gray-200 cursor-pointer hover:opacity-90 transition shadow-xs">
                 {% endfor %}
             </div>
         {% endif %}
