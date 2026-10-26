@@ -17,11 +17,11 @@ Ingredients without a match are skipped and the user is told, so one unknown
 ingredient cannot empty the whole search (the catalog filter is an AND).
 """
 import re
+import requests
 from dataclasses import dataclass, field
-
 from recipes.models import RecipeIngredient
-
 from .models import IngredientAlias
+from django.core.cache import cache
 
 # What people type -> how TheMealDB usually words it. Keys are singular (a
 # trailing "s" is matched automatically) and are replaced inside the name, so
@@ -85,14 +85,47 @@ def _alias_keyword(name, patterns):
     return None
 
 
+
 def catalog_ingredient_names():
-    """Ingredient names that recipes in the catalog really use (A-Z)."""
+    """Get ingredient names from TheMealDB, cached for 24 hours."""
+    cache_key = "themealdb_ingredient_names"
+
+    cached_names = cache.get(cache_key)
+    if cached_names is not None:
+        return cached_names
+
+    url = "https://www.themealdb.com/api/json/v1/1/list.php?i=list"
+
+    try:
+        response = requests.get(url, timeout=5)
+        response.raise_for_status()
+        data = response.json()
+
+        meals = data.get("meals") or []
+        names = sorted(
+            {
+                item["strIngredient"].strip()
+                for item in meals
+                if item.get("strIngredient", "").strip()
+            },
+            key=str.casefold,
+        )
+
+        if names:
+            cache.set(cache_key, names, 60 * 60 * 24)
+            return names
+
+    except (requests.RequestException, ValueError, TypeError):
+        pass
+
+    # Fallback: use ingredients linked to locally stored recipes.
     return list(
         RecipeIngredient.objects
         .order_by("ingredient__name")
         .values_list("ingredient__name", flat=True)
         .distinct()
     )
+
 
 
 @dataclass
