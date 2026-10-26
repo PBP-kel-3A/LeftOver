@@ -4,18 +4,18 @@
     <!-- Header & Tombol Buka Modal -->
     <div class="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 pb-5 mb-6">
         <div>
-            <h2 class="text-xl font-extrabold text-[#26382D]">💬 Ulasan Pengguna & Tips Memasak</h2>
+            <h2 class="text-xl font-extrabold text-[#26382D]">💬 Community Reviews & Cooking Tips</h2>
             <p class="text-xs text-[#65756A] mt-1">LeftOver Community</p>
         </div>
 
         <div class="flex flex-wrap items-center gap-3">
             {% if user.is_authenticated %}
                 <button type="button" onclick="openAddReviewModal()" class="px-4 py-2.5 rounded-xl bg-[#7C1A0F] hover:bg-[#65140B] text-white font-semibold text-xs transition shadow-xs cursor-pointer">
-                    + Tulis Ulasan & Tips
+                    + Write a Review & Tips
                 </button>
             {% else %}
                 <a href="{% url 'main:login' %}" class="px-4 py-2.5 rounded-xl bg-[#315D47] text-white font-semibold text-xs transition">
-                    Login untuk Mengulas
+                    Log In to Leave a Review
                 </a>
             {% endif %}
         </div>
@@ -48,7 +48,7 @@
                     {% if review.images.all %}
                         <div class="mt-3 flex flex-wrap gap-2">
                             {% for img in review.images.all %}
-                                <img src="{{ img.image }}" alt="Foto ulasan" onclick="openImageLightbox('{{ img.image }}')" class="w-24 h-24 object-cover rounded-xl border border-gray-200 cursor-pointer hover:opacity-90 transition shadow-xs">
+                                <img src="{{ img.image }}" alt="Review Photo" onclick="openImageLightbox('{{ img.image }}')" class="w-24 h-24 object-cover rounded-xl border border-gray-200 cursor-pointer hover:opacity-90 transition shadow-xs">
                             {% endfor %}
                         </div>
                     {% endif %}
@@ -76,13 +76,13 @@
                                 data-review-id="{{ review.id }}"
                                 onclick="openDeleteReviewModal(this)"
                                 class="text-red-600 font-semibold hover:underline cursor-pointer">
-                            Hapus
+                            Delete
                         </button>
                     {% endif %}
                 </div>
             </div>
         {% empty %}
-            <p id="noReviewMsg" class="text-center text-sm text-[#65756A] py-8">Belum ada ulasan untuk resep ini. Jadilah yang pertama memberikan ulasan!</p>
+            <p id="noReviewMsg" class="text-center text-sm text-[#65756A] py-8">No reviews yet for this recipe. Be the first to leave a review!</p>
         {% endfor %}
     </div>
 </div>
@@ -90,8 +90,8 @@
 <!-- MODAL POPUP INPUT / EDIT ULASAN -->
 <div id="reviewModal" class="fixed inset-0 bg-black/50 backdrop-blur-xs hidden items-center justify-center z-50 px-4">
     <div class="bg-white rounded-3xl max-w-md w-full p-6 md:p-7 shadow-2xl border border-[#26382D]/10">
-        <h3 id="reviewModalTitle" class="text-lg font-extrabold text-[#26382D] mb-1">Bagikan Pengalaman Memasak</h3>
-        <p class="text-xs text-[#65756A] mb-5">Berikan penilaian bintang (wajib) serta tips atau foto masakan Anda.</p>
+        <h3 id="reviewModalTitle" class="text-lg font-extrabold text-[#26382D] mb-1">Share Your Cooking Experience</h3>
+        <p class="text-xs text-[#65756A] mb-5">Leave a star rating and share your cooking tips or photos.</p>
 
         <form id="reviewForm" method="POST" action="{% url 'reviews:add_review' recipe.id %}" enctype="multipart/form-data" onsubmit="return validateReviewForm()">
             {% csrf_token %}
@@ -99,7 +99,7 @@
 
             <!-- Bintang Interaktif -->
             <div class="mb-4">
-                <label class="block text-xs font-bold text-[#26382D] mb-1.5">Rating Bintang <span class="text-red-500">*</span></label>
+                <label class="block text-xs font-bold text-[#26382D] mb-1.5">Rating<span class="text-red-500">*</span></label>
                 <div class="flex items-center gap-3">
                     <div class="flex text-3xl cursor-pointer select-none space-x-1" id="starContainer" onmouseleave="resetStarHover()">
                         <span onclick="selectStar(1)" onmouseenter="hoverStar(1)" class="star-btn text-gray-300 transition hover:scale-110">★</span>
@@ -108,40 +108,40 @@
                         <span onclick="selectStar(4)" onmouseenter="hoverStar(4)" class="star-btn text-gray-300 transition hover:scale-110">★</span>
                         <span onclick="selectStar(5)" onmouseenter="hoverStar(5)" class="star-btn text-gray-300 transition hover:scale-110">★</span>
                     </div>
-                    <span id="ratingLabel" class="text-xs font-semibold text-[#65756A]">0 dari 5 Bintang</span>
+                    <span id="ratingLabel" class="text-xs font-semibold text-[#65756A]">0 out of 5 stars</span>
                 </div>
-                <p id="ratingErrorMsg" class="text-xs text-red-600 mt-1.5 hidden">⚠️ Pilih minimal 1 bintang terlebih dahulu!</p>
+                <p id="ratingErrorMsg" class="text-xs text-red-600 mt-1.5 hidden">⚠️ Please select at least 1 star!</p>
             </div>
 
             <!-- Komentar -->
             <div class="mb-4">
-                <label class="block text-xs font-bold text-[#26382D] mb-1.5">Ulasan & Tips (Opsional)</label>
-                <textarea name="comment" id="commentInput" rows="3" placeholder="Tulis tips memasak, rasa, atau bahan substitusi..." class="w-full rounded-2xl border border-gray-200 p-3.5 text-sm text-[#26382D] focus:outline-none focus:border-[#315D47]"></textarea>
+                <label class="block text-xs font-bold text-[#26382D] mb-1.5">Review & Tips (Optional)</label>
+                <textarea name="comment" id="commentInput" rows="3" placeholder="Share cooking tips, describe the taste, or suggest ingredient substitutions..." class="w-full rounded-2xl border border-gray-200 p-3.5 text-sm text-[#26382D] focus:outline-none focus:border-[#315D47]"></textarea>
             </div>
 
             <!-- Upload Foto (Tanpa Teks Nama File Bawaan Browser, Maksimal 3 Foto) -->
             <div class="mb-4">
-                <label class="block text-xs font-bold text-[#26382D] mb-1.5">Foto Hasil Masakan (Maksimal 3 Foto)</label>
+                <label class="block text-xs font-bold text-[#26382D] mb-1.5">Photos of Your Dish (Up to 3 Photos)</label>
                 
                 <!-- Tombol Kustom pengganti file input standar agar bersih dari nama file -->
                 <div class="flex items-center gap-3">
                     <label id="pickPhotoLabel" for="imageInput" class="px-4 py-2 rounded-xl bg-[#315D47]/10 text-[#315D47] font-semibold text-xs hover:bg-[#315D47]/20 transition cursor-pointer select-none">
-                        Pilih Foto
+                        Choose Photos
                     </label>
-                    <span id="fileCountLabel" class="text-xs text-[#65756A]">Belum ada foto dipilih</span>
+                    <span id="fileCountLabel" class="text-xs text-[#65756A]">No photos selected</span>
                 </div>
 
                 <!-- Input asli disembunyikan total agar tidak memunculkan teks nama file bawaan -->
                 <input type="file" name="images" id="imageInput" accept="image/*" multiple class="hidden">
-                <p class="text-[11px] text-[#65756A] mt-1.5">Kamu bisa memilih hingga 3 foto sekaligus.</p>
+                <p class="text-[11px] text-[#65756A] mt-1.5">You can select up to 3 photos.</p>
             </div>
 
             <!-- Container Pratinjau Foto Langsung dengan Tombol Silang (X) -->
             <div id="imagePreviewContainer" class="mb-6 hidden flex gap-3 flex-wrap"></div>
 
             <div class="flex justify-end gap-2.5">
-                <button type="button" onclick="closeReviewModal()" class="px-5 py-2.5 rounded-xl border border-gray-200 text-xs font-semibold text-[#26382D] cursor-pointer">Batal</button>
-                <button type="submit" class="px-5 py-2.5 rounded-xl bg-[#7C1A0F] hover:bg-[#65140B] text-white text-xs font-semibold transition cursor-pointer">Kirim Ulasan</button>
+                <button type="button" onclick="closeReviewModal()" class="px-5 py-2.5 rounded-xl border border-gray-200 text-xs font-semibold text-[#26382D] cursor-pointer">Cancel</button>
+                <button type="submit" class="px-5 py-2.5 rounded-xl bg-[#7C1A0F] hover:bg-[#65140B] text-white text-xs font-semibold transition cursor-pointer">Submit Review</button>
             </div>
         </form>
     </div>
@@ -151,14 +151,14 @@
 <div id="deleteReviewModal" class="fixed inset-0 bg-black/50 backdrop-blur-xs hidden items-center justify-center z-50 px-4">
     <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl border border-[#26382D]/10">
         <div class="w-12 h-12 rounded-2xl bg-red-50 text-[#7C1A0F] flex items-center justify-center mx-auto mb-3 text-2xl font-bold">⚠️</div>
-        <h3 class="text-lg font-extrabold text-[#26382D] mb-1">Hapus Ulasan</h3>
-        <p class="text-xs text-[#65756A] mb-6">Apakah kamu ingin menghapus ulasan dan penilaian ini?</p>
+        <h3 class="text-lg font-extrabold text-[#26382D] mb-1">Delete Review</h3>
+        <p class="text-xs text-[#65756A] mb-6">Are you sure you want to delete this review and rating?</p>
 
         <form id="deleteReviewForm" method="POST" action="">
             {% csrf_token %}
             <div class="flex justify-center gap-3">
-                <button type="button" onclick="closeDeleteReviewModal()" class="flex-1 py-2.5 rounded-full border border-gray-200 text-xs font-semibold text-[#26382D] cursor-pointer">Batal</button>
-                <button type="submit" class="flex-1 py-2.5 rounded-full bg-[#7C1A0F] hover:bg-[#65140B] text-white text-xs font-semibold transition cursor-pointer">Ya, Lanjutkan</button>
+                <button type="button" onclick="closeDeleteReviewModal()" class="flex-1 py-2.5 rounded-full border border-gray-200 text-xs font-semibold text-[#26382D] cursor-pointer">Cancel</button>
+                <button type="submit" class="flex-1 py-2.5 rounded-full bg-[#7C1A0F] hover:bg-[#65140B] text-white text-xs font-semibold transition cursor-pointer">Yes, Continue</button>
             </div>
         </form>
     </div>
@@ -168,7 +168,7 @@
 <div id="imageLightboxModal" class="fixed inset-0 bg-black/90 hidden items-center justify-center z-50 p-4" onclick="closeImageLightbox()">
     <div class="relative max-w-4xl max-h-screen w-full flex items-center justify-center">
         <button type="button" onclick="closeImageLightbox()" class="absolute top-4 right-4 text-white bg-black/60 hover:bg-black w-10 h-10 rounded-full flex items-center justify-center text-xl font-bold transition cursor-pointer z-10">✕</button>
-        <img id="lightboxImage" src="" alt="Zoomed Foto Ulasan" class="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl">
+        <img id="lightboxImage" src="" alt="Enlarged review photo" class="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl">
     </div>
 </div>
 
@@ -201,7 +201,7 @@
 
     function openAddReviewModal() {
         editingReviewId = null;
-        document.getElementById('reviewModalTitle').innerText = "Bagikan Pengalaman Memasak";
+        document.getElementById('reviewModalTitle').innerText = "Share Your Cooking Experience";
         document.getElementById('commentInput').value = "";
 
         dataTransferFiles = new DataTransfer();
@@ -260,10 +260,10 @@
 
         if (files.length > 0) {
             previewContainer.classList.remove("hidden");
-            fileCountLabel.innerText = `${files.length} foto dipilih`;
+            fileCountLabel.innerText = `${files.length} photo(s) selected`;
         } else {
             previewContainer.classList.add("hidden");
-            fileCountLabel.innerText = "Belum ada foto dipilih";
+            fileCountLabel.innerText = "No photos selected";
         }
 
         // Disable total tombol "Pilih Foto" menggunakan pointer-events-none jika sudah 3 foto
@@ -327,7 +327,7 @@
                 const newFiles = Array.from(event.target.files);
 
                 if (dataTransferFiles.files.length + newFiles.length > 3) {
-                    alert("Maksimal hanya bisa mengunggah 3 foto!");
+                    alert("You can upload a maximum of 3 photos!");
                     imageInput.value = "";
                     return;
                 }
@@ -372,7 +372,7 @@
                             document.getElementById('noReviewMsg')?.classList.add('hidden');
                         }
                     } else {
-                        alert(data.error || "Gagal menyimpan ulasan.");
+                        alert(data.error || "Failed to save the review.");
                     }
                 });
             });
@@ -392,7 +392,7 @@
                         closeDeleteReviewModal();
                         document.getElementById('review-' + deletingReviewId).remove();
                     } else {
-                        alert("Gagal menghapus ulasan.");
+                        alert("Failed to delete the review.");
                     }
                 });
             });
