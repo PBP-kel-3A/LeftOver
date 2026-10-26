@@ -1,0 +1,42 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+<section class="mx-auto max-w-2xl px-6 pt-28 pb-12">
+    <div class="rounded-2xl bg-white p-6 shadow-md md:p-8">
+        <h1 class="mb-4 text-2xl font-bold text-gray-900">
+            Hapus Resep
+        </h1>
+
+        <p class="mb-3 text-gray-600">
+            Apakah kamu yakin ingin menghapus resep berikut?
+        </p>
+
+        <p class="mb-6 text-lg font-semibold text-gray-900">
+            {{ recipe.name }}
+        </p>
+
+        <p class="mb-6 text-sm text-red-600">
+            Tindakan ini tidak dapat dibatalkan.
+        </p>
+
+        <form method="post" class="flex flex-wrap gap-3">
+            {% csrf_token %}
+
+            <button
+                type="submit"
+                class="rounded-lg bg-red-600 px-5 py-3 font-semibold text-white hover:bg-red-700"
+            >
+                Ya, Hapus Resep
+            </button>
+
+            <a
+                href="{% url 'recipes:recipe_detail' recipe.pk %}"
+                class="rounded-lg border border-gray-300 px-5 py-3 font-semibold text-gray-700 hover:bg-gray-50"
+            >
+                Batal
+            </a>
+        </form>
+    </div>
+</section>
+{% endblock %}

@@ -1,10 +1,11 @@
 from django.db import models
+from django.conf import settings
 
 # Create your models here.
 
 # menyimpan informasi resep
 class Recipe(models.Model):
-    mealdb_id = models.CharField(max_length=20, unique=True)
+    mealdb_id = models.CharField(max_length=20, unique=True, blank=True, null=True)
     name = models.CharField(max_length=200)
     alternate_name = models.CharField(max_length=200, blank=True, null=True)
     category = models.CharField(max_length=100, blank=True, null=True)
@@ -18,6 +19,7 @@ class Recipe(models.Model):
     image_source = models.URLField(blank=True, null=True)
     creative_commons_confirmed = models.CharField(max_length=10, blank=True, null=True)
     date_modified = models.DateTimeField(blank=True, null=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.SET_NULL, null=True, blank=True, related_name="created_recipes",)
 
     def __str__(self):
         return self.name
@@ -42,8 +44,8 @@ class RecipeIngredient(models.Model):
             models.UniqueConstraint(fields=["recipe", "ingredient"], name="unique_recipe_ingredient")
         ]
 
-        def __str__(self):
-            return f"{self.recipe.name} - {self.ingredient.name}"
+    def __str__(self): 
+        return f"{self.recipe.name} - {self.ingredient.name}"
 
 
     

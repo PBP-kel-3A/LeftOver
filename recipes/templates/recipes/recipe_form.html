@@ -1,0 +1,66 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+<section class="mx-auto max-w-3xl px-6 pt-28 pb-12">
+    <div class="rounded-2xl bg-white p-6 shadow-md md:p-8">
+        <h1 class="mb-2 text-3xl font-bold text-gray-900">
+            {{ page_title }}
+        </h1>
+        <p class="mb-8 text-gray-600">
+            Lengkapi informasi resep dan bahan-bahan yang diperlukan.
+        </p>
+
+        <form method="post" class="space-y-5">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="rounded-lg bg-red-50 p-3 text-red-700">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            {% for field in form %}
+                <div>
+                    <label
+                        for="{{ field.id_for_label }}"
+                        class="mb-2 block font-medium text-gray-700"
+                    >
+                        {{ field.label }}
+                    </label>
+
+                    {{ field }}
+
+                    {% if field.help_text %}
+                        <p class="mt-1 text-sm text-gray-500">
+                            {{ field.help_text }}
+                        </p>
+                    {% endif %}
+
+                    {% for error in field.errors %}
+                        <p class="mt-1 text-sm text-red-600">
+                            {{ error }}
+                        </p>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+
+            <div class="flex flex-wrap gap-3 pt-4">
+                <button
+                    type="submit"
+                    class="rounded-lg bg-sky-600 px-5 py-3 font-semibold text-white hover:bg-sky-700"
+                >
+                    Simpan Resep
+                </button>
+
+                <a
+                    href="{% if recipe %}{% url 'recipes:recipe_detail' recipe.pk %}{% else %}{% url 'recipes:recipe_list' %}{% endif %}"
+                    class="rounded-lg border border-gray-300 px-5 py-3 font-semibold text-gray-700 hover:bg-gray-50"
+                >
+                    Batal
+                </a>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}
