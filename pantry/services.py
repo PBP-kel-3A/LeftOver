@@ -1,131 +1,159 @@
-"""Penghubung Pantry Tracker -> Katalog Resep.
+"""Bridge between the Pantry Tracker and the Recipe Catalog.
 
-Resep di katalog berasal dari TheMealDB, jadi nama bahannya berbahasa Inggris
-(Egg, Carrots, Garlic, ...). Nama bahan di pantry ditulis user dalam bahasa
-Indonesia, sehingga perlu diterjemahkan dulu sebelum dipakai sebagai filter
-`ingredients` di Katalog Resep (yang memakai `icontains`).
+Recipes in the catalog come from TheMealDB, so ingredient names there are in
+English and follow TheMealDB's wording (Eggs, Carrots, Spring Onions, ...).
+The catalog's `ingredients` filter uses `icontains`.
+
+For one pantry ingredient, the keyword sent to the catalog is the first of
+these guesses that really exists in the catalog:
+
+1. the "Recipe Catalog Name" the user set in the edit dialog. It is used
+   as-is; if it isn't in the catalog the ingredient is skipped.
+2. an IngredientAlias row (managed in the Django admin)
+3. the ingredient name as typed (also tried in singular form)
+4. the name with built-in synonyms applied (eggplant -> aubergine)
+
+Ingredients without a match are skipped and the user is told, so one unknown
+ingredient cannot empty the whole search (the catalog filter is an AND).
 """
-
 import re
-# Kata kunci Indonesia -> kata kunci TheMealDB.
-# Dicocokkan per kata utuh; kunci yang lebih panjang dicek lebih dulu,
-# jadi "bawang putih" menang atas "bawang", "telur" atas "ayam", dst.
-INDONESIAN_TO_MEALDB = {
-    # Protein
-    "daging ayam": "chicken",
-    "ayam": "chicken",
-    "telur": "egg",
-    "daging sapi": "beef",
-    "sapi": "beef",
-    "kambing": "lamb",
-    "babi": "pork",
-    "sosis": "sausage",
-    "bacon": "bacon",
-    "ikan": "fish",
-    "salmon": "salmon",
-    "tuna": "tuna",
-    "udang": "prawn",
-    "cumi": "squid",
-    "tahu": "tofu",
-    "tempe": "tempeh",
-    # Sayur
-    "bawang putih": "garlic",
-    "bawang merah": "onion",
-    "bawang bombay": "onion",
-    "bawang": "onion",
-    "daun bawang": "spring onion",
-    "wortel": "carrot",
-    "kentang": "potato",
-    "tomat": "tomato",
-    "cabai": "chilli",
-    "cabe": "chilli",
-    "lombok": "chilli",
-    "jahe": "ginger",
-    "kunyit": "turmeric",
-    "bayam": "spinach",
-    "brokoli": "broccoli",
-    "kubis": "cabbage",
-    "kol": "cabbage",
-    "jamur": "mushroom",
-    "terong": "aubergine",
-    "timun": "cucumber",
-    "mentimun": "cucumber",
-    "jagung": "corn",
-    "buncis": "green beans",
-    "kacang panjang": "green beans",
-    "kacang tanah": "peanut",
-    "kacang merah": "kidney beans",
-    "labu": "pumpkin",
-    "ubi": "sweet potato",
-    "singkong": "cassava",
-    "selada": "lettuce",
-    "seledri": "celery",
-    "peterseli": "parsley",
-    "tauge": "bean sprouts",
-    # Buah
-    "jeruk nipis": "lime",
-    "jeruk": "orange",
-    "lemon": "lemon",
-    "apel": "apple",
-    "pisang": "banana",
-    "mangga": "mango",
-    "nanas": "pineapple",
-    "alpukat": "avocado",
-    # Bahan pokok & bumbu
-    "beras": "rice",
-    "nasi": "rice",
-    "mie": "noodle",
-    "pasta": "pasta",
-    "spageti": "spaghetti",
-    "roti": "bread",
-    "tepung terigu": "flour",
-    "tepung": "flour",
-    "gula": "sugar",
-    "garam": "salt",
-    "merica": "pepper",
-    "lada": "pepper",
-    "mentega": "butter",
-    "margarin": "butter",
-    "susu": "milk",
-    "keju": "cheese",
-    "yogurt": "yogurt",
-    "krim": "cream",
-    "minyak zaitun": "olive oil",
-    "minyak": "oil",
-    "kecap": "soy sauce",
-    "santan": "coconut milk",
-    "madu": "honey",
-    "cuka": "vinegar",
-    "kaldu": "stock",
+from dataclasses import dataclass, field
+
+from recipes.models import RecipeIngredient
+
+from .models import IngredientAlias
+
+# What people type -> how TheMealDB usually words it. Keys are singular (a
+# trailing "s" is matched automatically) and are replaced inside the name, so
+# "Chili Powder" becomes "chilli powder". Best effort: a synonym that isn't in
+# the catalog is simply ignored.
+SYNONYMS = {
+    "eggplant": "aubergine",
+    "zucchini": "courgette",
+    "cilantro": "coriander",
+    "scallion": "spring onion",
+    "green onion": "spring onion",
+    "shrimp": "prawn",
+    "ground beef": "minced beef",
+    "heavy whipping cream": "double cream",
+    "heavy cream": "double cream",
+    "arugula": "rocket",
+    "powdered sugar": "icing sugar",
+    "confectioners sugar": "icing sugar",
+    "all-purpose flour": "plain flour",
+    "all purpose flour": "plain flour",
+    "yogurt": "yoghurt",
+    "garbanzo bean": "chickpea",
+    "fava bean": "broad bean",
+    "beet": "beetroot",
+    "rutabaga": "swede",
+    "baking soda": "bicarbonate of soda",
+    "chili": "chilli",
 }
 
-# Urutkan dari kunci terpanjang supaya frasa spesifik dicek lebih dulu.
-_PATTERNS = [
-    (re.compile(rf"\b{re.escape(key)}\b"), value)
-    for key, value in sorted(
-        INDONESIAN_TO_MEALDB.items(), key=lambda kv: len(kv[0]), reverse=True
+
+def _compile(mapping):
+    """(regex, replacement) pairs, longest key first so
+    "heavy whipping cream" wins over "heavy cream"."""
+    return [
+        (re.compile(rf"\b{re.escape(key)}s?\b"), value)
+        for key, value in sorted(
+            mapping.items(), key=lambda kv: len(kv[0]), reverse=True
+        )
+    ]
+
+
+_SYNONYM_PATTERNS = _compile(SYNONYMS)
+
+
+def _normalize(text):
+    return " ".join(text.lower().split())
+
+
+def apply_synonyms(name):
+    """Rewrite common wording into TheMealDB's: 'Eggplant' -> 'aubergine'."""
+    result = _normalize(name)
+    for pattern, replacement in _SYNONYM_PATTERNS:
+        result = pattern.sub(replacement, result)
+    return result
+
+
+def _alias_keyword(name, patterns):
+    for pattern, keyword in patterns:
+        if pattern.search(name):
+            return keyword
+    return None
+
+
+def catalog_ingredient_names():
+    """Ingredient names that recipes in the catalog really use (A-Z)."""
+    return list(
+        RecipeIngredient.objects
+        .order_by("ingredient__name")
+        .values_list("ingredient__name", flat=True)
+        .distinct()
     )
-]
 
 
-def to_recipe_keyword(name):
-    """Terjemahkan satu nama bahan pantry jadi kata kunci filter resep.
+@dataclass
+class KeywordResult:
+    keywords: list = field(default_factory=list)  # keywords to send to the catalog
+    skipped: list = field(default_factory=list)   # pantry names that had no match
+    catalog_empty: bool = False                   # no recipes imported yet
 
-    Kalau tidak ada di kamus (misal user sudah menulis dalam bahasa Inggris),
-    nama aslinya dipakai apa adanya.
+
+def _candidates(keyword):
+    # "carrots" is also tried as "carrot" (the catalog may use the singular)
+    candidates = [keyword]
+    if len(keyword) > 3 and keyword.endswith("s"):
+        candidates.append(keyword[:-1])
+    return candidates
+
+
+def resolve_recipe_keywords(items):
+    """Work out catalog keywords for a collection of PantryItem.
+
+    Returns a KeywordResult: the valid keywords (unique, order kept) and the
+    pantry names that were skipped because the catalog doesn't know them.
     """
-    normalized = " ".join(name.lower().split())
-    for pattern, english in _PATTERNS:
-        if pattern.search(normalized):
-            return english
-    return normalized
+    catalog = [name.lower() for name in catalog_ingredient_names()]
+    result = KeywordResult(catalog_empty=not catalog)
 
+    if not catalog:
+        result.skipped = list(dict.fromkeys(item.name for item in items))
+        return result
 
-def recipe_keywords(items):
-    """Daftar kata kunci unik (urutan dipertahankan) dari kumpulan PantryItem."""
-    keywords = []
+    aliases = dict(IngredientAlias.objects.values_list("alias", "keyword"))
+    alias_patterns = _compile(aliases) if aliases else []
+
     for item in items:
-        keyword = to_recipe_keyword(item.name)
-        if keyword and keyword not in keywords:
-            keywords.append(keyword)
-    return keywords
+        name = _normalize(item.name)
+        override = _normalize(item.recipe_name)
+
+        if override:
+            guesses = [override]
+        else:
+            guesses = [
+                _alias_keyword(name, alias_patterns),
+                name,
+                apply_synonyms(name),
+            ]
+        guesses = [guess for guess in dict.fromkeys(guesses) if guess]
+
+        match = next(
+            (
+                candidate
+                for guess in guesses
+                for candidate in _candidates(guess)
+                if any(candidate in catalog_name for catalog_name in catalog)
+            ),
+            None,
+        )
+
+        if match:
+            if match not in result.keywords:
+                result.keywords.append(match)
+        elif item.name not in result.skipped:
+            result.skipped.append(item.name)
+
+    return result
