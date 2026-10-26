@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'recipes',
     'main',
+    'reviews',
 ]
 
 MIDDLEWARE = [
@@ -128,7 +129,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Jakarta'
 
 USE_I18N = True
 
@@ -148,4 +149,13 @@ WHITENOISE_USE_FINDERS = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGIN_URL = "main:login"
+import cloudinaryd
+import cloudinary.uploader
+import cloudinary.utils
+
+cloudinary.config(
+    cloud_name='okjpcj3h',
+    api_key='256931589853396',
+    api_secret='Hfl2NHgYgb818OYtLUXfKUunhkk',
+    secure=True
+)
