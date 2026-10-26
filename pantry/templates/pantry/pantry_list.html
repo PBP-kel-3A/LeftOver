@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}My Kitchen - Pantry Tracker - LeftOver{% endblock %}
+
+{% block extra_css %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/pantry.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="pantry-page">
+    <div class="pantry-container">
+
+        <!-- Header -->
+        <header class="pantry-header">
+            <div>
+                <h1 class="pantry-title">
+                    My Kitchen: Pantry Tracker
+                    <span class="pantry-tag">Inventory</span>
+                </h1>
+                <p class="pantry-subtitle">
+                    Keep track of your raw ingredients so nothing spoils before you get to use it.
+                </p>
+            </div>
+
+            <!-- Empty form: the checkboxes in the table and this button are linked to it with the form="" attribute -->
+            <form id="find-recipe-form" method="get" action="{% url 'pantry:find_recipes' %}"></form>
+            <button
+                type="submit"
+                form="find-recipe-form"
+                id="find-recipe-btn"
+                class="pantry-btn pantry-btn--red"
+                title="Tick the ingredients you want to use. With nothing ticked, every ingredient that hasn't expired is used."
+                {% if not items %}disabled{% endif %}
+            >
+                <svg class="pantry-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72"/><path d="m14 7 3 3"/><path d="M5 6v4"/><path d="M19 14v4"/><path d="M10 2v2"/><path d="M7 8H3"/><path d="M21 16h-4"/><path d="M11 3H9"/></svg>
+                <span>Find Recipes from Pantry</span>
+                <span id="selected-count" class="pantry-count" hidden></span>
+            </button>
+        </header>
+
+        <div class="pantry-layout">
+
+            <!-- Add ingredient form -->
+            <aside class="pantry-card pantry-form-card">
+                <h2 class="pantry-card-title">
+                    <svg class="pantry-icon pantry-icon--lg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="currentColor"/><path d="M12 7v10M7 12h10" stroke="#F8F3E6" stroke-width="2.2" stroke-linecap="round"/></svg>
+                    Add Raw Ingredient
+                </h2>
+
+                <form method="post" action="{% url 'pantry:pantry_list' %}" class="pantry-form" novalidate>
+                    {% csrf_token %}
+
+                    <div class="pantry-field">
+                        <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+                        {{ form.name }}
+                        {% for error in form.name.errors %}<p class="pantry-error">{{ error }}</p>{% endfor %}
+                    </div>
+
+                    <div class="pantry-row">
+                        <div class="pantry-field">
+                            <label for="{{ form.quantity.id_for_label }}">{{ form.quantity.label }}</label>
+                            {{ form.quantity }}
+                            {% for error in form.quantity.errors %}<p class="pantry-error">{{ error }}</p>{% endfor %}
+                        </div>
+                        <div class="pantry-field">
+                            <label for="{{ form.unit.id_for_label }}">{{ form.unit.label }}</label>
+                            {{ form.unit }}
+                            {% for error in form.unit.errors %}<p class="pantry-error">{{ error }}</p>{% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="pantry-field">
+                        <label for="{{ form.expiry_date.id_for_label }}">{{ form.expiry_date.label }}</label>
+                        {{ form.expiry_date }}
+                        {% for error in form.expiry_date.errors %}<p class="pantry-error">{{ error }}</p>{% endfor %}
+                    </div>
+
+                    <div class="pantry-field">
+                        <label for="{{ form.storage.id_for_label }}">{{ form.storage.label }}</label>
+                        {{ form.storage }}
+                        {% for error in form.storage.errors %}<p class="pantry-error">{{ error }}</p>{% endfor %}
+                    </div>
+
+                    <button type="submit" class="pantry-btn pantry-btn--green pantry-btn--block">
+                        <svg class="pantry-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/></svg>
+                        Save to Pantry
+                    </button>
+                </form>
+            </aside>
+
+            <!-- Pantry dashboard -->
+            <div class="pantry-main">
+
+                <!-- Status legend -->
+                <div class="pantry-legend">
+                    <strong>Expiry Status:</strong>
+                    <ul>
+                        <li><span class="dot dot--safe"></span>Safe (&gt;3 days)</li>
+                        <li><span class="dot dot--soon"></span>Use Soon (≤3 days)</li>
+                        <li><span class="dot dot--expired"></span>Urgent / Expired</li>
+                    </ul>
+                </div>
+
+                <div class="pantry-card pantry-table-card">
+                    <div class="pantry-table-scroll">
+                        <table class="pantry-table">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        <label class="pantry-th-select">
+                                            <input type="checkbox" id="select-all" class="pantry-check" aria-label="Select all ingredients" {% if not items %}disabled{% endif %}>
+                                            <span>Ingredient</span>
+                                        </label>
+                                    </th>
+                                    <th>Quantity</th>
+                                    <th>Storage</th>
+                                    <th>Expires</th>
+                                    <th>Status</th>
+                                    <th class="pantry-th-action">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in items %}
+                                <tr>
+                                    <td class="pantry-name">
+                                        <label>
+                                            <input
+                                                type="checkbox"
+                                                name="items"
+                                                value="{{ item.pk }}"
+                                                form="find-recipe-form"
+                                                class="pantry-check item-check"
+                                                aria-label="Select {{ item.name }}"
+                                                {% if item.is_expired %}disabled title="Expired ingredients can't be used to search for recipes"{% endif %}
+                                            >
+                                            <span>{{ item.name }}</span>
+                                        </label>
+                                    </td>
+                                    <td class="pantry-qty">
+                                        <b>{{ item.quantity_display }}</b> {{ item.unit_display }}
+                                    </td>
+                                    <td>
+                                        <span class="pantry-storage">{{ item.get_storage_display }}</span>
+                                    </td>
+                                    <td class="pantry-date">{{ item.expiry_date|date:"Y-m-d" }}</td>
+                                    <td>
+                                        <span class="pantry-status pantry-status--{{ item.status }}">
+                                            <span class="dot dot--{{ item.status }}"></span>{{ item.status_label }}
+                                        </span>
+                                    </td>
+                                    <td class="pantry-actions">
+                                        <button
+                                            type="button"
+                                            class="pantry-icon-btn pantry-icon-btn--edit js-edit"
+                                            aria-label="Edit {{ item.name }}"
+                                            data-url="{% url 'pantry:pantry_edit' item.pk %}"
+                                            data-name="{{ item.name }}"
+                                            data-quantity="{{ item.quantity_display }}"
+                                            data-unit="{{ item.unit }}"
+                                            data-storage="{{ item.storage }}"
+                                            data-expiry="{{ item.expiry_date|date:'Y-m-d' }}"
+                                            data-recipe-name="{{ item.recipe_name }}"
+                                        >
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"/></svg>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            class="pantry-icon-btn pantry-icon-btn--delete js-delete"
+                                            aria-label="Delete {{ item.name }}"
+                                            data-url="{% url 'pantry:pantry_delete' item.pk %}"
+                                            data-name="{{ item.name }}"
+                                        >
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="pantry-empty">
+                                        <strong>Your pantry is empty.</strong><br>
+                                        Add your first ingredient using the form.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                {% if items %}
+                <p class="pantry-hint">
+                    Tick the ingredients you want to cook with, then click <em>Find Recipes from Pantry</em>.
+                    With nothing ticked, every ingredient that hasn't expired is used.
+                </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit dialog -->
+    <dialog id="edit-dialog" class="pantry-dialog">
+        <form method="post" id="edit-form" class="pantry-form" novalidate>
+            {% csrf_token %}
+            <h2 class="pantry-card-title">Edit Ingredient</h2>
+
+            <div class="pantry-field">
+                <label for="{{ edit_form.name.id_for_label }}">{{ edit_form.name.label }}</label>
+                {{ edit_form.name }}
+            </div>
+            <div class="pantry-row">
+                <div class="pantry-field">
+                    <label for="{{ edit_form.quantity.id_for_label }}">{{ edit_form.quantity.label }}</label>
+                    {{ edit_form.quantity }}
+                </div>
+                <div class="pantry-field">
+                    <label for="{{ edit_form.unit.id_for_label }}">{{ edit_form.unit.label }}</label>
+                    {{ edit_form.unit }}
+                </div>
+            </div>
+            <div class="pantry-field">
+                <label for="{{ edit_form.expiry_date.id_for_label }}">{{ edit_form.expiry_date.label }}</label>
+                {{ edit_form.expiry_date }}
+            </div>
+            <div class="pantry-field">
+                <label for="{{ edit_form.storage.id_for_label }}">{{ edit_form.storage.label }}</label>
+                {{ edit_form.storage }}
+            </div>
+            <div class="pantry-field">
+                <label for="{{ edit_form.recipe_name.id_for_label }}">{{ edit_form.recipe_name.label }}</label>
+                {{ edit_form.recipe_name }}
+                <p class="pantry-field-hint">
+                    Used by Find Recipes from Pantry. Leave empty to match automatically.
+                </p>
+            </div>
+
+            <div class="pantry-dialog-actions">
+                <button type="button" class="pantry-btn pantry-btn--ghost js-close">Cancel</button>
+                <button type="submit" class="pantry-btn pantry-btn--green">Save Changes</button>
+            </div>
+        </form>
+    </dialog>
+
+    <!-- Suggestions for the name fields: ingredients that exist in the recipe catalog -->
+    <datalist id="catalog-ingredients">
+        {% for name in catalog_ingredients %}<option value="{{ name }}">{% endfor %}
+    </datalist>
+
+    <!-- Delete dialog -->
+    <dialog id="delete-dialog" class="pantry-dialog pantry-dialog--small">
+        <form method="post" id="delete-form" class="pantry-form">
+            {% csrf_token %}
+            <h2 class="pantry-card-title">Delete ingredient?</h2>
+            <p class="pantry-dialog-text">
+                <strong id="delete-name"></strong> will be removed from your pantry.
+                Use this for ingredients you've used up or thrown away.
+            </p>
+            <div class="pantry-dialog-actions">
+                <button type="button" class="pantry-btn pantry-btn--ghost js-close">Cancel</button>
+                <button type="submit" class="pantry-btn pantry-btn--red">Yes, Delete</button>
+            </div>
+        </form>
+    </dialog>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/pantry.js' %}"></script>
+{% endblock %}

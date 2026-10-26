@@ -1,0 +1,586 @@
+/* =========================================================
+   PANTRY TRACKER (Dapur Saya)
+   Semua aturan di-scope ke .pantry-page supaya tidak bentrok
+   dengan Tailwind (preflight) maupun style.css modul lain.
+   ========================================================= */
+
+.pantry-page {
+    --green-900: #264736;   /* secondary-900 */
+    --green-800: #335F49;
+    --red-800: #7A1A0F;     /* primary-800 */
+    --red-900: #5D140B;
+    --cream-50: #FBF8EF;
+    --cream-100: #FDF3D6;
+    --cream-200: #F3E4B4;
+    --line: #E9E1CC;
+    --ink: #1E1B19;
+    --muted: #71655F;
+
+    min-height: 100vh;
+    padding: 7rem 1.5rem 4rem;
+    background-color: #F5F1E3;
+    color: var(--ink);
+    font-family: "Plus Jakarta Sans", -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.pantry-page .pantry-container {
+    max-width: 1040px;
+    margin: 0 auto;
+}
+
+/* ---------- Header ---------- */
+
+.pantry-page .pantry-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-bottom: 1.75rem;
+}
+
+.pantry-page .pantry-title {
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: "Fraunces", Georgia, "Times New Roman", serif;
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    color: var(--green-900);
+}
+
+.pantry-page .pantry-tag {
+    padding: 0.2rem 0.55rem;
+    border-radius: 6px;
+    background: #CFF5DD;
+    color: var(--green-900);
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0;
+    line-height: 1.2;
+}
+
+.pantry-page .pantry-subtitle {
+    margin: 0.35rem 0 0;
+    font-size: 0.9rem;
+    color: var(--muted);
+}
+
+/* ---------- Layout ---------- */
+
+.pantry-page .pantry-layout {
+    display: grid;
+    grid-template-columns: 280px minmax(0, 1fr);
+    gap: 1.5rem;
+    align-items: start;
+}
+
+/* ---------- Card (gaya border + bayangan solid) ---------- */
+
+.pantry-page .pantry-card {
+    background: var(--cream-50);
+    border: 2px solid var(--green-900);
+    border-radius: 20px;
+    box-shadow: 3px 3px 0 var(--green-900);
+}
+
+.pantry-page .pantry-form-card {
+    padding: 1.4rem 1.25rem 1.25rem;
+}
+
+.pantry-page .pantry-card-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 1.1rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--ink);
+}
+
+/* ---------- Form ---------- */
+
+.pantry-page .pantry-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+
+.pantry-page .pantry-row {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 0.75rem;
+}
+
+.pantry-page .pantry-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    min-width: 0;
+}
+
+.pantry-page .pantry-field label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #3F3733;
+}
+
+.pantry-page .pantry-input {
+    width: 100%;
+    height: 2.5rem;
+    padding: 0 0.75rem;
+    border: 1px solid #CFC7B8;
+    border-radius: 10px;
+    background: #fff;
+    color: var(--ink);
+    font: inherit;
+    font-size: 0.82rem;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.pantry-page .pantry-input::placeholder {
+    color: #A69A94;
+}
+
+.pantry-page .pantry-input:focus {
+    border-color: var(--green-800);
+    box-shadow: 0 0 0 3px rgba(51, 95, 73, 0.18);
+}
+
+.pantry-page select.pantry-input {
+    cursor: pointer;
+}
+
+.pantry-page .pantry-error {
+    margin: 0;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #B91C1C;
+}
+
+/* ---------- Tombol ---------- */
+
+.pantry-page .pantry-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.1rem;
+    border: 2px solid transparent;
+    border-radius: 12px;
+    font: inherit;
+    font-size: 0.82rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: transform 0.12s, box-shadow 0.12s, background-color 0.12s;
+}
+
+.pantry-page .pantry-btn--block {
+    width: 100%;
+    margin-top: 0.3rem;
+    padding: 0.85rem 1rem;
+}
+
+.pantry-page .pantry-btn--green {
+    background-color: var(--green-900);
+    border-color: var(--green-900);
+    color: #fff;
+}
+
+.pantry-page .pantry-btn--green:hover {
+    background-color: var(--green-800);
+}
+
+.pantry-page .pantry-btn--red {
+    background-color: var(--red-800);
+    border-color: var(--red-800);
+    color: #fff;
+    box-shadow: 3px 3px 0 var(--green-900);
+}
+
+.pantry-page .pantry-btn--red:hover:not(:disabled) {
+    background-color: var(--red-900);
+    transform: translate(1px, 1px);
+    box-shadow: 2px 2px 0 var(--green-900);
+}
+
+.pantry-page .pantry-btn--ghost {
+    background-color: transparent;
+    border-color: #CFC7B8;
+    color: #3F3733;
+}
+
+.pantry-page .pantry-btn--ghost:hover {
+    background-color: #F0EADA;
+}
+
+.pantry-page .pantry-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pantry-page .pantry-btn:focus-visible,
+.pantry-page .pantry-icon-btn:focus-visible,
+.pantry-page .pantry-check:focus-visible {
+    outline: 3px solid rgba(51, 95, 73, 0.45);
+    outline-offset: 2px;
+}
+
+.pantry-page .pantry-icon {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+}
+
+.pantry-page .pantry-icon--lg {
+    width: 1.35rem;
+    height: 1.35rem;
+    color: var(--green-900);
+}
+
+.pantry-page .pantry-count {
+    min-width: 1.4rem;
+    padding: 0.2rem 0.4rem;
+    border-radius: 999px;
+    background: #FDF3D6;
+    color: var(--red-800);
+    font-size: 0.7rem;
+    text-align: center;
+}
+
+.pantry-page .pantry-count[hidden] {
+    display: none;
+}
+
+/* ---------- Legenda ---------- */
+
+.pantry-page .pantry-legend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    margin-bottom: 1.1rem;
+    padding: 0.7rem 1rem;
+    background: var(--cream-100);
+    border: 1px solid var(--cream-200);
+    border-radius: 14px;
+    font-size: 0.72rem;
+    color: #3F3733;
+}
+
+.pantry-page .pantry-legend ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.pantry-page .pantry-legend li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.pantry-page .dot {
+    display: inline-block;
+    width: 0.55rem;
+    height: 0.55rem;
+    flex-shrink: 0;
+    border-radius: 50%;
+}
+
+.pantry-page .dot--safe    { background: #10B981; }
+.pantry-page .dot--soon    { background: #F59E0B; }
+.pantry-page .dot--expired { background: #DC2626; }
+
+/* ---------- Tabel ---------- */
+
+.pantry-page .pantry-table-card {
+    overflow: hidden;
+}
+
+.pantry-page .pantry-table-scroll {
+    overflow-x: auto;
+}
+
+.pantry-page .pantry-table {
+    width: 100%;
+    min-width: 600px;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+}
+
+.pantry-page .pantry-table th {
+    padding: 0.95rem 0.75rem;
+    background: #FDF8EA;
+    border-bottom: 1px solid var(--line);
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-align: left;
+    text-transform: uppercase;
+    color: #3F3733;
+    white-space: nowrap;
+}
+
+.pantry-page .pantry-table td {
+    padding: 0.95rem 0.75rem;
+    border-bottom: 1px solid var(--line);
+    vertical-align: middle;
+}
+
+.pantry-page .pantry-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.pantry-page .pantry-table tbody tr:hover td {
+    background: #FDFAF1;
+}
+
+.pantry-page .pantry-th-action,
+.pantry-page .pantry-actions {
+    text-align: right;
+}
+
+.pantry-page .pantry-th-select,
+.pantry-page .pantry-name label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    cursor: pointer;
+}
+
+.pantry-page .pantry-name span {
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.pantry-page .pantry-check {
+    width: 1rem;
+    height: 1rem;
+    margin: 0;
+    flex-shrink: 0;
+    accent-color: var(--green-900);
+    cursor: pointer;
+}
+
+.pantry-page .pantry-check:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+}
+
+.pantry-page .pantry-qty {
+    color: var(--muted);
+    white-space: nowrap;
+}
+
+.pantry-page .pantry-qty b {
+    color: var(--ink);
+    font-weight: 600;
+}
+
+.pantry-page .pantry-storage {
+    display: inline-block;
+    padding: 0.2rem 0.5rem;
+    border-radius: 6px;
+    background: #EFEDE8;
+    color: #5E544F;
+    font-size: 0.68rem;
+    white-space: nowrap;
+}
+
+.pantry-page .pantry-date {
+    font-family: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+    font-size: 0.7rem;
+    color: #3F3733;
+    white-space: nowrap;
+}
+
+.pantry-page .pantry-table th:first-child,
+.pantry-page .pantry-table td:first-child {
+    padding-left: 1.1rem;
+}
+
+.pantry-page .pantry-table th:last-child,
+.pantry-page .pantry-table td:last-child {
+    padding-right: 1rem;
+}
+
+/* ---------- Pill status ---------- */
+
+.pantry-page .pantry-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.28rem 0.65rem;
+    border: 1px solid;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.pantry-page .pantry-status--safe {
+    background: #D1FAE5;
+    border-color: #86E3B5;
+    color: #047857;
+}
+
+.pantry-page .pantry-status--soon {
+    background: #FEF3C7;
+    border-color: #F5D77A;
+    color: #92400E;
+}
+
+.pantry-page .pantry-status--expired {
+    background: #FEE2E2;
+    border-color: #FCA5A5;
+    color: #B91C1C;
+}
+
+/* ---------- Aksi ---------- */
+
+.pantry-page .pantry-actions {
+    white-space: nowrap;
+}
+
+.pantry-page .pantry-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.9rem;
+    height: 1.9rem;
+    margin-left: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    cursor: pointer;
+    transition: background-color 0.12s;
+}
+
+.pantry-page .pantry-icon-btn svg {
+    width: 1rem;
+    height: 1rem;
+}
+
+.pantry-page .pantry-icon-btn--edit   { color: #2563EB; }
+.pantry-page .pantry-icon-btn--delete { color: #DC2626; }
+.pantry-page .pantry-icon-btn--edit:hover   { background: #DBEAFE; }
+.pantry-page .pantry-icon-btn--delete:hover { background: #FEE2E2; }
+
+/* ---------- Kosong & hint ---------- */
+
+.pantry-page .pantry-empty {
+    padding: 2.5rem 1rem !important;
+    text-align: center;
+    line-height: 1.7;
+    color: var(--muted);
+}
+
+.pantry-page .pantry-empty strong {
+    color: var(--ink);
+}
+
+.pantry-page .pantry-hint {
+    margin: 0.9rem 0.25rem 0;
+    font-size: 0.72rem;
+    line-height: 1.5;
+    color: var(--muted);
+}
+
+/* ---------- Dialog (edit & hapus) ---------- */
+
+.pantry-page .pantry-dialog {
+    width: min(92vw, 400px);
+    padding: 1.4rem 1.25rem 1.25rem;
+    border: 2px solid var(--green-900);
+    border-radius: 20px;
+    background: var(--cream-50);
+    box-shadow: 4px 4px 0 var(--green-900);
+    color: var(--ink);
+}
+
+.pantry-page .pantry-dialog::backdrop {
+    background: rgba(30, 27, 25, 0.45);
+}
+
+.pantry-page .pantry-dialog--small {
+    width: min(92vw, 360px);
+}
+
+.pantry-page .pantry-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.6rem;
+    margin-top: 0.4rem;
+}
+
+.pantry-page .pantry-dialog-text {
+    margin: 0;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: #3F3733;
+}
+
+/* ---------- Toast (messages Django) ---------- */
+
+.toast-container {
+    position: fixed;
+    top: 5.5rem;
+    right: 1.25rem;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    max-width: min(92vw, 360px);
+}
+
+.toast {
+    padding: 0.8rem 1rem;
+    border: 2px solid #264736;
+    border-radius: 14px;
+    background: #FBF8EF;
+    box-shadow: 3px 3px 0 #264736;
+    color: #1E1B19;
+    font-family: "Plus Jakarta Sans", -apple-system, "Segoe UI", sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1.45;
+    transition: opacity 0.4s, transform 0.4s;
+}
+
+.toast.is-hiding {
+    opacity: 0;
+    transform: translateY(-6px);
+}
+
+/* ---------- Responsif ---------- */
+
+@media (max-width: 860px) {
+    .pantry-page {
+        padding-top: 6.5rem;
+    }
+
+    .pantry-page .pantry-header {
+        flex-direction: column;
+    }
+
+    .pantry-page .pantry-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .pantry-page .pantry-title {
+        font-size: 1.65rem;
+    }
+}

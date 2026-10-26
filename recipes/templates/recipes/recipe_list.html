@@ -15,7 +15,11 @@
         const hiddenInput = document.getElementById("ingredients");
         const chipsContainer = document.getElementById("ingredient-chips");
 
-        let ingredients = [];
+        // Isi awal diambil dari ?ingredients=... (mis. dari Pantry Tracker)
+        let ingredients = hiddenInput.value
+            .split(",")
+            .map(item => item.trim())
+            .filter(Boolean);
 
         function renderChips() {
             chipsContainer.querySelectorAll(".ingredient-chip").forEach(
@@ -30,28 +34,28 @@
                     "rounded-full bg-[#E6F0E9] px-3 py-1 " +
                     "text-sm font-medium text-[#315D47]";
 
-                chip.innerHTML = `
-                    <span>${ingredient}</span>
-                    <button
-                        type="button"
-                        class="remove-ingredient text-[#315D47] hover:text-[#1F4934]"
-                        aria-label="Hapus ${ingredient}"
-                    >
-                        ×
-                    </button>
-                `;
+                // textContent (bukan innerHTML) agar nilai dari URL tidak
+                // dieksekusi sebagai HTML.
+                const label = document.createElement("span");
+                label.textContent = ingredient;
 
-                chip.querySelector(".remove-ingredient").addEventListener(
-                    "click",
-                    function () {
-                        ingredients = ingredients.filter(
-                            item => item !== ingredient
-                        );
+                const removeButton = document.createElement("button");
+                removeButton.type = "button";
+                removeButton.className =
+                    "remove-ingredient text-[#315D47] hover:text-[#1F4934]";
+                removeButton.setAttribute("aria-label", "Hapus " + ingredient);
+                removeButton.textContent = "×";
 
-                        updateHiddenInput();
-                        renderChips();
-                    }
-                );
+                removeButton.addEventListener("click", function () {
+                    ingredients = ingredients.filter(
+                        item => item !== ingredient
+                    );
+
+                    updateHiddenInput();
+                    renderChips();
+                });
+
+                chip.append(label, removeButton);
 
                 chipsContainer.insertBefore(chip, input);
             });
@@ -60,6 +64,8 @@
         function updateHiddenInput() {
             hiddenInput.value = ingredients.join(",");
         }
+
+        renderChips();
 
         input.addEventListener("keydown", function (event) {
             if (event.key !== "Enter") {
