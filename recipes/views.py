@@ -18,7 +18,6 @@ def admin_required(view_func):
 
 #parse bahan dengan format satu bahan per baris yang dipisahkan oleh "|" -> nama | takaran
 def parse_ingredients(ingredients_text):
-    """Parse bahan dengan format satu bahan per baris: nama | takaran."""
     ingredients = []
     seen = set()
 
@@ -78,7 +77,7 @@ def save_recipe_ingredients(recipe, ingredients):
         )
 
 
-@login_required
+
 def recipe_list(request):
     recipes = Recipe.objects.all().order_by("name")
 
@@ -133,7 +132,7 @@ def recipe_list(request):
     return render(request, "recipes/recipe_list.html", context)
 
 
-@login_required
+
 def recipe_detail(request, pk):
     recipe = get_object_or_404(Recipe, pk=pk)
 
