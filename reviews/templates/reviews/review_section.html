@@ -24,7 +24,7 @@
     <!-- Daftar Ulasan -->
     <div id="reviewListContainer" class="space-y-4">
         {% for review in recipe.reviews.all %}
-            <div id="review-{{ review.id }}" class="review-item p-5 rounded-2xl border border-gray-100 bg-[#FAF8F5] flex flex-col sm:flex-row justify-between items-start gap-4">
+            <div id="review-{{ review.id }}" class="review-item p-4 sm:p-5 rounded-2xl border border-gray-100 bg-[#FAF8F5] flex flex-col sm:flex-row justify-between items-start gap-3 sm:gap-4 min-w-0">
                 <div class="flex-1">
                     <span class="font-bold text-sm text-[#26382D]">{{ review.user.username }}</span>
                     
@@ -55,7 +55,7 @@
                 </div>
 
                 <!-- Waktu, Label Edited, & Tombol Edit/Hapus -->
-                <div class="text-right text-xs text-[#65756A] flex items-center gap-3 self-end sm:self-start shrink-0">
+                <div class="text-right text-xs text-[#65756A] flex items-center gap-3 self-end sm:self-start shrink-0 flex-wrap">
                     <div class="flex items-center gap-1.5">
                         <span>{{ review.get_time_ago }}</span>
                         {% if review.is_edited %}
@@ -89,7 +89,7 @@
 
 <!-- MODAL POPUP INPUT / EDIT ULASAN -->
 <div id="reviewModal" class="fixed inset-0 bg-black/50 backdrop-blur-xs hidden items-center justify-center z-50 px-4">
-    <div class="bg-white rounded-3xl max-w-md w-full p-6 md:p-7 shadow-2xl border border-[#26382D]/10">
+    <div class="bg-white rounded-3xl max-w-md w-full max-h-[90vh] overflow-y-auto overscroll-contain p-4 sm:p-6 md:p-7 shadow-2xl border border-[#26382D]/10">
         <h3 id="reviewModalTitle" class="text-lg font-extrabold text-[#26382D] mb-1">Share Your Cooking Experience</h3>
         <p class="text-xs text-[#65756A] mb-5">Leave a star rating and share your cooking tips or photos.</p>
 
