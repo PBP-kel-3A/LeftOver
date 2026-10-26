@@ -8,5 +8,5 @@ urlpatterns = [
     path("", views.pantry_list, name="pantry_list"),
     path("<int:pk>/edit/", views.pantry_edit, name="pantry_edit"),
     path("<int:pk>/delete/", views.pantry_delete, name="pantry_delete"),
-    path("cari-resep/", views.find_recipes, name="find_recipes"),
+    path("find-recipes/", views.find_recipes, name="find_recipes"),
 ]
