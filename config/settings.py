@@ -150,7 +150,7 @@ WHITENOISE_USE_FINDERS = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-import cloudinaryd
+import cloudinary
 import cloudinary.uploader
 import cloudinary.utils
 
