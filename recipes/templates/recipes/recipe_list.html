@@ -121,6 +121,14 @@
                 Temukan resep yang bisa membantu kamu mengolah bahan makanan
                 yang masih tersedia di dapur.
             </p>
+            {% if user.is_authenticated %}
+                <a
+                    href="{% url 'recipes:recipe_create' %}"
+                    class="mt-5 inline-flex items-center rounded-lg bg-[#315D47] px-5 py-3 font-semibold text-white transition hover:bg-[#1F4934]"
+                >
+                    + Tambah Resep
+                </a>
+            {% endif %}
         </div>
 
         <!-- Search & Filter -->

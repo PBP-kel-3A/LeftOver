@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'recipes',
     'main',
     'pantry',
+    'reviews',
 ]
 
 MIDDLEWARE = [
@@ -148,3 +149,14 @@ WHITENOISE_USE_FINDERS = True
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+import cloudinaryd
+import cloudinary.uploader
+import cloudinary.utils
+
+cloudinary.config(
+    cloud_name='okjpcj3h',
+    api_key='256931589853396',
+    api_secret='Hfl2NHgYgb818OYtLUXfKUunhkk',
+    secure=True
+)

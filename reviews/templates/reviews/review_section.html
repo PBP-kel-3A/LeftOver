@@ -1,0 +1,401 @@
+<!-- BAGIAN ULASAN & TIPS MEMASAK -->
+<div class="mt-10 bg-white rounded-3xl p-6 md:p-8 shadow-sm ring-1 ring-black/5">
+    
+    <!-- Header & Tombol Buka Modal -->
+    <div class="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 pb-5 mb-6">
+        <div>
+            <h2 class="text-xl font-extrabold text-[#26382D]">💬 Community Reviews & Cooking Tips</h2>
+            <p class="text-xs text-[#65756A] mt-1">LeftOver Community</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3">
+            {% if user.is_authenticated %}
+                <button type="button" onclick="openAddReviewModal()" class="px-4 py-2.5 rounded-xl bg-[#7C1A0F] hover:bg-[#65140B] text-white font-semibold text-xs transition shadow-xs cursor-pointer">
+                    + Write a Review & Tips
+                </button>
+            {% else %}
+                <a href="{% url 'main:login' %}" class="px-4 py-2.5 rounded-xl bg-[#315D47] text-white font-semibold text-xs transition">
+                    Log In to Leave a Review
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Daftar Ulasan -->
+    <div id="reviewListContainer" class="space-y-4">
+        {% for review in recipe.reviews.all %}
+            <div id="review-{{ review.id }}" class="review-item p-4 sm:p-5 rounded-2xl border border-gray-100 bg-[#FAF8F5] flex flex-col sm:flex-row justify-between items-start gap-3 sm:gap-4 min-w-0">
+                <div class="flex-1">
+                    <span class="font-bold text-sm text-[#26382D]">{{ review.user.username }}</span>
+                    
+                    <!-- Tampilan Bintang -->
+                    <div class="flex items-center text-sm my-1 select-none">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= review.rating %}
+                                <span class="text-yellow-400">★</span>
+                            {% else %}
+                                <span class="text-gray-300">★</span>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <!-- Teks Ulasan -->
+                    {% if review.comment %}
+                        <p class="text-sm text-[#26382D]/85 mt-1.5 leading-relaxed">{{ review.comment }}</p>
+                    {% endif %}
+
+                    <!-- Foto Hasil Masakan (Bisa banyak & klik untuk Lightbox) -->
+                    {% if review.images.all %}
+                        <div class="mt-3 flex flex-wrap gap-2">
+                            {% for img in review.images.all %}
+                                <img src="{{ img.image }}" alt="Review Photo" onclick="openImageLightbox('{{ img.image }}')" class="w-24 h-24 object-cover rounded-xl border border-gray-200 cursor-pointer hover:opacity-90 transition shadow-xs">
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Waktu, Label Edited, & Tombol Edit/Hapus -->
+                <div class="text-right text-xs text-[#65756A] flex items-center gap-3 self-end sm:self-start shrink-0 flex-wrap">
+                    <div class="flex items-center gap-1.5">
+                        <span>{{ review.get_time_ago }}</span>
+                        {% if review.is_edited %}
+                            <span class="italic text-gray-400">(edited)</span>
+                        {% endif %}
+                    </div>
+
+                    {% if user == review.user %}
+                        <button type="button"
+                                data-review-id="{{ review.id }}"
+                                data-rating="{{ review.rating }}"
+                                data-comment="{{ review.comment|default:'' }}"
+                                onclick="openEditReviewModal(this)"
+                                class="text-[#315D47] font-semibold hover:underline cursor-pointer">
+                            Edit
+                        </button>
+                        <button type="button"
+                                data-review-id="{{ review.id }}"
+                                onclick="openDeleteReviewModal(this)"
+                                class="text-red-600 font-semibold hover:underline cursor-pointer">
+                            Delete
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+        {% empty %}
+            <p id="noReviewMsg" class="text-center text-sm text-[#65756A] py-8">No reviews yet for this recipe. Be the first to leave a review!</p>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- MODAL POPUP INPUT / EDIT ULASAN -->
+<div id="reviewModal" class="fixed inset-0 bg-black/50 backdrop-blur-xs hidden items-center justify-center z-50 px-4">
+    <div class="bg-white rounded-3xl max-w-md w-full max-h-[90vh] overflow-y-auto overscroll-contain p-4 sm:p-6 md:p-7 shadow-2xl border border-[#26382D]/10">
+        <h3 id="reviewModalTitle" class="text-lg font-extrabold text-[#26382D] mb-1">Share Your Cooking Experience</h3>
+        <p class="text-xs text-[#65756A] mb-5">Leave a star rating and share your cooking tips or photos.</p>
+
+        <form id="reviewForm" method="POST" action="{% url 'reviews:add_review' recipe.id %}" enctype="multipart/form-data" onsubmit="return validateReviewForm()">
+            {% csrf_token %}
+            <input type="hidden" name="rating" id="ratingInput" value="0">
+
+            <!-- Bintang Interaktif -->
+            <div class="mb-4">
+                <label class="block text-xs font-bold text-[#26382D] mb-1.5">Rating<span class="text-red-500">*</span></label>
+                <div class="flex items-center gap-3">
+                    <div class="flex text-3xl cursor-pointer select-none space-x-1" id="starContainer" onmouseleave="resetStarHover()">
+                        <span onclick="selectStar(1)" onmouseenter="hoverStar(1)" class="star-btn text-gray-300 transition hover:scale-110">★</span>
+                        <span onclick="selectStar(2)" onmouseenter="hoverStar(2)" class="star-btn text-gray-300 transition hover:scale-110">★</span>
+                        <span onclick="selectStar(3)" onmouseenter="hoverStar(3)" class="star-btn text-gray-300 transition hover:scale-110">★</span>
+                        <span onclick="selectStar(4)" onmouseenter="hoverStar(4)" class="star-btn text-gray-300 transition hover:scale-110">★</span>
+                        <span onclick="selectStar(5)" onmouseenter="hoverStar(5)" class="star-btn text-gray-300 transition hover:scale-110">★</span>
+                    </div>
+                    <span id="ratingLabel" class="text-xs font-semibold text-[#65756A]">0 out of 5 stars</span>
+                </div>
+                <p id="ratingErrorMsg" class="text-xs text-red-600 mt-1.5 hidden">⚠️ Please select at least 1 star!</p>
+            </div>
+
+            <!-- Komentar -->
+            <div class="mb-4">
+                <label class="block text-xs font-bold text-[#26382D] mb-1.5">Review & Tips (Optional)</label>
+                <textarea name="comment" id="commentInput" rows="3" placeholder="Share cooking tips, describe the taste, or suggest ingredient substitutions..." class="w-full rounded-2xl border border-gray-200 p-3.5 text-sm text-[#26382D] focus:outline-none focus:border-[#315D47]"></textarea>
+            </div>
+
+            <!-- Upload Foto (Tanpa Teks Nama File Bawaan Browser, Maksimal 3 Foto) -->
+            <div class="mb-4">
+                <label class="block text-xs font-bold text-[#26382D] mb-1.5">Photos of Your Dish (Up to 3 Photos)</label>
+                
+                <!-- Tombol Kustom pengganti file input standar agar bersih dari nama file -->
+                <div class="flex items-center gap-3">
+                    <label id="pickPhotoLabel" for="imageInput" class="px-4 py-2 rounded-xl bg-[#315D47]/10 text-[#315D47] font-semibold text-xs hover:bg-[#315D47]/20 transition cursor-pointer select-none">
+                        Choose Photos
+                    </label>
+                    <span id="fileCountLabel" class="text-xs text-[#65756A]">No photos selected</span>
+                </div>
+
+                <!-- Input asli disembunyikan total agar tidak memunculkan teks nama file bawaan -->
+                <input type="file" name="images" id="imageInput" accept="image/*" multiple class="hidden">
+                <p class="text-[11px] text-[#65756A] mt-1.5">You can select up to 3 photos.</p>
+            </div>
+
+            <!-- Container Pratinjau Foto Langsung dengan Tombol Silang (X) -->
+            <div id="imagePreviewContainer" class="mb-6 hidden flex gap-3 flex-wrap"></div>
+
+            <div class="flex justify-end gap-2.5">
+                <button type="button" onclick="closeReviewModal()" class="px-5 py-2.5 rounded-xl border border-gray-200 text-xs font-semibold text-[#26382D] cursor-pointer">Cancel</button>
+                <button type="submit" class="px-5 py-2.5 rounded-xl bg-[#7C1A0F] hover:bg-[#65140B] text-white text-xs font-semibold transition cursor-pointer">Submit Review</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL KONFIRMASI HAPUS -->
+<div id="deleteReviewModal" class="fixed inset-0 bg-black/50 backdrop-blur-xs hidden items-center justify-center z-50 px-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl border border-[#26382D]/10">
+        <div class="w-12 h-12 rounded-2xl bg-red-50 text-[#7C1A0F] flex items-center justify-center mx-auto mb-3 text-2xl font-bold">⚠️</div>
+        <h3 class="text-lg font-extrabold text-[#26382D] mb-1">Delete Review</h3>
+        <p class="text-xs text-[#65756A] mb-6">Are you sure you want to delete this review and rating?</p>
+
+        <form id="deleteReviewForm" method="POST" action="">
+            {% csrf_token %}
+            <div class="flex justify-center gap-3">
+                <button type="button" onclick="closeDeleteReviewModal()" class="flex-1 py-2.5 rounded-full border border-gray-200 text-xs font-semibold text-[#26382D] cursor-pointer">Cancel</button>
+                <button type="submit" class="flex-1 py-2.5 rounded-full bg-[#7C1A0F] hover:bg-[#65140B] text-white text-xs font-semibold transition cursor-pointer">Yes, Continue</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL LIGHTBOX FOTO FULL LAYAR -->
+<div id="imageLightboxModal" class="fixed inset-0 bg-black/90 hidden items-center justify-center z-50 p-4" onclick="closeImageLightbox()">
+    <div class="relative max-w-4xl max-h-screen w-full flex items-center justify-center">
+        <button type="button" onclick="closeImageLightbox()" class="absolute top-4 right-4 text-white bg-black/60 hover:bg-black w-10 h-10 rounded-full flex items-center justify-center text-xl font-bold transition cursor-pointer z-10">✕</button>
+        <img id="lightboxImage" src="" alt="Enlarged review photo" class="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl">
+    </div>
+</div>
+
+<!-- SCRIPT MODAL, BINTANG, LIVE PREVIEW, & LIGHTBOX -->
+<script>
+    let selectedRating = 0;
+    let editingReviewId = null;
+    let deletingReviewId = null;
+    const addReviewUrl = "{% url 'reviews:add_review' recipe.id %}";
+    let dataTransferFiles = new DataTransfer();
+
+    function renderStars(count) {
+        const stars = document.querySelectorAll('#starContainer .star-btn');
+        stars.forEach((star, idx) => {
+            star.classList.toggle('text-yellow-400', idx < count);
+            star.classList.toggle('text-gray-300', idx >= count);
+        });
+    }
+
+    function selectStar(val) {
+        selectedRating = val;
+        document.getElementById('ratingInput').value = val;
+        document.getElementById('ratingLabel').innerText = val + " dari 5 Bintang";
+        document.getElementById('ratingErrorMsg').classList.add('hidden');
+        renderStars(val);
+    }
+
+    function hoverStar(val) { renderStars(val); }
+    function resetStarHover() { renderStars(selectedRating); }
+
+    function openAddReviewModal() {
+        editingReviewId = null;
+        document.getElementById('reviewModalTitle').innerText = "Share Your Cooking Experience";
+        document.getElementById('commentInput').value = "";
+
+        dataTransferFiles = new DataTransfer();
+        document.getElementById('imageInput').files = dataTransferFiles.files;
+        renderPreviews();
+
+        selectStar(0);
+        document.getElementById('reviewModal').classList.replace('hidden', 'flex');
+    }
+
+    function openEditReviewModal(btn) {
+        editingReviewId = btn.dataset.reviewId;
+        const rating = parseInt(btn.dataset.rating, 10);
+        const comment = btn.dataset.comment || "";
+
+        document.getElementById('reviewModalTitle').innerText = "Edit Ulasan & Tips";
+        document.getElementById('commentInput').value = comment;
+
+        dataTransferFiles = new DataTransfer();
+        document.getElementById('imageInput').files = dataTransferFiles.files;
+        renderPreviews();
+
+        selectStar(rating);
+        document.getElementById('reviewModal').classList.replace('hidden', 'flex');
+    }
+
+    function closeReviewModal() {
+        document.getElementById('reviewModal').classList.replace('flex', 'hidden');
+    }
+
+    function openDeleteReviewModal(btn) {
+        deletingReviewId = btn.dataset.reviewId;
+        document.getElementById('deleteReviewModal').classList.replace('hidden', 'flex');
+    }
+
+    function closeDeleteReviewModal() {
+        document.getElementById('deleteReviewModal').classList.replace('flex', 'hidden');
+    }
+
+    function openImageLightbox(imgSrc) {
+        document.getElementById('lightboxImage').src = imgSrc;
+        document.getElementById('imageLightboxModal').classList.replace('hidden', 'flex');
+    }
+
+    function closeImageLightbox() {
+        document.getElementById('imageLightboxModal').classList.replace('flex', 'hidden');
+    }
+
+    let previewContainer, fileCountLabel, imageInput, pickPhotoLabel;
+
+    function renderPreviews() {
+        if (!previewContainer) return;
+
+        previewContainer.innerHTML = "";
+        const files = dataTransferFiles.files;
+
+        if (files.length > 0) {
+            previewContainer.classList.remove("hidden");
+            fileCountLabel.innerText = `${files.length} photo(s) selected`;
+        } else {
+            previewContainer.classList.add("hidden");
+            fileCountLabel.innerText = "No photos selected";
+        }
+
+        // Disable total tombol "Pilih Foto" menggunakan pointer-events-none jika sudah 3 foto
+        if (files.length >= 3) {
+            pickPhotoLabel.classList.add("opacity-50", "cursor-not-allowed", "pointer-events-none");
+            pickPhotoLabel.classList.remove("hover:bg-[#315D47]/20", "cursor-pointer");
+        } else {
+            pickPhotoLabel.classList.remove("opacity-50", "cursor-not-allowed", "pointer-events-none");
+            pickPhotoLabel.classList.add("hover:bg-[#315D47]/20", "cursor-pointer");
+        }
+
+        Array.from(files).forEach((file, index) => {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const wrapper = document.createElement("div");
+                wrapper.className = "relative w-20 h-20 rounded-xl overflow-hidden border border-gray-200 shadow-xs bg-gray-50";
+                
+                wrapper.innerHTML = `
+                    <img src="${e.target.result}" class="w-full h-full object-cover">
+                    <button type="button" 
+                        onclick="removeSelectedImage(${index})" 
+                        class="absolute top-1 right-1 bg-black/60 hover:bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs transition cursor-pointer">
+                        ×
+                    </button>
+                `;
+                previewContainer.appendChild(wrapper);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    window.removeSelectedImage = function(index) {
+        const dt = new DataTransfer();
+        const currentFiles = dataTransferFiles.files;
+
+        for (let i = 0; i < currentFiles.length; i++) {
+            if (i !== index) {
+                dt.items.add(currentFiles[i]);
+            }
+        }
+
+        dataTransferFiles = dt;
+        imageInput.files = dataTransferFiles.files;
+        renderPreviews();
+    };
+
+    document.addEventListener("DOMContentLoaded", function () {
+        imageInput = document.getElementById("imageInput");
+        previewContainer = document.getElementById("imagePreviewContainer");
+        fileCountLabel = document.getElementById("fileCountLabel");
+        pickPhotoLabel = document.getElementById("pickPhotoLabel");
+        const reviewForm = document.getElementById("reviewForm");
+
+        if (imageInput) {
+            imageInput.addEventListener("change", function (event) {
+                if (dataTransferFiles.files.length >= 3) {
+                    imageInput.value = "";
+                    return;
+                }
+
+                const newFiles = Array.from(event.target.files);
+
+                if (dataTransferFiles.files.length + newFiles.length > 3) {
+                    alert("You can upload a maximum of 3 photos!");
+                    imageInput.value = "";
+                    return;
+                }
+
+                newFiles.forEach(file => dataTransferFiles.items.add(file));
+                imageInput.files = dataTransferFiles.files;
+
+                renderPreviews();
+            });
+        }
+
+        if (reviewForm) {
+            reviewForm.addEventListener("submit", function (e) {
+                e.preventDefault();
+
+                if (selectedRating < 1) {
+                    document.getElementById('ratingErrorMsg').classList.remove('hidden');
+                    return;
+                }
+
+                const formData = new FormData(reviewForm);
+                formData.set('rating', selectedRating);
+
+                let url = addReviewUrl;
+                if (editingReviewId) {
+                    url = `/reviews/edit/${editingReviewId}/`;
+                }
+
+                fetch(url, {
+                    method: "POST",
+                    body: formData,
+                    headers: { "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        closeReviewModal();
+                        if (editingReviewId) {
+                            document.getElementById('review-' + editingReviewId).outerHTML = data.html;
+                        } else {
+                            document.getElementById('reviewListContainer').insertAdjacentHTML('afterbegin', data.html);
+                            document.getElementById('noReviewMsg')?.classList.add('hidden');
+                        }
+                    } else {
+                        alert(data.error || "Failed to save the review.");
+                    }
+                });
+            });
+        }
+
+        const deleteForm = document.getElementById("deleteReviewForm");
+        if (deleteForm) {
+            deleteForm.addEventListener("submit", function (e) {
+                e.preventDefault();
+                fetch(`/reviews/delete/${deletingReviewId}/`, {
+                    method: "POST",
+                    headers: { "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        closeDeleteReviewModal();
+                        document.getElementById('review-' + deletingReviewId).remove();
+                    } else {
+                        alert("Failed to delete the review.");
+                    }
+                });
+            });
+        }
+    });
+</script>
