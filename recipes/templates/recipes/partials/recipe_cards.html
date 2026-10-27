@@ -48,8 +48,37 @@
                     >
                         No image available
                     </div>
-                {% endif %}
-
+                {% endif %}           
+                
+                <!-- Favorite Button -->
+                <button
+                    type="button"
+                    class="favorite-toggle absolute right-4 top-4 z-10 flex h-11 w-11
+                        items-center justify-center rounded-full bg-white shadow-md
+                        transition hover:scale-110 disabled:cursor-wait
+                        disabled:opacity-60"
+                    data-toggle-url="{% url 'favorites:favorite_toggle' recipe.pk %}"
+                    data-login-url="{% url 'main:login' %}"
+                    data-favorited="{% if recipe.is_favorited %}true{% else %}false{% endif %}"
+                    data-recipe-id="{{ recipe.pk }}"
+                    aria-label="{% if recipe.is_favorited %}Hapus dari favorit{% else %}Tambahkan ke favorit{% endif %}"
+                    aria-pressed="{% if recipe.is_favorited %}true{% else %}false{% endif %}"
+                    title="{% if recipe.is_favorited %}Hapus dari favorit{% else %}Simpan ke favorit{% endif %}"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        class="favorite-icon h-6 w-6 transition-colors
+                            {% if recipe.is_favorited %}fill-[#781B10] text-[#781B10]{% else %}fill-none text-[#781B10]{% endif %}"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                    >
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                    </svg>
+                </button>
             </div>
 
             <!-- Content -->
