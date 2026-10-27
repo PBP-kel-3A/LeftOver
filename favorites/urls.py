@@ -30,4 +30,10 @@ urlpatterns = [
         views.favorite_list_json,
         name="favorite_list_json"
     ),
+
+    path(
+    "toggle/<int:recipe_id>/",
+    views.favorite_toggle,
+    name="favorite_toggle"
+),
 ]

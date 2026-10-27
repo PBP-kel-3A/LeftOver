@@ -182,3 +182,34 @@ def favorite_list_json(request):
         "count": len(data),
         "favorites": data
     })
+
+
+# TOGGLE: Tambah atau hapus favorit melalui tombol hati
+@login_required
+@require_POST
+def favorite_toggle(request, recipe_id):
+    recipe = get_object_or_404(Recipe, pk=recipe_id)
+
+    favorite = Favorite.objects.filter(
+        user=request.user,
+        recipe=recipe
+    ).first()
+
+    if favorite:
+        favorite.delete()
+        is_favorited = False
+        message = "Resep dihapus dari favorit."
+    else:
+        Favorite.objects.get_or_create(
+            user=request.user,
+            recipe=recipe
+        )
+        is_favorited = True
+        message = "Resep ditambahkan ke favorit!"
+
+    return JsonResponse({
+        "success": True,
+        "is_favorited": is_favorited,
+        "recipe_id": recipe.id,
+        "message": message
+    })
