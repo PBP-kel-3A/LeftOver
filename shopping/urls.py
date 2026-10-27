@@ -9,4 +9,5 @@ urlpatterns = [
     path("add/", views.shopping_add, name="shopping_add"),
     path("<int:pk>/toggle/", views.shopping_toggle, name="shopping_toggle"),
     path("<int:pk>/delete/", views.shopping_delete, name="shopping_delete"),
+    path("transfer/", views.transfer_to_pantry, name="transfer_to_pantry"),
 ]

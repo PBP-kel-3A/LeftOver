@@ -1,13 +1,21 @@
+from datetime import timedelta
+
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.template.loader import render_to_string
+from django.utils import timezone
 from django.views.decorators.http import require_POST
+
+from pantry.models import PantryItem
 
 from .forms import ShoppingItemForm
 from .models import ShoppingItem
 
 LOGIN_URL = "main:login"
+# Perkiraan kedaluwarsa untuk bahan yang baru dibeli, bisa diedit di Pantry
+DEFAULT_SHELF_LIFE_DAYS = 7
 
 
 def _first_error(form):
@@ -72,3 +80,41 @@ def shopping_delete(request, pk):
     name = item.name
     item.delete()
     return JsonResponse({"success": True, "name": name})
+
+
+@login_required(login_url=LOGIN_URL)
+@require_POST
+def transfer_to_pantry(request):
+    """Pindahkan semua barang yang sudah dicoret ke Pantry Tracker."""
+    purchased = list(
+        ShoppingItem.objects.filter(user=request.user, is_purchased=True)
+    )
+    if not purchased:
+        return JsonResponse(
+            {"success": False, "error": "Belum ada barang yang dicoret."}, status=400
+        )
+
+    expiry = timezone.localdate() + timedelta(days=DEFAULT_SHELF_LIFE_DAYS)
+    pantry_items = []
+    for item in purchased:
+        quantity, unit = item.pantry_quantity()
+        pantry_items.append(
+            PantryItem(
+                user=request.user,
+                name=item.name,
+                quantity=quantity,
+                unit=unit,
+                expiry_date=expiry,
+            )
+        )
+
+    # Simpan ke pantry dan hapus dari daftar belanja sekaligus
+    with transaction.atomic():
+        PantryItem.objects.bulk_create(pantry_items)
+        ShoppingItem.objects.filter(pk__in=[item.pk for item in purchased]).delete()
+
+    return JsonResponse({
+        "success": True,
+        "moved_ids": [item.pk for item in purchased],
+        "count": len(purchased),
+    })
