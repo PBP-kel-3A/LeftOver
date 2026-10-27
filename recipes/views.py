@@ -9,6 +9,9 @@ from django.shortcuts import get_object_or_404, redirect, render
 from .forms import RecipeForm
 from .models import Ingredient, Recipe, RecipeIngredient
 
+from django.db.models import Exists, OuterRef
+from favorites.models import Favorite
+
 #Membatasi akses hanya untuk staff atau superuser.
 def admin_required(view_func):
     return user_passes_test(
@@ -107,6 +110,16 @@ def recipe_list(request):
         )
 
     recipes = recipes.distinct()
+    # Menentukan status favorit setiap resep untuk user yang sedang login
+    if request.user.is_authenticated:
+        user_favorites = Favorite.objects.filter(
+            user=request.user,
+            recipe_id=OuterRef("pk"),
+        )
+
+        recipes = recipes.annotate(
+            is_favorited=Exists(user_favorites)
+        )
 
     categories = (
         Recipe.objects.exclude(category__isnull=True)
