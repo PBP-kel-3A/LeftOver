@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
 
@@ -51,3 +51,24 @@ def shopping_add(request):
     # Kirim potongan HTML supaya JS bisa langsung menampilkan barang baru
     html = render_to_string("shopping/_shopping_item.html", {"item": item}, request=request)
     return JsonResponse({"success": True, "html": html, "name": item.name})
+
+
+@login_required(login_url=LOGIN_URL)
+@require_POST
+def shopping_toggle(request, pk):
+    """Centang / batal centang 'Sudah Dibeli' (Update)."""
+    # user=request.user supaya user tidak bisa mengubah barang orang lain
+    item = get_object_or_404(ShoppingItem, pk=pk, user=request.user)
+    item.is_purchased = not item.is_purchased
+    item.save(update_fields=["is_purchased", "updated_at"])
+    return JsonResponse({"success": True, "is_purchased": item.is_purchased})
+
+
+@login_required(login_url=LOGIN_URL)
+@require_POST
+def shopping_delete(request, pk):
+    """Hapus barang dari daftar belanja (Delete)."""
+    item = get_object_or_404(ShoppingItem, pk=pk, user=request.user)
+    name = item.name
+    item.delete()
+    return JsonResponse({"success": True, "name": name})
