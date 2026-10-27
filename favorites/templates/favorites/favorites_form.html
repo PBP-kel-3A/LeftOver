@@ -1,78 +1,70 @@
+{% extends "base.html" %}
 
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% block title %}Edit Catatan | LeftOver{% endblock %}
 
-    <title>Edit Catatan | LeftOver</title>
-
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-
-<body class="bg-[#F8FAF5] min-h-screen">
-
-    <main class="max-w-2xl mx-auto px-6 py-12">
+{% block content %}
+<section class="min-h-screen bg-[#F5F1E3] px-5 pb-20 pt-28">
+    <div class="mx-auto max-w-2xl">
 
         <a
             href="{% url 'favorites:favorite_list' %}"
-            class="text-green-700 text-sm"
+            class="text-sm font-semibold text-[#315D47] hover:underline"
         >
-            ← Kembali ke Favorites
+            ← Kembali ke My Favorites
         </a>
 
-        <div class="bg-white rounded-2xl shadow-sm p-8 mt-6">
+        <div class="mt-7 rounded-3xl bg-white p-7 shadow-md sm:p-10">
+            <p class="mb-2 text-xs font-bold tracking-wide text-[#427B5E]">
+                PERSONAL NOTES
+            </p>
 
-            <h1 class="text-2xl font-bold text-green-800 mb-2">
+            <h1 class="text-3xl font-extrabold text-[#5D140B]">
                 Edit Catatan
             </h1>
 
-            <p class="text-gray-500 mb-6">
+            <p class="mb-8 mt-3 text-sm text-[#71655F]">
                 {{ favorite.recipe.name }}
             </p>
 
             <form method="POST">
-
                 {% csrf_token %}
 
                 <label
                     for="{{ form.personal_note.id_for_label }}"
-                    class="block font-semibold mb-2"
+                    class="mb-3 block text-sm font-semibold text-[#3F2520]"
                 >
                     Catatan Pribadi
                 </label>
 
-                {{ form.personal_note }}
+                <!-- Field ModelForm dari Django -->
+                <div class="[&_textarea]:w-full [&_textarea]:rounded-2xl [&_textarea]:border [&_textarea]:border-[#D6D0CE] [&_textarea]:p-4 [&_textarea]:text-sm [&_textarea]:outline-none [&_textarea]:focus:border-[#427B5E]">
+                    {{ form.personal_note }}
+                </div>
 
                 {% if form.personal_note.errors %}
-                    <p class="text-red-600 text-sm mt-2">
+                    <div class="mt-3 text-sm text-[#A92415]">
                         {{ form.personal_note.errors }}
-                    </p>
+                    </div>
                 {% endif %}
 
-                <div class="flex gap-3 mt-6">
-
+                <div class="mt-8 flex flex-wrap gap-3">
                     <button
                         type="submit"
-                        class="bg-green-700 text-white px-6 py-3 rounded-lg"
+                        class="rounded-full bg-[#315D47] px-7 py-3 text-sm font-semibold text-white transition hover:bg-[#264736]"
                     >
                         Simpan Perubahan
                     </button>
 
                     <a
                         href="{% url 'favorites:favorite_list' %}"
-                        class="border border-gray-300 px-6 py-3 rounded-lg"
+                        class="rounded-full border border-[#D6D0CE] px-7 py-3 text-sm font-semibold text-[#5E544F] hover:bg-[#F9F7F1]"
                     >
                         Batal
                     </a>
-
                 </div>
-
             </form>
-
         </div>
 
-    </main>
-
-</body>
-</html>
+    </div>
+</section>
+{% endblock %}
