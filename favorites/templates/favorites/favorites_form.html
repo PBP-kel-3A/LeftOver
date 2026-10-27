@@ -1,0 +1,78 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Edit Catatan | LeftOver</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-[#F8FAF5] min-h-screen">
+
+    <main class="max-w-2xl mx-auto px-6 py-12">
+
+        <a
+            href="{% url 'favorites:favorite_list' %}"
+            class="text-green-700 text-sm"
+        >
+            ← Kembali ke Favorites
+        </a>
+
+        <div class="bg-white rounded-2xl shadow-sm p-8 mt-6">
+
+            <h1 class="text-2xl font-bold text-green-800 mb-2">
+                Edit Catatan
+            </h1>
+
+            <p class="text-gray-500 mb-6">
+                {{ favorite.recipe.name }}
+            </p>
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+                <label
+                    for="{{ form.personal_note.id_for_label }}"
+                    class="block font-semibold mb-2"
+                >
+                    Catatan Pribadi
+                </label>
+
+                {{ form.personal_note }}
+
+                {% if form.personal_note.errors %}
+                    <p class="text-red-600 text-sm mt-2">
+                        {{ form.personal_note.errors }}
+                    </p>
+                {% endif %}
+
+                <div class="flex gap-3 mt-6">
+
+                    <button
+                        type="submit"
+                        class="bg-green-700 text-white px-6 py-3 rounded-lg"
+                    >
+                        Simpan Perubahan
+                    </button>
+
+                    <a
+                        href="{% url 'favorites:favorite_list' %}"
+                        class="border border-gray-300 px-6 py-3 rounded-lg"
+                    >
+                        Batal
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </main>
+
+</body>
+</html>

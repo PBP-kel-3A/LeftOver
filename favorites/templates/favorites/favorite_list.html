@@ -1,0 +1,173 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>My Favorites | LeftOver</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-[#F8FAF5] min-h-screen text-gray-800">
+
+    <main class="max-w-6xl mx-auto px-6 py-12">
+
+        <!-- HEADER -->
+        <div class="mb-10">
+            <h1 class="text-3xl font-bold text-green-800">
+                My Favorites
+            </h1>
+
+            <p class="text-gray-500 mt-2">
+                Kumpulan resep yang sudah kamu simpan.
+            </p>
+        </div>
+
+        <!-- FILTER KATEGORI -->
+        <form method="GET" class="mb-8 flex gap-3">
+
+            <select
+                name="category"
+                class="border border-gray-300 rounded-lg px-4 py-2 bg-white"
+            >
+                <option value="">Semua Kategori</option>
+
+                {% for category in categories %}
+                    <option
+                        value="{{ category }}"
+                        {% if selected_category == category %}selected{% endif %}
+                    >
+                        {{ category }}
+                    </option>
+                {% endfor %}
+
+            </select>
+
+            <button
+                type="submit"
+                class="bg-green-700 text-white px-5 py-2 rounded-lg hover:bg-green-800"
+            >
+                Filter
+            </button>
+
+        </form>
+
+        <!-- FAVORITE CARDS -->
+        {% if favorites %}
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                {% for favorite in favorites %}
+
+                    <article class="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100">
+
+                        <!-- RECIPE IMAGE -->
+                        {% if favorite.recipe.image_url %}
+                            <img
+                                src="{{ favorite.recipe.image_url }}"
+                                alt="{{ favorite.recipe.name }}"
+                                class="w-full h-48 object-cover"
+                            >
+                        {% else %}
+                            <div class="w-full h-48 bg-green-100 flex items-center justify-center text-green-700">
+                                Tidak ada gambar
+                            </div>
+                        {% endif %}
+
+                        <!-- CARD CONTENT -->
+                        <div class="p-5">
+
+                            <p class="text-sm text-green-700 font-medium mb-2">
+                                {{ favorite.recipe.category|default:"Tanpa kategori" }}
+                            </p>
+
+                            <h2 class="text-xl font-bold mb-3">
+                                {{ favorite.recipe.name }}
+                            </h2>
+
+                            <!-- PERSONAL NOTE -->
+                            <div class="bg-gray-50 rounded-lg p-3 mb-4">
+
+                                <p class="text-xs font-semibold text-gray-500 mb-1">
+                                    Catatan Pribadi
+                                </p>
+
+                                <p class="text-sm text-gray-700">
+                                    {{ favorite.personal_note|default:"Belum ada catatan." }}
+                                </p>
+
+                            </div>
+
+                            <!-- ACTION BUTTONS -->
+                            <div class="flex flex-wrap gap-2">
+
+                                <a
+                                    href="{% url 'recipes:recipe_detail' favorite.recipe.id %}"
+                                    class="bg-green-700 text-white px-4 py-2 rounded-lg text-sm"
+                                >
+                                    Lihat Resep
+                                </a>
+
+                                <a
+                                    href="{% url 'favorites:favorite_update' favorite.id %}"
+                                    class="border border-gray-300 px-4 py-2 rounded-lg text-sm"
+                                >
+                                    Edit Catatan
+                                </a>
+
+                                <form
+                                    method="POST"
+                                    action="{% url 'favorites:favorite_delete' favorite.id %}"
+                                    onsubmit="return confirm('Hapus resep ini dari favorit?')"
+                                >
+                                    {% csrf_token %}
+
+                                    <button
+                                        type="submit"
+                                        class="text-red-600 border border-red-200 px-4 py-2 rounded-lg text-sm"
+                                    >
+                                        Hapus
+                                    </button>
+
+                                </form>
+
+                            </div>
+
+                        </div>
+
+                    </article>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <!-- EMPTY STATE -->
+            <div class="bg-white rounded-2xl border border-dashed border-gray-300 p-12 text-center">
+
+                <h2 class="text-xl font-semibold text-gray-700">
+                    Belum ada resep favorit
+                </h2>
+
+                <p class="text-gray-500 mt-2 mb-6">
+                    Yuk, jelajahi katalog dan simpan resep yang kamu suka!
+                </p>
+
+                <a
+                    href="{% url 'recipes:recipe_list' %}"
+                    class="inline-block bg-green-700 text-white px-6 py-3 rounded-lg"
+                >
+                    Jelajahi Resep
+                </a>
+
+            </div>
+
+        {% endif %}
+
+    </main>
+
+</body>
+</html>
