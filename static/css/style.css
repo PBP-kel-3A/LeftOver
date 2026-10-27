@@ -73,9 +73,9 @@
 
 body {
     margin: 0;
-    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: "Plus Jakarta Sans", -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     color: var(--neutral-950);
-    background-color: #F5F1E3;
+    background-color: #FFFFFF;
 }
 
 a {
