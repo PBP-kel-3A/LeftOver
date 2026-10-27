@@ -28,7 +28,6 @@
 
             ingredients.forEach(function (ingredient) {
                 const chip = document.createElement("span");
-
                 chip.className =
                     "ingredient-chip inline-flex items-center gap-1 " +
                     "rounded-full bg-[#E6F0E9] px-3 py-1 " +
@@ -45,18 +44,15 @@
                     "remove-ingredient text-[#315D47] hover:text-[#1F4934]";
                 removeButton.setAttribute("aria-label", "Hapus " + ingredient);
                 removeButton.textContent = "×";
-
                 removeButton.addEventListener("click", function () {
                     ingredients = ingredients.filter(
                         item => item !== ingredient
                     );
-
                     updateHiddenInput();
                     renderChips();
                 });
 
                 chip.append(label, removeButton);
-
                 chipsContainer.insertBefore(chip, input);
             });
         }
@@ -71,11 +67,9 @@
             if (event.key !== "Enter") {
                 return;
             }
-
             event.preventDefault();
 
             const ingredient = input.value.trim();
-
             if (!ingredient) {
                 return;
             }
@@ -85,7 +79,6 @@
             }
 
             input.value = "";
-
             updateHiddenInput();
             renderChips();
         });
@@ -100,10 +93,71 @@
             });
     });
 </script>
+
+<script>
+    // Event delegation: bekerja juga setelah HTMX mengganti card.
+    function getCookie(name) {
+        for (const cookie of document.cookie.split(";")) {
+            const trimmed = cookie.trim();
+            if (trimmed.startsWith(name + "=")) {
+                return decodeURIComponent(trimmed.substring(name.length + 1));
+            }
+        }
+        return null;
+    }
+
+    function updateHeart(button, isFavorited) {
+        const icon = button.querySelector(".favorite-icon");
+        button.dataset.favorited = String(isFavorited);
+        button.setAttribute("aria-pressed", String(isFavorited));
+        const label = isFavorited ? "Hapus dari favorit" : "Tambahkan ke favorit";
+        button.setAttribute("aria-label", label);
+        button.title = label;
+        icon.classList.toggle("fill-[#781B10]", isFavorited);
+        icon.classList.toggle("fill-none", !isFavorited);
+    }
+
+    document.addEventListener("click", async function (event) {
+        const button = event.target.closest(".favorite-toggle");
+        if (!button || button.disabled) return;
+        event.preventDefault();
+
+        // Nilai ini disisipkan Django pada HTML, bukan pada kode JavaScript.
+        const results = document.getElementById("recipe-results");
+        if (results.dataset.authenticated !== "true") {
+            window.location.href = button.dataset.loginUrl;
+            return;
+        }
+
+        button.disabled = true;
+        try {
+            const response = await fetch(button.dataset.toggleUrl, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": getCookie("csrftoken"),
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+                credentials: "same-origin"
+            });
+            if (response.redirected) {
+                window.location.href = response.url;
+                return;
+            }
+            if (!response.ok) throw new Error("Gagal memperbarui favorit.");
+            const data = await response.json();
+            if (!data.success) throw new Error(data.message || "Gagal memperbarui favorit.");
+            updateHeart(button, data.is_favorited);
+        } catch (error) {
+            console.error(error);
+            alert("Gagal memperbarui favorit. Coba lagi.");
+        } finally {
+            button.disabled = false;
+        }
+    });
+</script>
 {% endblock %}
 
 {% block content %}
-
 <section class="min-h-screen bg-[#F5F1E3] px-6 pb-12 pt-28">
     <div class="mx-auto max-w-7xl">
 
@@ -112,11 +166,9 @@
             <p class="mb-2 text-sm font-semibold uppercase tracking-widest text-[#315D47]">
                 LeftOver Recipe Catalog
             </p>
-
             <h1 class="text-4xl font-bold tracking-tight text-[#26382D] md:text-5xl">
                 Katalog Resep
             </h1>
-
             <p class="mt-3 max-w-2xl text-base leading-relaxed text-[#65756A]">
                 Temukan resep yang bisa membantu kamu mengolah bahan makanan
                 yang masih tersedia di dapur.
@@ -142,7 +194,6 @@
             class="mb-10 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-black/5"
         >
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-[2fr_1fr_2fr_auto]">
-
                 <!-- Search -->
                 <div>
                     <label
@@ -151,7 +202,6 @@
                     >
                         Cari resep
                     </label>
-
                     <input
                         type="text"
                         id="search"
@@ -172,7 +222,6 @@
                     >
                         Kategori
                     </label>
-
                     <select
                         id="category"
                         name="category"
@@ -181,7 +230,6 @@
                             focus:border-[#315D47] focus:ring-2 focus:ring-[#315D47]/20"
                     >
                         <option value="">Semua kategori</option>
-
                         {% for category in categories %}
                             <option
                                 value="{{ category }}"
@@ -213,7 +261,6 @@
                     >
                         Bahan yang tersedia
                     </label>
-
                     <div
                         id="ingredient-chips-container"
                         class="min-h-[48px] w-full rounded-xl border border-gray-200
@@ -235,28 +282,24 @@
                             >
                         </div>
                     </div>
-
                     <input
                         type="hidden"
                         id="ingredients"
                         name="ingredients"
                         value="{{ ingredient_query }}"
                     >
-
                     <p class="mt-2 text-xs text-[#65756A]">
                         Tekan Enter untuk menambahkan bahan.
                     </p>
                 </div>
-
             </div>
         </form>
 
         <!-- Recipe List -->
-        <div id="recipe-results">
+        <div id="recipe-results" data-authenticated="{% if user.is_authenticated %}true{% else %}false{% endif %}">
             {% include "recipes/partials/recipe_cards.html" %}
         </div>
 
     </div>
 </section>
-
 {% endblock %}
