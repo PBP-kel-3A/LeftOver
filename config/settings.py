@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'main',
     'pantry',
     'reviews',
+    'shopping',
     'favorites',
 ]
 
