@@ -5,11 +5,11 @@
 <section class="mx-auto max-w-2xl px-6 pt-28 pb-12">
     <div class="rounded-2xl bg-white p-6 shadow-md md:p-8">
         <h1 class="mb-4 text-2xl font-bold text-gray-900">
-            Hapus Resep
+            Delete Recipe
         </h1>
 
         <p class="mb-3 text-gray-600">
-            Apakah kamu yakin ingin menghapus resep berikut?
+            Are you sure you want to delete the following recipe?
         </p>
 
         <p class="mb-6 text-lg font-semibold text-gray-900">
@@ -17,7 +17,7 @@
         </p>
 
         <p class="mb-6 text-sm text-red-600">
-            Tindakan ini tidak dapat dibatalkan.
+            This action cannot be undone.
         </p>
 
         <form method="post" class="flex flex-wrap gap-3">
@@ -27,14 +27,14 @@
                 type="submit"
                 class="rounded-lg bg-red-600 px-5 py-3 font-semibold text-white hover:bg-red-700"
             >
-                Ya, Hapus Resep
+                Yes, delete this recipe
             </button>
 
             <a
                 href="{% url 'recipes:recipe_detail' recipe.pk %}"
                 class="rounded-lg border border-gray-300 px-5 py-3 font-semibold text-gray-700 hover:bg-gray-50"
             >
-                Batal
+                Cancelled
             </a>
         </form>
     </div>
