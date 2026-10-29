@@ -1,9 +1,11 @@
 import importlib
 from datetime import date, datetime, timedelta
 from decimal import Decimal
+from unittest import mock
 from urllib.parse import urlencode
 from zoneinfo import ZoneInfo
 
+import requests
 from django.apps import apps
 from django.contrib.auth.models import User
 from django.contrib.messages import get_messages
@@ -19,6 +21,16 @@ from .models import IngredientAlias, PantryItem
 from .services import apply_synonyms, resolve_recipe_keywords
 
 JAKARTA = ZoneInfo("Asia/Jakarta")
+
+
+def _offline(*args, **kwargs):
+    raise requests.ConnectionError("tes tidak boleh memanggil TheMealDB")
+
+
+# Kalau catalog_ingredient_names() memanggil API TheMealDB, jaringan dimatikan di
+# tes supaya hasilnya sama di mana pun dijalankan (fungsi itu jatuh ke fallback
+# resep di database tes). Tidak berpengaruh bila services.py tidak memakai jaringan.
+offline_catalog = mock.patch("requests.get", new=_offline)
 
 
 def make_item(user, name="Eggs", days=5, **kwargs):
@@ -228,6 +240,7 @@ class IngredientAliasTests(TestCase):
             duplicate.full_clean()
 
 
+@offline_catalog
 class ResolveKeywordsTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user("rahmi", password="pw12345!")
@@ -306,6 +319,7 @@ class ResolveKeywordsTests(TestCase):
         self.assertEqual(result.skipped, ["Chicken"])
 
 
+@offline_catalog
 class PantryViewTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user("rahmi", password="pw12345!")
@@ -598,6 +612,7 @@ class PantryViewTests(TestCase):
         self.assertEqual(response.status_code, 405)
 
 
+@offline_catalog
 class FindRecipesTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user("rahmi", password="pw12345!")
@@ -700,3 +715,144 @@ class FindRecipesTests(TestCase):
         response = self.client.get(self.url, {"items": [item.pk]}, follow=True)
         self.assertContains(response, "Test Dish")
         self.assertNotContains(response, "Plain Rice")
+
+
+@offline_catalog
+class SearchSortToolbarTests(TestCase):
+    """Toolbar: tombol cari resep, pencarian nama, urutan, dan chip kategori."""
+
+    def setUp(self):
+        self.user = User.objects.create_user("rahmi", password="pw12345!")
+        self.other = User.objects.create_user("lain", password="pw12345!")
+        self.client.login(username="rahmi", password="pw12345!")
+        self.url = reverse("pantry:pantry_list")
+
+    def listed(self, **params):
+        response = self.client.get(self.url, params)
+        return response, [item.name for item in response.context["items"]]
+
+    # ----- Posisi tombol cari resep -----
+    def test_find_recipes_button_is_above_the_toolbar_and_outside_the_hero(self):
+        make_item(self.user)
+        html = self.client.get(self.url).content.decode()
+        self.assertEqual(html.count('id="find-recipe-btn"'), 1)
+        self.assertEqual(html.count('id="find-recipe-form"'), 1)
+        hero_end = html.index("</header>")
+        button = html.index('id="find-recipe-btn"')
+        toolbar = html.index('class="pantry-toolbar"')
+        chips = html.index('class="pantry-chips"')
+        self.assertLess(hero_end, button)   # tidak lagi di hero
+        self.assertLess(button, toolbar)    # tepat di atas toolbar
+        self.assertLess(toolbar, chips)
+
+    def test_checkboxes_are_still_linked_to_the_find_recipes_form(self):
+        make_item(self.user)
+        self.assertContains(self.client.get(self.url), 'form="find-recipe-form"')
+
+    def test_find_recipes_button_stays_enabled_when_search_has_no_match(self):
+        make_item(self.user, "Eggs")
+        html = self.client.get(self.url, {"q": "zzz"}).content.decode()
+        button = html[html.index('id="find-recipe-btn"'):]
+        self.assertNotIn("disabled", button[: button.index(">")])
+
+    # ----- Pencarian -----
+    def test_search_matches_part_of_the_name_ignoring_case(self):
+        make_item(self.user, "Eggs"); make_item(self.user, "Duck eggs"); make_item(self.user, "Carrots")
+        self.assertEqual(sorted(self.listed(q="EGG")[1]), ["Duck eggs", "Eggs"])
+
+    def test_blank_search_shows_everything(self):
+        make_item(self.user, "Eggs"); make_item(self.user, "Carrots")
+        self.assertEqual(sorted(self.listed(q="   ")[1]), ["Carrots", "Eggs"])
+
+    def test_search_does_not_leak_other_users_items(self):
+        make_item(self.other, "Eggplant")
+        self.assertEqual(self.listed(q="egg")[1], [])
+
+    def test_search_combines_with_category_filter(self):
+        make_item(self.user, "Eggs", category="protein")
+        make_item(self.user, "Eggplant", category="vegetables")
+        self.assertEqual(self.listed(q="egg", category="vegetables")[1], ["Eggplant"])
+
+    def test_search_wildcards_are_treated_as_plain_text(self):
+        make_item(self.user, "Eggs"); make_item(self.user, "100% juice")
+        self.assertEqual(self.listed(q="%")[1], ["100% juice"])
+        self.assertEqual(self.listed(q="_")[1], [])
+
+    def test_summary_cards_ignore_search_and_filters(self):
+        make_item(self.user, "Eggs", days=0); make_item(self.user, "Carrots", days=9)
+        response, names = self.listed(q="carrot")
+        self.assertEqual(names, ["Carrots"])
+        self.assertEqual(response.context["total_items"], 2)
+        self.assertEqual(response.context["expiring_soon_count"], 1)
+
+    def test_search_text_is_kept_in_the_input_and_escaped(self):
+        response, _ = self.listed(q='"><script>alert(1)</script>')
+        self.assertNotContains(response, "<script>alert(1)</script>")
+        self.assertContains(response, "&lt;script&gt;")
+
+    def test_no_match_shows_a_message_with_a_clear_link(self):
+        make_item(self.user, "Eggs", category="protein")
+        response, names = self.listed(q="zzz", category="protein", sort="name")
+        self.assertEqual(names, [])
+        self.assertContains(response, "No ingredients match &ldquo;zzz&rdquo;.")
+        # "Clear the search" membuang q tetapi mempertahankan kategori dan urutan
+        self.assertEqual(
+            response.context["clear_search_url"], "/pantry/?category=protein&sort=name"
+        )
+
+    # ----- Urutan -----
+    def test_default_sort_is_nearest_expiry(self):
+        make_item(self.user, "Rice", days=90); make_item(self.user, "Milk", days=2); make_item(self.user, "Eggs", days=9)
+        response, names = self.listed()
+        self.assertEqual(names, ["Milk", "Eggs", "Rice"])
+        self.assertEqual(response.context["active_sort"], "expiry")
+
+    def test_sort_furthest_expiry(self):
+        make_item(self.user, "Rice", days=90); make_item(self.user, "Milk", days=2); make_item(self.user, "Eggs", days=9)
+        self.assertEqual(self.listed(sort="expiry_desc")[1], ["Rice", "Eggs", "Milk"])
+
+    def test_sort_by_name_ignores_case(self):
+        make_item(self.user, "banana"); make_item(self.user, "Apple"); make_item(self.user, "cherry")
+        self.assertEqual(self.listed(sort="name")[1], ["Apple", "banana", "cherry"])
+
+    def test_sort_recently_added_first(self):
+        old = make_item(self.user, "Old"); mid = make_item(self.user, "Mid"); new = make_item(self.user, "New")
+        base = timezone.now()
+        for item, hours in ((old, 72), (mid, 24), (new, 1)):
+            PantryItem.objects.filter(pk=item.pk).update(created_at=base - timedelta(hours=hours))
+        self.assertEqual(self.listed(sort="recent")[1], ["New", "Mid", "Old"])
+
+    def test_unknown_sort_falls_back_to_the_default(self):
+        make_item(self.user, "Rice", days=90); make_item(self.user, "Milk", days=2)
+        response, names = self.listed(sort="drop table")
+        self.assertEqual(names, ["Milk", "Rice"])
+        self.assertEqual(response.context["active_sort"], "expiry")
+
+    def test_sort_select_has_english_options_and_marks_the_active_one(self):
+        response = self.client.get(self.url, {"sort": "name"})
+        self.assertContains(response, "Sort by:")
+        for label in ("Nearest Expiry", "Furthest Expiry", "Name (A-Z)", "Recently Added"):
+            self.assertContains(response, f">{label}</option>")
+        self.assertContains(response, '<option value="name" selected>')
+        self.assertContains(response, 'id="sort-select"')
+
+    # ----- Parameter saling dipertahankan -----
+    def test_chip_links_keep_search_and_sort(self):
+        response = self.client.get(self.url, {"q": "egg", "sort": "name"})
+        self.assertContains(response, 'href="/pantry/?category=protein&amp;q=egg&amp;sort=name"')
+        self.assertContains(response, 'href="/pantry/?q=egg&amp;sort=name"')  # All Items
+
+    def test_chip_links_are_clean_when_nothing_else_is_set(self):
+        response = self.client.get(self.url)
+        self.assertContains(response, 'href="/pantry/?category=protein"')
+        self.assertContains(response, 'href="/pantry/"')
+
+    def test_default_sort_is_not_added_to_urls(self):
+        response = self.client.get(self.url, {"sort": "expiry"})
+        self.assertNotContains(response, "sort=expiry")
+
+    def test_search_form_keeps_the_active_category(self):
+        with_category = self.client.get(self.url, {"category": "fruits"})
+        self.assertContains(with_category, '<input type="hidden" name="category" value="fruits">')
+        without = self.client.get(self.url)
+        self.assertNotContains(without, 'type="hidden" name="category"')
