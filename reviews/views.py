@@ -12,12 +12,16 @@ import cloudinary.uploader
 # Tambah ulasan baru ke sebuah resep (dipanggil lewat AJAX)
 @login_required(login_url='main:login')
 def add_review(request, recipe_id):
+    #  ngambil resep target
     recipe = get_object_or_404(Recipe, pk=recipe_id)
-
+    # di sini ekstraksi form POST
     if request.method == 'POST':
+        # Untuk menjaga 1 user hanya bisa me-review satu kali
+        if Review.objects.filter(recipe=recipe, user=request.user).exists():
+            return JsonResponse({'success': False, 'error': 'Hanya boleh mengulas satu kali!'}, status=400)
+
         rating = request.POST.get('rating')
         comment = request.POST.get('comment')
-        images = request.FILES.getlist('images')
 
         # Rating wajib diisi, komentar dan foto boleh kosong
         if not rating:
@@ -32,6 +36,7 @@ def add_review(request, recipe_id):
 
         # Maksimal 3 foto per ulasan
         images = request.FILES.getlist('images')
+        # loop foto 3 kali
         for img in images[:3]:
             # Upload ke Cloudinary
             upload_result = cloudinary.uploader.upload(img)
@@ -104,7 +109,7 @@ def delete_review(request, review_id):
                         public_id = f"review_images/{file_name}"
                     else:
                         public_id = file_name
-                        
+                    # delete file fisik yang ada di Cloudinary juga
                     cloudinary.uploader.destroy(public_id)
                 except Exception as e:
                     print(f"Cloudinary deletion error: {e}")
