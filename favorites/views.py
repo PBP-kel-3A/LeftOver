@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
+from django.db.models import Avg, Count
 
 from recipes.models import Recipe
 from .forms import FavoriteNoteForm
@@ -15,12 +16,18 @@ def is_ajax(request):
 
 def user_favorites(request):
     """Ambil favorit milik user yang login, dengan filter kategori jika ada."""
-    favorites = Favorite.objects.filter(user=request.user).select_related("recipe")
+    favorites = (
+        Favorite.objects.filter(user=request.user)
+        .select_related("recipe")
+        .annotate(
+            avg_rating=Avg("recipe__reviews__rating"),
+            review_count=Count("recipe__reviews", distinct=True),
+        )
+    )
     category = request.GET.get("category", "").strip()
     if category:
         favorites = favorites.filter(recipe__category__iexact=category)
     return favorites
-
 
 def add_favorite(user, recipe):
     """Ambil favorit yang sudah ada, atau buat jika belum ada (tanpa duplikat)."""
