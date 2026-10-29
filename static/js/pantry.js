@@ -34,6 +34,15 @@ document.addEventListener("DOMContentLoaded", function () {
     // Browser bisa mengembalikan centang lama saat tombol Back ditekan.
     updateSelection();
 
+    // ---------- Urutkan: kirim form otomatis saat pilihan diganti ----------
+    const sortSelect = document.getElementById("sort-select");
+
+    if (sortSelect) {
+        sortSelect.addEventListener("change", function () {
+            sortSelect.form.submit();
+        });
+    }
+
     // ---------- Dialog Edit ----------
     const editDialog = document.getElementById("edit-dialog");
     const editForm = document.getElementById("edit-form");
