@@ -5,7 +5,19 @@
     <div class="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 pb-5 mb-6">
         <div>
             <h2 class="text-xl font-extrabold text-[#26382D]">💬 Community Reviews & Cooking Tips</h2>
-            <p class="text-xs text-[#65756A] mt-1">LeftOver Community</p>
+            <!-- Rating & Jumlah Ulasan (Menggantikan LeftOver Community) -->
+<div class="ml-9 flex items-center gap-1.5 text-sm mt-1">
+    {% if recipe.review_count and recipe.review_count > 0 %}
+        <span class="text-amber-500 font-bold text-base leading-none">★</span>
+        <span class="font-bold text-[#26382D]">{{ recipe.avg_rating|floatformat:1 }}</span>
+        <span class="text-[#65756A]">
+            ({{ recipe.review_count }} review{{ recipe.review_count|pluralize }})
+        </span>
+    {% else %}
+        <span class="text-gray-300 text-base leading-none">★</span>
+        <span class="text-[#65756A] italic text-xs">No reviews yet</span>
+    {% endif %}
+</div>
         </div>
 
         <div class="flex flex-wrap items-center gap-3">
