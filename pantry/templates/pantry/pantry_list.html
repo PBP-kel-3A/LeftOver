@@ -22,21 +22,6 @@
                     Track the shelf life of your ingredients with ease. Get cooking suggestions and early notifications before food goes to waste!
                 </p>
             </div>
-
-            <!-- Form kosong: checkbox di tabel dan tombol ini terhubung lewat atribut form="" -->
-            <form id="find-recipe-form" method="get" action="{% url 'pantry:find_recipes' %}"></form>
-            <button
-                type="submit"
-                form="find-recipe-form"
-                id="find-recipe-btn"
-                class="pantry-cta"
-                title="Tick the ingredients you want to use. With nothing ticked, every ingredient that hasn't expired is used."
-                {% if not total_items %}disabled{% endif %}
-            >
-                <span>Find recipes from pantry</span>
-                <span id="selected-count" class="pantry-count" hidden></span>
-                <svg class="pantry-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-            </button>
         </div>
     </header>
 
@@ -155,21 +140,70 @@
             <!-- Dashboard pantry -->
             <div class="pantry-main">
 
-                <!-- Filter kategori -->
-                <nav class="pantry-toolbar" aria-label="Filter ingredients by category">
-                    <a
-                        href="{% url 'pantry:pantry_list' %}"
-                        class="pantry-chip {% if not active_category %}is-active{% endif %}"
-                        {% if not active_category %}aria-current="true"{% endif %}
-                    >All Items</a>
-                    {% for value, label in category_chips %}
-                    <a
-                        href="?category={{ value }}"
-                        class="pantry-chip {% if value == active_category %}is-active{% endif %}"
-                        {% if value == active_category %}aria-current="true"{% endif %}
-                    >{{ label }}</a>
-                    {% endfor %}
-                </nav>
+                <!-- Cari resep: di atas chip filter agar dekat dengan daftar bahan.
+                     Form kosong ini terhubung ke checkbox di tabel lewat atribut form="" -->
+                <div class="pantry-cta-row">
+                    <form id="find-recipe-form" method="get" action="{% url 'pantry:find_recipes' %}"></form>
+                    <button
+                        type="submit"
+                        form="find-recipe-form"
+                        id="find-recipe-btn"
+                        class="pantry-cta"
+                        title="Tick the ingredients you want to use. With nothing ticked, every ingredient that hasn't expired is used."
+                        {% if not total_items %}disabled{% endif %}
+                    >
+                        <span>Find recipes from pantry</span>
+                        <span id="selected-count" class="pantry-count" hidden></span>
+                        <svg class="pantry-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                    </button>
+                </div>
+
+                <!-- Toolbar: pencarian, urutan, dan filter kategori -->
+                <div class="pantry-toolbar">
+                    <form method="get" action="{% url 'pantry:pantry_list' %}" class="pantry-filters" role="search">
+                        {% if active_category %}<input type="hidden" name="category" value="{{ active_category }}">{% endif %}
+
+                        <div class="pantry-search">
+                            <input
+                                type="search"
+                                name="q"
+                                value="{{ query }}"
+                                class="pantry-search-input"
+                                placeholder="Search spinach, eggs, chicken fillet..."
+                                aria-label="Search ingredients"
+                                maxlength="100"
+                                autocomplete="off"
+                            >
+                            <button type="submit" class="pantry-search-btn" aria-label="Search">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+                            </button>
+                        </div>
+
+                        <label class="pantry-sort">
+                            <span>Sort by:</span>
+                            <select name="sort" id="sort-select" class="pantry-sort-select">
+                                {% for code, label in sort_options %}
+                                <option value="{{ code }}" {% if code == active_sort %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </label>
+                    </form>
+
+                    <nav class="pantry-chips" aria-label="Filter ingredients by category">
+                        <a
+                            href="{{ all_items_url }}"
+                            class="pantry-chip {% if not active_category %}is-active{% endif %}"
+                            {% if not active_category %}aria-current="true"{% endif %}
+                        >All Items</a>
+                        {% for chip in category_chips %}
+                        <a
+                            href="{{ chip.url }}"
+                            class="pantry-chip {% if chip.is_active %}is-active{% endif %}"
+                            {% if chip.is_active %}aria-current="true"{% endif %}
+                        >{{ chip.label }}</a>
+                        {% endfor %}
+                    </nav>
+                </div>
 
                 <div class="pantry-table-card">
                     <div class="pantry-table-scroll">
@@ -248,7 +282,10 @@
                                 {% empty %}
                                 <tr>
                                     <td colspan="6" class="pantry-empty">
-                                        {% if active_category and total_items %}
+                                        {% if query %}
+                                        <strong>No ingredients match &ldquo;{{ query }}&rdquo;.</strong><br>
+                                        Try a different keyword or <a href="{{ clear_search_url }}" class="pantry-link">clear the search</a>.
+                                        {% elif active_category and total_items %}
                                         <strong>No {{ active_category_label }} in your pantry yet.</strong><br>
                                         Pick another category, or set this category when you add or edit an ingredient.
                                         {% else %}
