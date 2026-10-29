@@ -4,7 +4,8 @@ from django.http import JsonResponse
 from django.template.loader import render_to_string
 from recipes.models import Recipe
 from .models import Review, ReviewImage
-import cloudinary.uploader 
+import cloudinary.uploader
+from django.db.models import Avg, Count
 
 # Semua tindakan di cakupan "Reviews" hanya bisa dilakukan akun yang sudah login --> @login_required
 # Semua view di bawah mengembalikan JSON untuk dipakai AJAX.
@@ -79,9 +80,16 @@ def add_review(request, recipe_id):
                 print(f"Cloudinary upload error: {e}")
                 continue
 
+        # Hitung avg rating n jumlah review terbaru untuk resep ini
+        stats = recipe.reviews.aggregate(
+            avg_rating=Avg('rating'),
+            review_count=Count('id')
+        )
+        avg_val = round(stats['avg_rating'], 1) if stats['avg_rating'] else 0
+
         # Kirim potongan HTML ulasan baru supaya JS bisa langsung menampilkannya
         html = render_to_string('reviews/_review_item.html', {'review': review}, request=request)
-        return JsonResponse({'success': True, 'html': html})
+        return JsonResponse({'success': True, 'html': html, 'avg_rating': avg_val, 'review_count':stats['review_count']})
 
     return JsonResponse({'success': False, 'error': 'Invalid method'}, status=400)
 
@@ -134,9 +142,16 @@ def edit_review(request, review_id):
         review.is_edited = True  # supaya label "(edited)" muncul
         review.save()
 
+        # Hitung avg rating n jumlah review terbaru untuk resep ini
+        stats = review.recipe.reviews.aggregate(
+            avg_rating=Avg('rating'),
+            review_count=Count('id')
+        )
+        avg_val = round(stats['avg_rating'], 1) if stats['avg_rating'] else 0
+
         # Kirim HTML ulasan yang sudah diperbarui untuk menggantikan kartu lama di halaman
         html = render_to_string('reviews/_review_item.html', {'review': review}, request=request)
-        return JsonResponse({'success': True, 'html': html})
+        return JsonResponse({'success': True, 'html': html, 'avg_rating': avg_val, 'review_count':stats['review_count']})
     
     return JsonResponse({'success': False, 'error': 'Invalid method'}, status=400)
 
@@ -148,6 +163,9 @@ def delete_review(request, review_id):
 
     # Hanya boleh lewat POST supaya tidak terhapus hanya karena membuka sebuah link
     if request.method == 'POST':
+        # Simpan recipe sebelum ulasan dihapus
+        recipe = review.recipe
+
         # Hapus foto-foto terkait dari Cloudinary-nya
         for img in review.images.all():
             if img.image:
@@ -168,6 +186,19 @@ def delete_review(request, review_id):
 
         # Hapus data ulasan dari database (ReviewImage akan ikut terhapus otomatis karena CASCADE)
         review.delete()
-        return JsonResponse({'success': True})
+
+        # Hitung avg rating n jumlah review terbaru untuk resep ini
+        stats = Review.objects.filter(recipe=recipe).aggregate(
+            avg_rating=Avg('rating'),
+            review_count=Count('id')
+        )
+        avg_val = round(stats['avg_rating'], 1) if stats['avg_rating'] else 0
+        total_count = stats['review_count'] or 0
+
+        return JsonResponse({
+            'success': True,
+            'avg_rating': avg_val,
+            'review_count': total_count
+        })
         
     return JsonResponse({'success': False, 'error': 'Invalid method'}, status=400)
