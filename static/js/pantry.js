@@ -34,6 +34,15 @@ document.addEventListener("DOMContentLoaded", function () {
     // Browser bisa mengembalikan centang lama saat tombol Back ditekan.
     updateSelection();
 
+    // ---------- Urutkan: kirim form otomatis saat pilihan diganti ----------
+    const sortSelect = document.getElementById("sort-select");
+
+    if (sortSelect) {
+        sortSelect.addEventListener("change", function () {
+            sortSelect.form.submit();
+        });
+    }
+
     // ---------- Dialog Edit ----------
     const editDialog = document.getElementById("edit-dialog");
     const editForm = document.getElementById("edit-form");
@@ -44,10 +53,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
             editForm.action = data.url;
             editForm.elements["edit-name"].value = data.name;
+            editForm.elements["edit-category"].value = data.category;
             editForm.elements["edit-quantity"].value = data.quantity;
             editForm.elements["edit-unit"].value = data.unit;
             editForm.elements["edit-storage"].value = data.storage;
             editForm.elements["edit-expiry_date"].value = data.expiry;
+            editForm.elements["edit-recipe_name"].value = data.recipeName;
 
             editDialog.showModal();
         });
@@ -83,13 +94,5 @@ document.addEventListener("DOMContentLoaded", function () {
                 dialog.close();
             }
         });
-    });
-
-    // ---------- Toast hilang otomatis ----------
-    document.querySelectorAll(".toast").forEach(function (toast) {
-        setTimeout(function () {
-            toast.classList.add("is-hiding");
-            setTimeout(function () { toast.remove(); }, 450);
-        }, 4500);
     });
 });
