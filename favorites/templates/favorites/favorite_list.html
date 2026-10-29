@@ -82,6 +82,18 @@
 
                         <!-- KONTEN CARD -->
                         <div class="flex flex-1 flex-col p-6">
+                            <!-- Rating & Ulasan -->
+                            <div class="flex items-center gap-1.5 text-xs mb-2">
+                            {% if favorite.review_count and favorite.review_count > 0 %}
+                                <span class="text-amber-500 font-bold text-sm leading-none">★</span>
+                                <span class="font-bold text-[#3F2520]">{{ favorite.avg_rating|floatformat:1 }}</span>
+                                <span class="text-[#71655F]">({{ favorite.review_count }} review{{ favorite.review_count|pluralize }})</span>
+                            {% else %}
+                                <span class="text-gray-300 text-sm leading-none">★</span>
+                                <span class="text-[#71655F] italic">No reviews yet</span>
+                            {% endif %}
+                        </div>
+
                             <h2 class="mb-5 text-xl font-bold leading-snug text-[#3F2520]">
                                 {{ favorite.recipe.name }}
                             </h2>
