@@ -1,3 +1,4 @@
+from datetime import timedelta
 from decimal import Decimal
 
 from django.conf import settings
@@ -5,11 +6,41 @@ from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils import timezone
 
+# Rentang waktu (jam) untuk kartu "Expiring Soon" di halaman Pantry
+EXPIRING_SOON_HOURS = 48
+
+
+class PantryItemQuerySet(models.QuerySet):
+    def expiring_soon(self, now=None):
+        """Bahan yang kedaluwarsa dalam rentang sekarang -> 48 jam ke depan.
+
+        expiry_date hanya berisi tanggal (tanpa jam), jadi bahan dianggap
+        masih berlaku sampai akhir hari tersebut (pukul 00:00 hari berikutnya).
+        Sebuah bahan dihitung kalau akhir harinya jatuh di antara "sekarang"
+        dan "sekarang + 48 jam", berdasarkan waktu lokal:
+        - kedaluwarsa kemarin atau lebih lama -> sudah lewat, tidak dihitung
+        - kedaluwarsa hari ini                -> dihitung
+        - kedaluwarsa besok                   -> dihitung
+        - kedaluwarsa lusa atau lebih         -> di luar rentang 48 jam
+
+        `now` boleh diisi (datetime aware) supaya mudah diuji.
+        """
+        now = timezone.localtime(now)
+        batas_akhir = now + timedelta(hours=EXPIRING_SOON_HOURS)
+
+        hari_pertama = now.date()
+        # Hari terakhir yang akhir harinya masih <= batas_akhir
+        hari_terakhir = (batas_akhir - timedelta(days=1)).date()
+
+        return self.filter(
+            expiry_date__gte=hari_pertama, expiry_date__lte=hari_terakhir
+        )
+
 
 class PantryItem(models.Model):
-    """A raw ingredient stored in a user's kitchen."""
+    """Satu bahan mentah yang tersimpan di dapur milik seorang user."""
 
-    # At or below this many days left, an ingredient is "Use Soon" (yellow)
+    # Batas hari untuk status "Use Soon" (pink)
     SOON_THRESHOLD_DAYS = 3
 
     class Unit(models.TextChoices):
@@ -24,7 +55,7 @@ class PantryItem(models.Model):
         SLICE = "slice", "slice"
         PACK = "pack", "pack"
 
-    # Shown instead of the label when the quantity is not exactly 1
+    # Dipakai sebagai pengganti label kalau jumlahnya bukan tepat 1
     UNIT_PLURALS = {
         "clove": "cloves",
         "stalk": "stalks",
@@ -38,6 +69,14 @@ class PantryItem(models.Model):
         FREEZER = "freezer", "Freezer"
         PANTRY = "pantry", "Room Temp / Shelf"
 
+    class Category(models.TextChoices):
+        VEGETABLES = "vegetables", "Vegetables"
+        PROTEIN = "protein", "Protein"
+        FRUITS = "fruits", "Fruits"
+        SPICES = "spices", "Spices & Seasonings"
+        CARBS = "carbs", "Carbohydrates"
+        OTHER = "other", "Other"
+
     class Status(models.TextChoices):
         SAFE = "safe", "Safe"
         SOON = "soon", "Use Soon"
@@ -49,6 +88,10 @@ class PantryItem(models.Model):
         related_name="pantry_items",
     )
     name = models.CharField(max_length=100)
+    # Dipilih sendiri oleh user (TheMealDB tidak menyediakan kategori bahan)
+    category = models.CharField(
+        max_length=20, choices=Category.choices, default=Category.OTHER
+    )
     quantity = models.DecimalField(
         max_digits=8,
         decimal_places=2,
@@ -61,20 +104,22 @@ class PantryItem(models.Model):
         max_length=20, choices=Storage.choices, default=Storage.CHILLER
     )
     expiry_date = models.DateField()
-    # Optional: the ingredient's name in the recipe catalog (e.g. "eggs").
-    # When set, it is used as-is by "Find Recipes from Pantry".
+    # Opsional: nama bahan di katalog resep (mis. "eggs"). Kalau diisi,
+    # dipakai apa adanya oleh "Find recipes from pantry".
     recipe_name = models.CharField(max_length=100, blank=True, default="")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    objects = PantryItemQuerySet.as_manager()
+
     class Meta:
-        # Closest to expiring first
+        # Yang paling cepat kedaluwarsa tampil paling atas
         ordering = ["expiry_date", "name"]
 
     def __str__(self):
         return f"{self.name} ({self.quantity_display} {self.unit})"
 
-    # ----- Quantity display -----
+    # ----- Tampilan jumlah -----
     @property
     def quantity_display(self):
         """300.00 -> '300', 2.50 -> '2.5'."""
@@ -82,12 +127,12 @@ class PantryItem(models.Model):
 
     @property
     def unit_display(self):
-        """'clove' for 1, 'cloves' for anything else."""
+        """'clove' untuk 1, 'cloves' untuk selain itu."""
         if self.quantity != 1 and self.unit in self.UNIT_PLURALS:
             return self.UNIT_PLURALS[self.unit]
         return self.get_unit_display()
 
-    # ----- Expiry -----
+    # ----- Kedaluwarsa -----
     @property
     def days_left(self):
         return (self.expiry_date - timezone.localdate()).days
@@ -96,11 +141,24 @@ class PantryItem(models.Model):
     def status(self):
         days = self.days_left
         if days <= 0:
-            # Already expired, or expiring today -> urgent
+            # Sudah lewat atau kedaluwarsa hari ini -> mendesak
             return self.Status.EXPIRED
         if days <= self.SOON_THRESHOLD_DAYS:
             return self.Status.SOON
         return self.Status.SAFE
+
+    @property
+    def status_tone(self):
+        """Warna pill di tabel: hijau (aman), pink (segera), hitam (sudah lewat).
+
+        Beda dengan `status`: bahan yang kedaluwarsa hari ini masih pink,
+        karena belum benar-benar lewat.
+        """
+        if self.is_expired:
+            return "expired"
+        if self.days_left <= self.SOON_THRESHOLD_DAYS:
+            return "soon"
+        return "safe"
 
     @property
     def is_expired(self):
@@ -113,16 +171,17 @@ class PantryItem(models.Model):
             return "Expired"
         if days == 0:
             return "Today"
-        if days <= self.SOON_THRESHOLD_DAYS:
-            return f"< {days} Day" if days == 1 else f"< {days} Days"
+        if days == 1:
+            return "1 day left"
         return f"{days} days left"
 
 
 class IngredientAlias(models.Model):
-    """Extra wording -> recipe catalog keyword, managed in the Django admin.
+    """Tambahan padanan nama bahan -> kata kunci katalog, dikelola di admin.
 
-    Takes priority over everything else, so it can be used both to add
-    missing synonyms (tulsi -> basil) and to override how a name is searched.
+    Prioritasnya di atas semua tebakan lain, jadi bisa dipakai untuk
+    menambah sinonim yang belum ada (tulsi -> basil) atau menimpa cara
+    sebuah nama dicari.
     """
 
     alias = models.CharField(
@@ -148,7 +207,8 @@ class IngredientAlias(models.Model):
         self.keyword = " ".join(self.keyword.lower().split())
 
     def clean(self):
-        # Runs before validate_unique, so "Tulsi " and "tulsi" count as duplicates.
+        # Dipanggil sebelum validate_unique, jadi "Tulsi " dan "tulsi"
+        # dianggap duplikat.
         self._normalize()
 
     def save(self, *args, **kwargs):
