@@ -308,3 +308,24 @@ class RecipeFormURLTests(SimpleTestCase):
 
         self.assertFalse(form.is_valid())
         self.assertIn("youtube_url", form.errors)
+
+    def test_rejects_non_web_scheme_for_image_url(self):
+        form = RecipeForm(data={
+            "name": "Test Recipe",
+            "image_url": "ftp://example.com/image.jpg",
+            "ingredients_text": "Chicken | 200 g",
+        })
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("image_url", form.errors)
+
+
+    def test_rejects_non_web_scheme_for_source_url(self):
+        form = RecipeForm(data={
+            "name": "Test Recipe",
+            "source_url": "ftp://example.com/recipe",
+            "ingredients_text": "Chicken | 200 g",
+        })
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("source_url", form.errors)

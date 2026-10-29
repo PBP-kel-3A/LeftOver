@@ -6,8 +6,6 @@ from django.core.exceptions import ValidationError
 from .models import Recipe
 
 
-
-
 class RecipeForm(forms.ModelForm):
     ingredients_text = forms.CharField(
         label="Bahan dan Takaran",
@@ -52,6 +50,47 @@ class RecipeForm(forms.ModelForm):
         ):
             raise ValidationError(
                 "Masukkan URL video dari domain YouTube yang valid."
+            )
+
+        return url
+
+    def clean_image_url(self):
+        url = self.cleaned_data.get("image_url")
+
+        if not url:
+            return url
+
+        parsed_url = urlparse(url)
+
+        if parsed_url.scheme not in {"http", "https"}:
+            raise ValidationError(
+                "URL gambar harus menggunakan HTTP atau HTTPS."
+            )
+
+        if not parsed_url.hostname:
+            raise ValidationError(
+                "Masukkan URL gambar yang valid."
+            )
+
+        return url
+
+
+    def clean_source_url(self):
+        url = self.cleaned_data.get("source_url")
+
+        if not url:
+            return url
+
+        parsed_url = urlparse(url)
+
+        if parsed_url.scheme not in {"http", "https"}:
+            raise ValidationError(
+                "URL sumber resep harus menggunakan HTTP atau HTTPS."
+            )
+
+        if not parsed_url.hostname:
+            raise ValidationError(
+                "Masukkan URL sumber resep yang valid."
             )
 
         return url
