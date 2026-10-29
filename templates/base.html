@@ -36,7 +36,6 @@
     <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
 
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <link rel="stylesheet" href="{% static 'css/toast.css' %}">
 
     {% block extra_css %}
     {% endblock %}
@@ -58,5 +57,8 @@
 
     <!-- add footer -->
     {% include 'footer.html' %} 
+
+    <!-- Navbar JavaScript -->
+    <script src="{% static 'js/navbar.js' %}" defer></script>
 </body>
 </html>

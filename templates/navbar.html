@@ -18,56 +18,66 @@
             >
         </a>
 
+        <!--Untuk mobile-->
+        <button class="navbar-toggle" type="button" aria-label="Buka menu navigasi"
+                aria-expanded="false" aria-controls="navbar-menu"
+        >
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
         <!-- Navigation -->
-        <div class="navbar-links">
+        <div class="navbar-menu" id="navbar-menu">
+            <div class="navbar-links">
 
-            <a href="{% url 'main:landing' %}">
-                Home
-            </a>
-
-            <a href="{% url 'recipes:recipe_list' %}">
-                Recipe Catalog
-            </a>
-
-            <a href="{% url 'pantry:pantry_list' %}">
-                Pantry Tracker
-            </a>
-
-            <a href="{% url 'shopping:shopping_list' %}">
-                Shopping
-            </a>
-
-            <a href="#">
-            <a href="{% url 'favorites:favorite_list' %}">
-                Favorite
-            </a>
-
-        </div>
-
-        <!-- Authentication -->
-        <div class="navbar-auth">
-            {% if user.is_authenticated %}
-                <!-- kalau user sudah login: tampilkan nama akun dan tombol logout aja -->
-                <!-- class dari tombolnya disamakan dengan class login-logout -->
-                <span class="nav-login">
-                    Halo, {{ user.username }}
-                </span>
-                
-                <form action="{% url 'main:logout' %}" method="POST" class="inline">
-                    {% csrf_token %}
-                    <button type="submit" class="nav-register">
-                        Logout
-                    </button>
-                </form>
-            {% else %}
-                <!-- kalau user belum login: tampilkan tombol Login dan Register -->
-                <a href="{% url 'main:login' %}" class="nav-login">
-                    Login
+                <a href="{% url 'main:landing' %}">
+                    Home
                 </a>
-                <a href="{% url 'main:register' %}" class="nav-register">
-                    Register
+
+                <a href="{% url 'recipes:recipe_list' %}">
+                    Recipe Catalog
                 </a>
-            {% endif %}
+
+                <a href="{% url 'pantry:pantry_list' %}">
+                    Pantry Tracker
+                </a>
+
+                <a href="{% url 'shopping:shopping_list' %}">
+                    Shopping
+                </a>
+
+                <a href="{% url 'favorites:favorite_list' %}">
+                    Favorite
+                </a>
+
+            </div>
+
+            <!-- Authentication -->
+            <div class="navbar-auth">
+                {% if user.is_authenticated %}
+                    <!-- kalau user sudah login: tampilkan nama akun dan tombol logout aja -->
+                    <!-- class dari tombolnya disamakan dengan class login-logout -->
+                    <span class="nav-login">
+                        Halo, {{ user.username }}
+                    </span>
+                    
+                    <form action="{% url 'main:logout' %}" method="POST" class="inline">
+                        {% csrf_token %}
+                        <button type="submit" class="nav-register">
+                            Logout
+                        </button>
+                    </form>
+                {% else %}
+                    <!-- kalau user belum login: tampilkan tombol Login dan Register -->
+                    <a href="{% url 'main:login' %}" class="nav-login">
+                        Login
+                    </a>
+                    <a href="{% url 'main:register' %}" class="nav-register">
+                        Register
+                    </a>
+                {% endif %}
+            </div>
         </div>
     </div>
 </nav>
