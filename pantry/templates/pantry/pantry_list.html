@@ -1,63 +1,108 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}My Kitchen - Pantry Tracker - LeftOver{% endblock %}
+{% block title %}Pantry Tracker - LeftOver{% endblock %}
 
 {% block extra_css %}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'css/pantry.css' %}">
 {% endblock %}
 
 {% block content %}
 <section class="pantry-page">
-    <div class="pantry-container">
 
-        <!-- Header -->
-        <header class="pantry-header">
-            <div>
-                <h1 class="pantry-title">
-                    My Kitchen: Pantry Tracker
-                    <span class="pantry-tag">Inventory</span>
-                </h1>
+    <!-- Hero / header -->
+    <header class="pantry-hero">
+        <div class="pantry-container pantry-hero-inner">
+            <div class="pantry-hero-text">
+                <h1 class="pantry-title">Pantry Tracker</h1>
                 <p class="pantry-subtitle">
-                    Keep track of your raw ingredients so nothing spoils before you get to use it.
+                    Track the shelf life of your ingredients with ease. Get cooking suggestions and early notifications before food goes to waste!
                 </p>
             </div>
 
-            <!-- Empty form: the checkboxes in the table and this button are linked to it with the form="" attribute -->
+            <!-- Form kosong: checkbox di tabel dan tombol ini terhubung lewat atribut form="" -->
             <form id="find-recipe-form" method="get" action="{% url 'pantry:find_recipes' %}"></form>
             <button
                 type="submit"
                 form="find-recipe-form"
                 id="find-recipe-btn"
-                class="pantry-btn pantry-btn--red"
+                class="pantry-cta"
                 title="Tick the ingredients you want to use. With nothing ticked, every ingredient that hasn't expired is used."
-                {% if not items %}disabled{% endif %}
+                {% if not total_items %}disabled{% endif %}
             >
-                <svg class="pantry-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72"/><path d="m14 7 3 3"/><path d="M5 6v4"/><path d="M19 14v4"/><path d="M10 2v2"/><path d="M7 8H3"/><path d="M21 16h-4"/><path d="M11 3H9"/></svg>
-                <span>Find Recipes from Pantry</span>
+                <span>Find recipes from pantry</span>
                 <span id="selected-count" class="pantry-count" hidden></span>
+                <svg class="pantry-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
             </button>
-        </header>
+        </div>
+    </header>
+
+    <div class="pantry-container pantry-body">
+
+        <!-- Summary: dihitung dari seluruh stok user, bukan dari hasil filter -->
+        <section class="pantry-summary" aria-label="Pantry summary">
+            <article class="pantry-stat pantry-stat--total">
+                <div class="pantry-stat-head">
+                    <h2 class="pantry-stat-label">Total Ingredients Stored</h2>
+                    <span class="pantry-stat-icon pantry-stat-icon--green" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/></svg>
+                    </span>
+                </div>
+                <p class="pantry-stat-value">
+                    <strong>{{ total_items }}</strong>
+                    <span>{{ total_items|pluralize:"item,items" }}</span>
+                </p>
+                <p class="pantry-stat-note">Across fridge, freezer &amp; shelf</p>
+            </article>
+
+            <article class="pantry-stat pantry-stat--soon">
+                <div class="pantry-stat-head">
+                    <h2 class="pantry-stat-label">Expiring Soon</h2>
+                    <span class="pantry-stat-icon pantry-stat-icon--red" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></svg>
+                    </span>
+                </div>
+                <p class="pantry-stat-value">
+                    <strong>{{ expiring_soon_count }}</strong>
+                    <span>{{ expiring_soon_count|pluralize:"item,items" }} expiring soon</span>
+                </p>
+                <p class="pantry-stat-note {% if expiring_soon_count %}pantry-stat-note--alert{% endif %}">Within the next 48 hours</p>
+            </article>
+        </section>
 
         <div class="pantry-layout">
 
-            <!-- Add ingredient form -->
-            <aside class="pantry-card pantry-form-card">
-                <h2 class="pantry-card-title">
-                    <svg class="pantry-icon pantry-icon--lg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="currentColor"/><path d="M12 7v10M7 12h10" stroke="#F8F3E6" stroke-width="2.2" stroke-linecap="round"/></svg>
-                    Add Raw Ingredient
+            <!-- Form tambah bahan -->
+            <aside class="pantry-panel pantry-form-card">
+                <h2 class="pantry-panel-title">
+                    <span class="pantry-title-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"/></svg>
+                    </span>
+                    Log New Ingredient
                 </h2>
+                <p class="pantry-panel-text">
+                    Just restocked? Log it now so its shelf life is tracked automatically.
+                </p>
 
                 <form method="post" action="{% url 'pantry:pantry_list' %}" class="pantry-form" novalidate>
                     {% csrf_token %}
 
                     <div class="pantry-field">
-                        <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+                        <div class="pantry-label-row">
+                            <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+                            <span class="pantry-required">*Required</span>
+                        </div>
                         {{ form.name }}
                         {% for error in form.name.errors %}<p class="pantry-error">{{ error }}</p>{% endfor %}
+                    </div>
+
+                    <div class="pantry-field">
+                        <label for="{{ form.category.id_for_label }}">{{ form.category.label }}</label>
+                        {{ form.category }}
+                        {% for error in form.category.errors %}<p class="pantry-error">{{ error }}</p>{% endfor %}
                     </div>
 
                     <div class="pantry-row">
@@ -73,39 +118,60 @@
                         </div>
                     </div>
 
+                    <!-- Storage: radio bergaya tombol; tetap mengirim field "storage" yang sama dengan <select> -->
+                    <div class="pantry-field">
+                        <span class="pantry-label" id="storage-label">{{ form.storage.label }}</span>
+                        <div class="pantry-segmented" role="radiogroup" aria-labelledby="storage-label">
+                            {% for value, label in form.storage.field.choices %}
+                            <label class="pantry-segment">
+                                <input type="radio" name="{{ form.storage.html_name }}" value="{{ value }}" {% if value == form.storage.value %}checked{% endif %}>
+                                <span class="pantry-segment-body">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        {% if value == "chiller" %}<path d="M5 6a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2Z"/><path d="M5 10h14"/><path d="M15 7v6"/>
+                                        {% elif value == "freezer" %}<path d="M12 2v20M2 12h20M4.9 4.9l14.2 14.2M19.1 4.9 4.9 19.1"/>
+                                        {% else %}<path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"/>{% endif %}
+                                    </svg>
+                                    <span>{{ label }}</span>
+                                </span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                        {% for error in form.storage.errors %}<p class="pantry-error">{{ error }}</p>{% endfor %}
+                    </div>
+
                     <div class="pantry-field">
                         <label for="{{ form.expiry_date.id_for_label }}">{{ form.expiry_date.label }}</label>
                         {{ form.expiry_date }}
                         {% for error in form.expiry_date.errors %}<p class="pantry-error">{{ error }}</p>{% endfor %}
                     </div>
 
-                    <div class="pantry-field">
-                        <label for="{{ form.storage.id_for_label }}">{{ form.storage.label }}</label>
-                        {{ form.storage }}
-                        {% for error in form.storage.errors %}<p class="pantry-error">{{ error }}</p>{% endfor %}
-                    </div>
-
-                    <button type="submit" class="pantry-btn pantry-btn--green pantry-btn--block">
-                        <svg class="pantry-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/></svg>
+                    <button type="submit" class="pantry-btn pantry-btn--red pantry-btn--block">
+                        <svg class="pantry-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/></svg>
                         Save to Pantry
                     </button>
                 </form>
             </aside>
 
-            <!-- Pantry dashboard -->
+            <!-- Dashboard pantry -->
             <div class="pantry-main">
 
-                <!-- Status legend -->
-                <div class="pantry-legend">
-                    <strong>Expiry Status:</strong>
-                    <ul>
-                        <li><span class="dot dot--safe"></span>Safe (&gt;3 days)</li>
-                        <li><span class="dot dot--soon"></span>Use Soon (≤3 days)</li>
-                        <li><span class="dot dot--expired"></span>Urgent / Expired</li>
-                    </ul>
-                </div>
+                <!-- Filter kategori -->
+                <nav class="pantry-toolbar" aria-label="Filter ingredients by category">
+                    <a
+                        href="{% url 'pantry:pantry_list' %}"
+                        class="pantry-chip {% if not active_category %}is-active{% endif %}"
+                        {% if not active_category %}aria-current="true"{% endif %}
+                    >All Items</a>
+                    {% for value, label in category_chips %}
+                    <a
+                        href="?category={{ value }}"
+                        class="pantry-chip {% if value == active_category %}is-active{% endif %}"
+                        {% if value == active_category %}aria-current="true"{% endif %}
+                    >{{ label }}</a>
+                    {% endfor %}
+                </nav>
 
-                <div class="pantry-card pantry-table-card">
+                <div class="pantry-table-card">
                     <div class="pantry-table-scroll">
                         <table class="pantry-table">
                             <thead>
@@ -118,9 +184,9 @@
                                     </th>
                                     <th>Quantity</th>
                                     <th>Storage</th>
-                                    <th>Expires</th>
-                                    <th>Status</th>
-                                    <th class="pantry-th-action">Actions</th>
+                                    <th>Date Added</th>
+                                    <th>Expiry</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -137,28 +203,29 @@
                                                 aria-label="Select {{ item.name }}"
                                                 {% if item.is_expired %}disabled title="Expired ingredients can't be used to search for recipes"{% endif %}
                                             >
-                                            <span>{{ item.name }}</span>
+                                            <span class="pantry-name-text">
+                                                {{ item.name }}
+                                                <small>{{ item.get_category_display }}</small>
+                                            </span>
                                         </label>
                                     </td>
                                     <td class="pantry-qty">
                                         <b>{{ item.quantity_display }}</b> {{ item.unit_display }}
                                     </td>
-                                    <td>
-                                        <span class="pantry-storage">{{ item.get_storage_display }}</span>
-                                    </td>
-                                    <td class="pantry-date">{{ item.expiry_date|date:"Y-m-d" }}</td>
-                                    <td>
-                                        <span class="pantry-status pantry-status--{{ item.status }}">
-                                            <span class="dot dot--{{ item.status }}"></span>{{ item.status_label }}
-                                        </span>
+                                    <td>{{ item.get_storage_display }}</td>
+                                    <td class="pantry-date">{{ item.created_at|date:"d-m-Y" }}</td>
+                                    <td class="pantry-expiry">
+                                        <span class="pantry-status pantry-status--{{ item.status_tone }}">{{ item.status_label }}</span>
+                                        <small class="pantry-expiry-date">{{ item.expiry_date|date:"d-m-Y" }}</small>
                                     </td>
                                     <td class="pantry-actions">
                                         <button
                                             type="button"
-                                            class="pantry-icon-btn pantry-icon-btn--edit js-edit"
+                                            class="pantry-icon-btn js-edit"
                                             aria-label="Edit {{ item.name }}"
                                             data-url="{% url 'pantry:pantry_edit' item.pk %}"
                                             data-name="{{ item.name }}"
+                                            data-category="{{ item.category }}"
                                             data-quantity="{{ item.quantity_display }}"
                                             data-unit="{{ item.unit }}"
                                             data-storage="{{ item.storage }}"
@@ -169,7 +236,7 @@
                                         </button>
                                         <button
                                             type="button"
-                                            class="pantry-icon-btn pantry-icon-btn--delete js-delete"
+                                            class="pantry-icon-btn js-delete"
                                             aria-label="Delete {{ item.name }}"
                                             data-url="{% url 'pantry:pantry_delete' item.pk %}"
                                             data-name="{{ item.name }}"
@@ -181,8 +248,13 @@
                                 {% empty %}
                                 <tr>
                                     <td colspan="6" class="pantry-empty">
+                                        {% if active_category and total_items %}
+                                        <strong>No {{ active_category_label }} in your pantry yet.</strong><br>
+                                        Pick another category, or set this category when you add or edit an ingredient.
+                                        {% else %}
                                         <strong>Your pantry is empty.</strong><br>
                                         Add your first ingredient using the form.
+                                        {% endif %}
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -193,7 +265,7 @@
 
                 {% if items %}
                 <p class="pantry-hint">
-                    Tick the ingredients you want to cook with, then click <em>Find Recipes from Pantry</em>.
+                    Tick the ingredients you want to cook with, then click <em>Find recipes from pantry</em>.
                     With nothing ticked, every ingredient that hasn't expired is used.
                 </p>
                 {% endif %}
@@ -201,15 +273,19 @@
         </div>
     </div>
 
-    <!-- Edit dialog -->
+    <!-- Dialog edit -->
     <dialog id="edit-dialog" class="pantry-dialog">
         <form method="post" id="edit-form" class="pantry-form" novalidate>
             {% csrf_token %}
-            <h2 class="pantry-card-title">Edit Ingredient</h2>
+            <h2 class="pantry-panel-title">Edit Ingredient</h2>
 
             <div class="pantry-field">
                 <label for="{{ edit_form.name.id_for_label }}">{{ edit_form.name.label }}</label>
                 {{ edit_form.name }}
+            </div>
+            <div class="pantry-field">
+                <label for="{{ edit_form.category.id_for_label }}">{{ edit_form.category.label }}</label>
+                {{ edit_form.category }}
             </div>
             <div class="pantry-row">
                 <div class="pantry-field">
@@ -233,27 +309,27 @@
                 <label for="{{ edit_form.recipe_name.id_for_label }}">{{ edit_form.recipe_name.label }}</label>
                 {{ edit_form.recipe_name }}
                 <p class="pantry-field-hint">
-                    Used by Find Recipes from Pantry. Leave empty to match automatically.
+                    Used by Find recipes from pantry. Leave empty to match automatically.
                 </p>
             </div>
 
             <div class="pantry-dialog-actions">
                 <button type="button" class="pantry-btn pantry-btn--ghost js-close">Cancel</button>
-                <button type="submit" class="pantry-btn pantry-btn--green">Save Changes</button>
+                <button type="submit" class="pantry-btn pantry-btn--red">Save Changes</button>
             </div>
         </form>
     </dialog>
 
-    <!-- Suggestions for the name fields: ingredients that exist in the recipe catalog -->
+    <!-- Saran untuk kolom nama: bahan yang ada di katalog resep -->
     <datalist id="catalog-ingredients">
         {% for name in catalog_ingredients %}<option value="{{ name }}">{% endfor %}
     </datalist>
 
-    <!-- Delete dialog -->
+    <!-- Dialog hapus -->
     <dialog id="delete-dialog" class="pantry-dialog pantry-dialog--small">
         <form method="post" id="delete-form" class="pantry-form">
             {% csrf_token %}
-            <h2 class="pantry-card-title">Delete ingredient?</h2>
+            <h2 class="pantry-panel-title">Delete ingredient?</h2>
             <p class="pantry-dialog-text">
                 <strong id="delete-name"></strong> will be removed from your pantry.
                 Use this for ingredients you've used up or thrown away.
