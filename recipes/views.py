@@ -150,14 +150,21 @@ def recipe_list(request):
 
 
 def recipe_detail(request, pk):
-    recipe = get_object_or_404(Recipe, pk=pk)
+    # Optimasi ambil relasi bahan, ulasan, user, dan foto sekaligus di awal
+    recipe = get_object_or_404(
+        Recipe.objects.prefetch_related(
+            'recipe_ingredients__ingredient',
+            'reviews__user',
+            'reviews__images'
+        ),
+        pk=pk
+    )
 
     return render(
         request,
         "recipes/recipe_detail.html",
         {"recipe": recipe},
     )
-
 
 @login_required
 def recipe_create(request):
