@@ -3,6 +3,9 @@
 {% block title %}Katalog Resep - LeftOver{% endblock %}
 
 {% block extra_css %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 {% endblock %}
 
@@ -158,7 +161,15 @@
 {% endblock %}
 
 {% block content %}
-<section class="min-h-screen bg-[#FFFFFF] px-6 pb-12 pt-28">
+<section class="relative isolate min-h-screen bg-white px-6 pb-12 pt-28">
+    <!-- Gradient hero background -->
+    <div
+        aria-hidden="true"
+        class="pointer-events-none absolute inset-x-0 top-[-7rem] -z-10
+               h-[460px] rounded-b-[48px]
+               bg-gradient-to-r
+               from-[#F4F5ED] via-[#A8C6AD] to-[#315D47]"
+    ></div>
     <div class="mx-auto max-w-7xl">
 
         <!-- Header -->
