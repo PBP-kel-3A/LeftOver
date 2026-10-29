@@ -1,407 +1,327 @@
+
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}My Favorites | LeftOver{% endblock %}
 
 {% block content %}
-<section class="min-h-screen bg-[#F5F1E3] px-6 pb-24 pt-[120px] sm:px-12 lg:px-16">
-    <div class="mx-auto max-w-6xl">
 
-        <!-- HEADER HALAMAN -->
-        <div class="mb-9 flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
-            <div>
-                <p class="mb-2 text-sm font-semibold tracking-wide text-[#427B5E]">
-                    KOLEKSI RESEP
-                </p>
-                <h1 class="text-3xl font-extrabold text-[#5D140B] sm:text-4xl">
-                    My Favorites
-                </h1>
-                <p class="mt-3 text-sm text-[#71655F]">
-                    Simpan resep kesukaanmu dan tambahkan catatan pribadi agar tidak lupa!
+<link rel="stylesheet" href="{% static 'css/favorites.css' %}">
+
+<div class="fav-page">
+
+    <!-- FAVORITES HERO -->
+    <section class="fav-hero">
+        <div class="fav-container fav-hero-inner">
+
+            <div class="fav-hero-copy">
+                <h1 class="fav-title">My Favorite Recipes</h1>
+                <p class="fav-subtitle">
+                    All your saved recipes in one place.
                 </p>
             </div>
 
-            <a
-                href="{% url 'recipes:recipe_list' %}"
-                class="inline-flex items-center justify-center rounded-full bg-[#315D47] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#264736]"
+            {% if has_favorites %}
+            <form
+                class="fav-search"
+                method="GET"
+                action="{% url 'favorites:favorite_list' %}"
+                role="search"
             >
-                + Jelajahi Resep
-            </a>
-        </div>
+                <input
+                    type="search"
+                    name="q"
+                    value="{{ search_query }}"
+                    placeholder="Search saved recipes..."
+                    aria-label="Search favorite recipes"
+                >
 
-        <!-- DAFTAR FAVORIT -->
-        {% if favorites %}
-            <div class="grid grid-cols-1 items-stretch gap-7 md:grid-cols-2 lg:grid-cols-3">
-                {% for favorite in favorites %}
-                    <article class="flex h-full flex-col overflow-hidden rounded-3xl border border-[#E6E2E1] bg-white shadow-md">
-
-                        <!-- GAMBAR RESEP -->
-                        <div class="relative h-52 overflow-hidden bg-[#D6E9DF]">
-                            {% if favorite.recipe.image_url %}
-                                <img
-                                    src="{{ favorite.recipe.image_url }}"
-                                    alt="{{ favorite.recipe.name }}"
-                                    class="h-full w-full object-cover"
-                                >
-                            {% else %}
-                                <div class="flex h-full items-center justify-center text-sm text-[#315D47]">
-                                    Gambar resep belum tersedia
-                                </div>
-                            {% endif %}
-
-                            <!-- TOMBOL HATI: DELETE -->
-                           <form
-                                method="POST"
-                                action="{% url 'favorites:favorite_delete' favorite.id %}"
-                                class="absolute right-4 top-4"
-                                onsubmit="return confirm('Hapus resep ini dari Favorites?')"
-                            >
-                                {% csrf_token %}
-
-                                <button
-                                    type="submit"
-                                    title="Hapus dari Favorites"
-                                    aria-label="Hapus {{ favorite.recipe.name }} dari Favorites"
-                                    class="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md transition hover:scale-110"
-                                >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        viewBox="0 0 24 24"
-                                        fill="#A92415"
-                                        stroke="#A92415"
-                                        stroke-width="1.8"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        class="h-6 w-6"
-                                        aria-hidden="true"
-                                    >
-                                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                                    </svg>
-                                </button>
-                            </form>
-                        </div>
-
-                        <!-- KONTEN CARD -->
-                        <div class="flex flex-1 flex-col p-6">
-                            <!-- Rating & Ulasan -->
-                            <div class="flex items-center gap-1.5 text-xs mb-2">
-                            {% if favorite.review_count and favorite.review_count > 0 %}
-                                <span class="text-amber-500 font-bold text-sm leading-none">★</span>
-                                <span class="font-bold text-[#3F2520]">{{ favorite.avg_rating|floatformat:1 }}</span>
-                                <span class="text-[#71655F]">({{ favorite.review_count }} review{{ favorite.review_count|pluralize }})</span>
-                            {% else %}
-                                <span class="text-gray-300 text-sm leading-none">★</span>
-                                <span class="text-[#71655F] italic">No reviews yet</span>
-                            {% endif %}
-                        </div>
-
-                            <h2 class="mb-5 text-xl font-bold leading-snug text-[#3F2520]">
-                                {{ favorite.recipe.name }}
-                            </h2>
-
-                            <!-- PERSONAL NOTES -->
-                            <div class="mb-5 rounded-2xl bg-[#F9F7F1] p-4">
-                                <div class="mb-3 flex items-center justify-between gap-3">
-                                    <h3 class="text-sm font-bold text-[#5D140B]">
-                                        Personal Notes
-                                    </h3>
-                                    <button
-                                        type="button"
-                                        class="edit-note-btn text-xs font-bold text-[#427B5E] hover:underline"
-                                        data-update-url="{% url 'favorites:favorite_update' favorite.id %}"
-                                        data-recipe-name="{{ favorite.recipe.name }}"
-                                        data-note-id="note-{{ favorite.id }}"
-                                        data-display-id="note-display-{{ favorite.id }}"
-                                    >
-                                        Edit
-                                    </button>
-                                </div>
-
-                                <!-- Catatan yang terlihat pada card -->
-                                <p
-                                    id="note-display-{{ favorite.id }}"
-                                    class="min-h-12 whitespace-pre-wrap break-words text-sm leading-relaxed text-[#71655F]"
-                                >{{ favorite.personal_note|default:"Belum ada catatan. Klik Edit untuk menambahkan." }}</p>
-
-                                <!-- Penyimpanan sementara isi catatan untuk modal -->
-                                <textarea
-                                    id="note-{{ favorite.id }}"
-                                    class="hidden"
-                                    aria-hidden="true"
-                                    tabindex="-1"
-                                >{{ favorite.personal_note }}</textarea>
-                            </div>
-
-                            <!-- TOMBOL LIHAT RESEP -->
-                            <a
-                                href="{% url 'recipes:recipe_detail' favorite.recipe.id %}"
-                                class="mt-auto block rounded-full bg-[#7A1A0F] px-5 py-3 text-center text-sm font-bold text-white transition hover:bg-[#5D140B]"
-                            >
-                                Lihat Resep
-                            </a>
-                        </div>
-
-                    </article>
-                {% endfor %}
-            </div>
-
-        {% else %}
-                <!-- Tampilan ketika user belum memiliki resep favorit -->
-                <div class="rounded-3xl border-2 border-dashed border-[#D6D0CE] bg-white px-6 py-20 text-center">
-
-                    <div class="mb-5 text-5xl text-[#A92415]">
-                        ♡
-                    </div>
-
-                    <h2 class="text-2xl font-bold text-[#5D140B]">
-                        Belum ada resep favorit
-                    </h2>
-
-                    <p class="mx-auto mb-7 mt-3 max-w-md text-sm leading-relaxed text-[#71655F]">
-                        Yuk, jelajahi katalog dan simpan resep yang ingin kamu masak nanti!
-                    </p>
-
-                    <a
-                        href="{% url 'recipes:recipe_list' %}"
-                        class="inline-block rounded-full bg-[#315D47] px-7 py-3 text-sm font-semibold text-white hover:bg-[#264736]"
+                <button type="submit" aria-label="Search recipes">
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        aria-hidden="true"
                     >
-                        Jelajahi Resep
-                    </a>
-                </div>
+                        <circle cx="11" cy="11" r="7"></circle>
+                        <path d="m16 16 5 5"></path>
+                    </svg>
+                </button>
+            </form>
             {% endif %}
 
-    </div>
-</section>
+        </div>
+    </section>
 
-<!-- MODAL EDIT PERSONAL NOTES -->
-<div
-    id="edit-note-modal"
-    class="fixed inset-0 z-[200] hidden items-center justify-center bg-black/50 px-4 py-6"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="modal-title"
->
-    <div class="w-full max-w-lg rounded-3xl bg-[#FFF8E7] p-6 shadow-2xl sm:p-8">
+    <!-- FAVORITES CONTENT -->
+    <main class="fav-container fav-main">
 
-        <div class="mb-6 flex items-start justify-between gap-4">
-            <div>
-                <h2
-                    id="modal-title"
-                    class="text-2xl font-extrabold text-[#5D140B]"
-                >
-                    Edit Personal Notes
-                </h2>
-                <p
-                    id="modal-recipe-name"
-                    class="mt-2 text-sm text-[#71655F]"
-                ></p>
-            </div>
+        {% if favorites %}
 
-            <button
-                type="button"
-                id="close-note-modal"
-                aria-label="Tutup modal"
-                class="text-2xl font-bold text-[#71655F] hover:text-[#7A1A0F]"
-            >
-                &times;
-            </button>
+        <div class="fav-grid">
+
+            {% for favorite in favorites %}
+
+            <article class="fav-card">
+
+                <!-- RECIPE IMAGE -->
+                <div class="fav-image-wrap">
+
+                    {% if favorite.recipe.image_url %}
+                    <img
+                        class="fav-image"
+                        src="{{ favorite.recipe.image_url }}"
+                        alt="{{ favorite.recipe.name }}"
+                        loading="lazy"
+                    >
+                    {% else %}
+                    <div class="fav-image-placeholder">
+                        Recipe image unavailable
+                    </div>
+                    {% endif %}
+
+                    <!-- REMOVE FAVORITE -->
+                    <form
+                        method="POST"
+                        action="{% url 'favorites:favorite_delete' favorite.id %}"
+                        class="fav-remove-form"
+                        data-confirm="Remove this recipe from your favorites?"
+                    >
+                        {% csrf_token %}
+
+                        <button
+                            type="submit"
+                            class="fav-heart"
+                            title="Remove from favorites"
+                            aria-label="Remove {{ favorite.recipe.name }} from favorites"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                aria-hidden="true"
+                            >
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                            </svg>
+                        </button>
+                    </form>
+
+                </div>
+
+                <!-- CARD CONTENT -->
+                <div class="fav-card-body">
+
+                    <!-- RATING & REVIEW COUNT -->
+                    <div class="fav-rating">
+                        {% if favorite.review_count %}
+                            <span class="fav-rating-star" aria-hidden="true">&#9733;</span>
+
+                            <span class="fav-rating-value">
+                                {{ favorite.avg_rating|floatformat:1 }}
+                            </span>
+
+                            <span class="fav-rating-count">
+                                ({{ favorite.review_count }} review{{ favorite.review_count|pluralize }})
+                            </span>
+                        {% else %}
+                            <span
+                                class="fav-rating-star fav-rating-star-empty"
+                                aria-hidden="true"
+                            >&#9733;</span>
+
+                            <span class="fav-rating-count">No reviews yet</span>
+                        {% endif %}
+                    </div>
+
+                    <h2 class="fav-card-title">
+                        {{ favorite.recipe.name }}
+                    </h2>
+
+                    <!-- PERSONAL NOTES -->
+                    <div class="fav-note-box">
+
+                        <div class="fav-note-head">
+                            <h3>Personal Notes</h3>
+
+                            <button
+                                type="button"
+                                class="fav-edit-btn"
+                                data-update-url="{% url 'favorites:favorite_update' favorite.id %}"
+                                data-recipe-name="{{ favorite.recipe.name }}"
+                                data-note-id="note-{{ favorite.id }}"
+                                data-display-id="note-display-{{ favorite.id }}"
+                            >
+                                Edit
+                            </button>
+                        </div>
+
+                        <p
+                            id="note-display-{{ favorite.id }}"
+                            class="fav-note-display"
+                        >{{ favorite.personal_note|default:"No notes yet. Click Edit to add one." }}</p>
+
+                        <!-- Stored note value for the edit modal -->
+                        <textarea
+                            id="note-{{ favorite.id }}"
+                            class="fav-stored-note"
+                            hidden
+                            aria-hidden="true"
+                            tabindex="-1"
+                        >{{ favorite.personal_note }}</textarea>
+
+                    </div>
+
+                    <!-- RECIPE DETAIL LINK -->
+                    <a
+                        class="fav-detail-btn"
+                        href="{% url 'recipes:recipe_detail' favorite.recipe.id %}"
+                    >
+                        View Recipe
+                    </a>
+
+                </div>
+
+            </article>
+
+            {% endfor %}
+
         </div>
 
-        <form id="edit-note-form" method="POST">
-            {% csrf_token %}
+        {% elif has_favorites %}
 
-            <label
-                for="modal-personal-note"
-                class="mb-2 block text-sm font-semibold text-[#3F2520]"
+        <!-- FAVORITES EXIST, BUT SEARCH HAS NO RESULTS -->
+        <section class="fav-empty" aria-live="polite">
+
+            <div class="fav-empty-icon" aria-hidden="true">&#8981;</div>
+
+            <h2>No recipes found</h2>
+
+            <p>
+                No favorite recipes match your search for
+                "{{ search_query }}".
+            </p>
+
+            <a
+                class="fav-empty-link"
+                href="{% url 'favorites:favorite_list' %}"
             >
-                Catatan Pribadi
-            </label>
+                Clear Search
+            </a>
 
-            <textarea
-                id="modal-personal-note"
-                name="personal_note"
-                rows="5"
-                placeholder="Contoh: Kurangi garam dan tambahkan sedikit cabai..."
-                class="w-full resize-y rounded-2xl border border-[#D6D0CE] bg-white p-4 text-sm text-[#3F2520] outline-none focus:border-[#427B5E]"
-            ></textarea>
+        </section>
 
-            <p
-                id="note-error"
-                class="mt-3 hidden text-sm text-[#A92415]"
-                role="alert"
-            ></p>
+        {% else %}
 
-            <div class="mt-7 flex justify-end gap-3">
+        <!-- USER HAS NO FAVORITES -->
+        <section class="fav-empty">
+
+            <div class="fav-empty-icon" aria-hidden="true">&#9825;</div>
+
+            <h2>No favorite recipes yet</h2>
+
+            <p>
+                Explore the recipe catalog and save recipes
+                you'd like to cook later!
+            </p>
+
+            <a
+                class="fav-empty-link"
+                href="{% url 'recipes:recipe_list' %}"
+            >
+                Explore Recipes
+            </a>
+
+        </section>
+
+        {% endif %}
+
+    </main>
+
+    <!-- EDIT PERSONAL NOTES MODAL -->
+    <div
+        id="edit-note-modal"
+        class="fav-modal"
+        hidden
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
+    >
+
+        <div class="fav-modal-panel">
+
+            <div class="fav-modal-head">
+
+                <div>
+                    <h2 id="modal-title">Edit Personal Notes</h2>
+                    <p id="modal-recipe-name"></p>
+                </div>
+
                 <button
                     type="button"
-                    id="cancel-note-modal"
-                    class="rounded-full border border-[#D6D0CE] px-6 py-3 text-sm font-semibold text-[#5E544F] hover:bg-white"
+                    id="close-note-modal"
+                    class="fav-modal-close"
+                    aria-label="Close dialog"
                 >
-                    Batal
+                    &times;
                 </button>
 
-                <button
-                    type="submit"
-                    id="save-note-btn"
-                    class="rounded-full bg-[#315D47] px-6 py-3 text-sm font-semibold text-white hover:bg-[#264736] disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                    Simpan Catatan
-                </button>
             </div>
-        </form>
 
+            <form id="edit-note-form" method="POST">
+                {% csrf_token %}
+
+                <label for="modal-personal-note">
+                    Personal Notes
+                </label>
+
+                <textarea
+                    id="modal-personal-note"
+                    name="personal_note"
+                    rows="5"
+                    placeholder="Example: Use less salt and add a little chili..."
+                ></textarea>
+
+                <p
+                    id="note-error"
+                    class="fav-note-error"
+                    role="alert"
+                    hidden
+                ></p>
+
+                <div class="fav-modal-actions">
+
+                    <button
+                        type="button"
+                        id="cancel-note-modal"
+                        class="fav-btn-cancel"
+                    >
+                        Cancel
+                    </button>
+
+                    <button
+                        type="submit"
+                        id="save-note-btn"
+                        class="fav-btn-save"
+                    >
+                        Save Notes
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
     </div>
+
 </div>
+
 {% endblock %}
 
 {% block extra_js %}
-<script>
-    // Mengambil elemen-elemen yang diperlukan untuk modal
-    const noteModal = document.getElementById("edit-note-modal");
-    const noteForm = document.getElementById("edit-note-form");
-    const noteInput = document.getElementById("modal-personal-note");
-    const modalRecipeName = document.getElementById("modal-recipe-name");
-    const noteError = document.getElementById("note-error");
-    const saveNoteBtn = document.getElementById("save-note-btn");
-
-    // Menyimpan ID elemen catatan yang sedang diedit
-    let activeNoteId = null;
-    let activeDisplayId = null;
-    let isSaving = false;
-
-    // Membuka modal dan memasukkan catatan lama ke textarea
-    document.querySelectorAll(".edit-note-btn").forEach(function (button) {
-        button.addEventListener("click", function () {
-            activeNoteId = button.dataset.noteId;
-            activeDisplayId = button.dataset.displayId;
-
-            const oldNote = document.getElementById(activeNoteId);
-
-            noteInput.value = oldNote.value;
-            noteForm.action = button.dataset.updateUrl;
-            modalRecipeName.textContent = button.dataset.recipeName;
-
-            noteError.classList.add("hidden");
-            noteError.textContent = "";
-
-            noteModal.classList.remove("hidden");
-            noteModal.classList.add("flex");
-
-            document.body.style.overflow = "hidden";
-
-            noteInput.focus();
-        });
-    });
-
-    // Fungsi untuk menutup modal
-    function closeNoteModal() {
-        if (isSaving) {
-            return;
-        }
-
-        noteModal.classList.add("hidden");
-        noteModal.classList.remove("flex");
-
-        document.body.style.overflow = "";
-
-        noteForm.reset();
-
-        activeNoteId = null;
-        activeDisplayId = null;
-    }
-
-    // Tombol tutup dan batal
-    document.getElementById("close-note-modal").addEventListener(
-        "click",
-        closeNoteModal
-    );
-
-    document.getElementById("cancel-note-modal").addEventListener(
-        "click",
-        closeNoteModal
-    );
-
-    // Menutup modal jika user mengklik area gelap di luar kotak modal
-    noteModal.addEventListener("click", function (event) {
-        if (event.target === noteModal) {
-            closeNoteModal();
-        }
-    });
-
-    // Menutup modal menggunakan tombol Escape
-    document.addEventListener("keydown", function (event) {
-        if (event.key === "Escape") {
-            closeNoteModal();
-        }
-    });
-
-    // Mengirim perubahan catatan ke Django menggunakan Fetch API
-    noteForm.addEventListener("submit", async function (event) {
-        // Mencegah form berpindah halaman
-        event.preventDefault();
-
-        if (isSaving) {
-            return;
-        }
-
-        isSaving = true;
-        saveNoteBtn.disabled = true;
-        saveNoteBtn.textContent = "Menyimpan...";
-
-        noteError.classList.add("hidden");
-        noteError.textContent = "";
-
-        try {
-            // FormData mengambil personal_note dan csrfmiddlewaretoken dari form
-            const formData = new FormData(noteForm);
-
-            const response = await fetch(noteForm.action, {
-                method: "POST",
-                body: formData,
-                credentials: "same-origin",
-                headers: {
-                    "X-Requested-With": "XMLHttpRequest"
-                }
-            });
-
-            // Jika session habis, Django mungkin mengarahkan user ke login
-            if (response.redirected) {
-                window.location.href = response.url;
-                return;
-            }
-
-            const data = await response.json();
-
-            if (!response.ok || !data.success) {
-                throw new Error(
-                    data.message || "Catatan gagal disimpan. Silakan coba lagi."
-                );
-            }
-
-            // Memperbarui isi catatan yang disimpan pada card
-            const storedNote = document.getElementById(activeNoteId);
-            storedNote.value = data.personal_note;
-
-            // Memperbarui teks card tanpa reload halaman
-            const displayedNote = document.getElementById(activeDisplayId);
-
-            displayedNote.textContent = data.personal_note.trim()
-                ? data.personal_note
-                : "Belum ada catatan. Klik Edit untuk menambahkan.";
-
-            // Mengaktifkan kembali tombol sebelum menutup modal
-            isSaving = false;
-            saveNoteBtn.disabled = false;
-            saveNoteBtn.textContent = "Simpan Catatan";
-
-            closeNoteModal();
-        } catch (error) {
-            noteError.textContent = error.message;
-            noteError.classList.remove("hidden");
-        } finally {
-            isSaving = false;
-            saveNoteBtn.disabled = false;
-            saveNoteBtn.textContent = "Simpan Catatan";
-        }
-    });
-</script>
+<script src="{% static 'js/favorites.js' %}" defer></script>
 {% endblock %}
