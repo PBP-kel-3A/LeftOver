@@ -574,3 +574,52 @@
 .fav-rating-count {
     color: #71655F;
 }
+
+
+/* FIX: Favorite heart button */
+
+.fav-image-wrap {
+    position: relative;
+}
+
+.fav-remove-form {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 10;
+    margin: 0;
+}
+
+.fav-heart {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 42px;
+    height: 42px;
+    padding: 0;
+
+    background: #FFFFFF;
+    color: #A92415;
+
+    border: none;
+    border-radius: 50%;
+
+    cursor: pointer;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s ease;
+}
+
+.fav-heart:hover {
+    transform: scale(1.1);
+}
+
+.fav-heart svg {
+    display: block;
+    width: 23px;
+    height: 23px;
+    fill: #A92415;
+    stroke: #A92415;
+    flex-shrink: 0;
+}
+
