@@ -18,14 +18,14 @@ def add_review(request, recipe_id):
     if request.method == 'POST':
         # Untuk menjaga 1 user hanya bisa me-review satu kali
         if Review.objects.filter(recipe=recipe, user=request.user).exists():
-            return JsonResponse({'success': False, 'error': 'Hanya boleh mengulas satu kali!'}, status=400)
+            return JsonResponse({'success': False, 'error': 'You have already reviewed this recipe!'}, status=400)
 
         rating = request.POST.get('rating')
         comment = request.POST.get('comment')
 
         # Rating wajib diisi, komentar dan foto boleh kosong
         if not rating:
-            return JsonResponse({'success': False, 'error': 'Rating wajib diisi!'}, status=400)
+            return JsonResponse({'success': False, 'error': 'Rating is required!'}, status=400)
 
         review = Review.objects.create(
             recipe=recipe,

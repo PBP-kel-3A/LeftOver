@@ -368,19 +368,24 @@
                     if (data.success) {
                         closeReviewModal();
                         if (editingReviewId) {
-                            document.getElementById('review-' + editingReviewId).outerHTML = data.html; // ganti kartu lama dengan kartu baru dari server
+                            document.getElementById('review-' + editingReviewId).outerHTML = data.html;
+                            showFloatingToast("Review updated successfully!");
                         } else {
                             document.getElementById('reviewListContainer').insertAdjacentHTML('afterbegin', data.html);
                             document.getElementById('noReviewMsg')?.classList.add('hidden');
+                            showFloatingToast("Review posted successfully!");
                         }
                     } else {
-                        alert(data.error || "Failed to save the review.");
+                        // Tambahkan baris ini agar modal tertutup saat terjadi error
+                        closeReviewModal();
+                        showFloatingToast(data.error || "Failed to save the review.");
                     }
                 });
             });
         }
+    });
 
-        const deleteForm = document.getElementById("deleteReviewForm"); // ambil form konfirmasi hapus
+    const deleteForm = document.getElementById("deleteReviewForm");
         if (deleteForm) {
             deleteForm.addEventListener("submit", function (e) {
                 e.preventDefault();
@@ -393,11 +398,38 @@
                     if (data.success) {
                         closeDeleteReviewModal();
                         document.getElementById('review-' + deletingReviewId).remove();
+                        showFloatingToast("Review deleted successfully!");
                     } else {
-                        alert("Failed to delete the review.");
+                        showFloatingToast(data.error || "Failed to delete the review.");
                     }
                 });
             });
         }
-    });
+
+    // Ganti fungsi showFloatingToast dengan z-index lebih tinggi (z-[100])
+    function showFloatingToast(message) {
+        let container = document.querySelector('.toast-container');
+        
+        // Buat container otomatis jika belum ada di DOM
+        if (!container) {
+            container = document.createElement('div');
+            // top-20 / top-24 menaruh container tepat di bawah navbar (sekitar 80px - 96px dari atas)
+            container.className = 'toast-container fixed top-20 right-5 z-[100] flex flex-col gap-2 pointer-events-none';
+            document.body.appendChild(container);
+        }
+
+        // Buat elemen kartu toast baru
+        const toast = document.createElement('div');
+        toast.className = 'toast bg-[#26382D] text-white text-xs font-semibold px-4 py-3 rounded-2xl shadow-xl transition-all duration-300 transform translate-y-0 opacity-100 border border-white/10 pointer-events-auto';
+        toast.innerText = message;
+
+        container.appendChild(toast);
+
+        // Hapus otomatis setelah 3 detik
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(-10px)';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
 </script>
