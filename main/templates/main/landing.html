@@ -26,22 +26,27 @@
                 into delicious, warm meals—saving money while being environmentally friendly.
             </p>
 
+            
             <!-- Search -->
-            <div class="hero-search">
-
+            <form
+                class="hero-search"
+                action="{% url 'recipes:recipe_list' %}"
+                method="GET"
+            >
                 <span class="search-icon">⌕</span>
 
                 <input
                     type="text"
-                    placeholder="Cari bahan yang anda: ayam, bawang, ..."
+                    name="ingredients"
+                    placeholder="Look for the ingredients you have: chicken, onions, ..."
+                    aria-label="Search for recipes by ingredient"
                 >
 
-                <a href="{% url 'recipes:recipe_list' %}" class="search-button">
+                <button type="submit" class="search-button">
                     Find a recipe now
                     <span>→</span>
-                </a>
-
-            </div>
+                </button>
+            </form>
 
             <!-- Popular Ingredients -->
             <div class="popular-ingredients">
@@ -50,19 +55,19 @@
                     Popular ingredient :
                 </span>
 
-                <a href="#" class="ingredient-pill">
+                <a href="{% url 'recipes:recipe_list' %}?ingredients=Egg" class="ingredient-pill">
                     🥚 Egg
                 </a>
 
-                <a href="#" class="ingredient-pill">
+                <a href="{% url 'recipes:recipe_list' %}?ingredients=Chicken" class="ingredient-pill">
                     🍗 Chicken
                 </a>
 
-                <a href="#" class="ingredient-pill">
+                <a href="{% url 'recipes:recipe_list' %}?ingredients=Onion" class="ingredient-pill">
                     🧅 Onion
                 </a>
 
-                <a href="#" class="ingredient-pill">
+                <a href="{% url 'recipes:recipe_list' %}?ingredients=Potato" class="ingredient-pill">
                     🥔 Potato
                 </a>
 
