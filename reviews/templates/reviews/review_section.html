@@ -6,18 +6,18 @@
         <div>
             <h2 class="text-xl font-extrabold text-[#26382D]">💬 Community Reviews & Cooking Tips</h2>
             <!-- Rating & Jumlah Ulasan (Menggantikan LeftOver Community) -->
-<div class="ml-9 flex items-center gap-1.5 text-sm mt-1">
-    {% if recipe.review_count and recipe.review_count > 0 %}
-        <span class="text-amber-500 font-bold text-base leading-none">★</span>
-        <span class="font-bold text-[#26382D]">{{ recipe.avg_rating|floatformat:1 }}</span>
-        <span class="text-[#65756A]">
-            ({{ recipe.review_count }} review{{ recipe.review_count|pluralize }})
-        </span>
-    {% else %}
-        <span class="text-gray-300 text-base leading-none">★</span>
-        <span class="text-[#65756A] italic text-xs">No reviews yet</span>
-    {% endif %}
-</div>
+            <div id="headerRatingStats" class="ml-9 flex items-center gap-1.5 text-sm mt-1">
+                {% if recipe.review_count and recipe.review_count > 0 %}
+                    <span class="text-amber-500 font-bold text-base leading-none">★</span>
+                    <span class="font-bold text-[#26382D]">{{ recipe.avg_rating|floatformat:1 }}</span>
+                    <span class="text-[#65756A]">
+                        ({{ recipe.review_count }} review{{ recipe.review_count|pluralize }})
+                    </span>
+                {% else %}
+                    <span class="text-gray-300 text-base leading-none">★</span>
+                    <span class="text-[#65756A] italic text-xs">No reviews yet</span>
+                {% endif %}
+            </div>
         </div>
 
         <div class="flex flex-wrap items-center gap-3">
@@ -339,6 +339,10 @@
                             document.getElementById('noReviewMsg')?.classList.add('hidden');
                             showFloatingToast("Review posted successfully!");
                         }
+                        // Update live rating header
+                        if (data.review_count !== undefined) {
+                            updateHeaderRatingStats(data.avg_rating, data.review_count);
+                        }
                     } else {
                         // Tambahkan baris ini agar modal tertutup saat terjadi error
                         closeReviewModal();
@@ -367,6 +371,11 @@
                     closeDeleteReviewModal();
                     document.getElementById('review-' + deletingReviewId).remove();
                     showFloatingToast("Review deleted successfully!");
+
+                    // Update live rating header setelah review dihapus
+                    if (data.review_count !== undefined) {
+                        updateHeaderRatingStats(data.avg_rating, data.review_count);
+                    }
 
                     // Munculkan kembali pesan kosong jika semua ulasan sudah terhapus
                     if (!document.querySelector('#reviewListContainer .review-item')) {
@@ -411,5 +420,25 @@
             toast.style.transform = 'translateY(-10px)';
             setTimeout(() => toast.remove(), 300);
         }, 3000);
+    }
+    // Fungsi untuk memperbarui tampilan rating di header review
+    function updateHeaderRatingStats(avg, count) {
+        const container = document.getElementById('headerRatingStats');
+        if (!container) return;
+
+        if (count > 0) {
+            const plural = count === 1 ? 'review' : 'reviews';
+            const formattedAvg = Number(avg).toFixed(1);
+            container.innerHTML = `
+                <span class="text-amber-500 font-bold text-base leading-none">★</span>
+                <span class="font-bold text-[#26382D]">${formattedAvg}</span>
+                <span class="text-[#65756A]">(${count} ${plural})</span>
+            `;
+        } else {
+            container.innerHTML = `
+                <span class="text-gray-300 text-base leading-none">★</span>
+                <span class="text-[#65756A] italic text-xs">No reviews yet</span>
+            `;
+        }
     }
 </script>
