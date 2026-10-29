@@ -14,9 +14,17 @@ from .services import catalog_ingredient_names, resolve_recipe_keywords
 LOGIN_URL = "main:login"
 EDIT_PREFIX = "edit"
 
+# Chip filter kategori. "Other" sengaja tidak punya chip: bahan dengan
+# kategori Other tetap tampil di "All Items".
+CATEGORY_CHIPS = [
+    (value, label)
+    for value, label in PantryItem.Category.choices
+    if value != PantryItem.Category.OTHER
+]
+
 
 def _first_error(form):
-    """First error message of a form, for showing in a toast."""
+    """Pesan error pertama dari form, untuk ditampilkan di toast."""
     for errors in form.errors.values():
         if errors:
             return errors[0]
@@ -25,7 +33,7 @@ def _first_error(form):
 
 @login_required(login_url=LOGIN_URL)
 def pantry_list(request):
-    """Pantry dashboard + add form (Create & Read)."""
+    """Dashboard pantry + form tambah bahan (Create & Read)."""
     if request.method == "POST":
         form = PantryItemForm(request.POST)
         if form.is_valid():
@@ -37,11 +45,29 @@ def pantry_list(request):
     else:
         form = PantryItemForm()
 
+    # Seluruh stok milik user. Kartu summary selalu dihitung dari sini,
+    # tidak terpengaruh filter kategori yang sedang aktif.
+    all_items = PantryItem.objects.filter(user=request.user)
+
+    # Filter kategori lewat ?category=...; nilai yang tidak dikenal -> All Items
+    category_labels = dict(CATEGORY_CHIPS)
+    active_category = request.GET.get("category", "")
+    if active_category not in category_labels:
+        active_category = ""
+    items = all_items.filter(category=active_category) if active_category else all_items
+
     context = {
         "form": form,
         "edit_form": PantryItemForm(prefix=EDIT_PREFIX),
-        "items": PantryItem.objects.filter(user=request.user),
-        # Suggestions for the name fields: ingredients that exist in the catalog
+        "items": items,
+        # Summary: jumlah baris bahan (bukan total kuantitas / nama unik)
+        "total_items": all_items.count(),
+        "expiring_soon_count": all_items.expiring_soon().count(),
+        # Chip filter
+        "category_chips": CATEGORY_CHIPS,
+        "active_category": active_category,
+        "active_category_label": category_labels.get(active_category, ""),
+        # Saran untuk kolom nama: bahan yang ada di katalog resep
         "catalog_ingredients": catalog_ingredient_names(),
     }
     return render(request, "pantry/pantry_list.html", context)
