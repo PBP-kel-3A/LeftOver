@@ -42,6 +42,7 @@
                     data-review-id="{{ review.id }}"
                     data-rating="{{ review.rating }}"
                     data-comment="{{ review.comment|default:'' }}"
+                    data-image-count="{{ review.images.count }}"
                     onclick="openEditReviewModal(this)"
                     class="text-[#315D47] font-semibold hover:underline cursor-pointer">
                 Edit

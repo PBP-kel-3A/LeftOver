@@ -122,6 +122,7 @@
     let selectedRating = 0; //rating bintang yang sedang dipilih di modal (0 = belum memilih)
     let editingReviewId = null; //id ulasan yang sedang diedit; null berarti modal dalam mode "tambah"
     let deletingReviewId = null; // id ulasan yang menunggu konfirmasi hapus
+    let currentExistingImages = 0; // Menyimpan jumlah foto yang sudah tersimpan sebelumnya
     // const -> nilainya tetap/konstan
     const addReviewUrl = "{% url 'reviews:add_review' recipe.id %}"; // URL tambah ulasan, ditulis Django saat render (mis. /reviews/add/5/)
     let dataTransferFiles = new DataTransfer(); // wadah file buatan sendiri supaya foto bisa ditambah bertahap dan dihapus satu per satu
@@ -137,7 +138,7 @@
     function selectStar(val) {
         selectedRating = val; // simpan ke variabel
         document.getElementById('ratingInput').value = val; //simpan juga ke input tersembunyi di form
-        document.getElementById('ratingLabel').innerText = val + " dari 5 Bintang"; // ganti teks keterangan
+        document.getElementById('ratingLabel').innerText = val + " out of 5 stars"; // ganti teks keterangan
         document.getElementById('ratingErrorMsg').classList.add('hidden');
         renderStars(val); // warnai bintang sesuai pilihan
     }
@@ -146,24 +147,26 @@
     function resetStarHover() { renderStars(selectedRating); } // reset kalo ga ngenain bintangnya
 
     function openAddReviewModal() {
-        editingReviewId = null; // tandai mode TAMBAH
+        editingReviewId = null;
+        currentExistingImages = 0; // Mode tambah: foto lama 0
         document.getElementById('reviewModalTitle').innerText = "Share Your Cooking Experience";
         document.getElementById('commentInput').value = "";
 
-        dataTransferFiles = new DataTransfer(); // buang semua foto yang pernah dipilih
-        document.getElementById('imageInput').files = dataTransferFiles.files; // samakan input file asli dengan daftar kosong
+        dataTransferFiles = new DataTransfer();
+        document.getElementById('imageInput').files = dataTransferFiles.files;
         renderPreviews();
 
-        selectStar(0); // reset bintang ke 0
-        document.getElementById('reviewModal').classList.replace('hidden', 'flex'); // tampilkan modal (hidden diganti flex)
+        selectStar(0);
+        document.getElementById('reviewModal').classList.replace('hidden', 'flex');
     }
 
     function openEditReviewModal(btn) {
         editingReviewId = btn.dataset.reviewId;
+        currentExistingImages = parseInt(btn.dataset.imageCount, 10) || 0; // Ambil jumlah foto lama
         const rating = parseInt(btn.dataset.rating, 10);
         const comment = btn.dataset.comment || "";
 
-        document.getElementById('reviewModalTitle').innerText = "Edit Ulasan & Tips";
+        document.getElementById('reviewModalTitle').innerText = "Edit Review & Tips";
         document.getElementById('commentInput').value = comment;
 
         dataTransferFiles = new DataTransfer();
@@ -203,22 +206,25 @@
 
         previewContainer.innerHTML = ""; // hapus yang lama
         const files = dataTransferFiles.files; // daftar foto yang sedang dipilih
+        const allowedSlots = Math.max(0, 3 - currentExistingImages);
 
-        if (files.length > 0) { // kalau ada foto
+        if (files.length > 0) {
             previewContainer.classList.remove("hidden");
-            fileCountLabel.innerText = `${files.length} photo(s) selected`; // jumlah foto yang udah di pilih
-        } else { // kalau belum ada foto
+            fileCountLabel.innerText = `${files.length} photo(s) selected`;
+        } else {
             previewContainer.classList.add("hidden");
-            fileCountLabel.innerText = "No photos selected";
+            fileCountLabel.innerText = allowedSlots === 0 
+                ? "Max photos reached (3/3)" 
+                : "No photos selected";
         }
 
         // Disable total tombol "Pilih Foto" menggunakan pointer-events-none jika sudah 3 foto
-        if (files.length >= 3) { // kalau sudah mencapai batas 3 foto
-            pickPhotoLabel.classList.add("opacity-50", "cursor-not-allowed", "pointer-events-none"); // buat tombol pudar dan tidak bisa diklik
-            pickPhotoLabel.classList.remove("hover:bg-[#315D47]/20", "cursor-pointer"); // hapus efek hover dan kursor pick
-        } else { // kalau masih di bawah 3 foto
-            pickPhotoLabel.classList.remove("opacity-50", "cursor-not-allowed", "pointer-events-none"); // kembalikan tombol jadi normal
-            pickPhotoLabel.classList.add("hover:bg-[#315D47]/20", "cursor-pointer"); // pasang kembali efek hover dan kursor pick
+        if (files.length >= allowedSlots || allowedSlots === 0) {
+            pickPhotoLabel.classList.add("opacity-50", "cursor-not-allowed", "pointer-events-none");
+            pickPhotoLabel.classList.remove("hover:bg-[#315D47]/20", "cursor-pointer");
+        } else {
+            pickPhotoLabel.classList.remove("opacity-50", "cursor-not-allowed", "pointer-events-none");
+            pickPhotoLabel.classList.add("hover:bg-[#315D47]/20", "cursor-pointer");
         }
 
         Array.from(files).forEach((file, index) => { // ubah FileList jadi array
@@ -265,15 +271,17 @@
 
         if (imageInput) {  // pastikan input-nya ada di halaman
             imageInput.addEventListener("change", function (event) {
-                if (dataTransferFiles.files.length >= 3) { // kalau sudah ada 3 foto
+                const allowedSlots = Math.max(0, 3 - currentExistingImages);
+
+                if (dataTransferFiles.files.length >= allowedSlots) {
                     imageInput.value = "";
                     return;
                 }
 
-                const newFiles = Array.from(event.target.files); // foto yang baru dipilih, diubah jadi array
+                const newFiles = Array.from(event.target.files);
 
-                if (dataTransferFiles.files.length + newFiles.length > 3) { //kalau total foto lama + baru lebih dari 3
-                    alert("You can upload a maximum of 3 photos!");
+                if (dataTransferFiles.files.length + newFiles.length > allowedSlots) {
+                    alert(`You can only add up to ${allowedSlots} photo(s)!`);
                     imageInput.value = "";
                     return;
                 }
@@ -284,7 +292,7 @@
                 renderPreviews();
             });
         }
-
+        
         if (reviewForm) { // // pastikan form-nya ada (user login)
             reviewForm.addEventListener("submit", function (e) {
                 e.preventDefault();
