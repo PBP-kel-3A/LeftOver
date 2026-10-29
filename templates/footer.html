@@ -5,32 +5,28 @@
 
         <!-- Bagian atas: ada logo & deskripsi -->
         <div class="flex flex-col md:flex-row justify-between items-start gap-6 mb-8">
-            <div class="space-y-4 max-w-full">
+            <div class="space-y-4 max-w-2xl">
                 <!-- logo & brand -->
                 <div class="flex items-center gap-3">
-                    <!-- buat logo -->
-                    <!-- Logo Gambar Asli -->
-                    <div class="flex items-center gap-3">
-                        <img src="{% static 'img/Logo.png' %}" alt="LeftOver Logo" class="h-10 w-auto object-contain">
-                        <img src="{% static 'img/TextLogo.png' %}" alt="LeftOver Logo" class="h-10 w-auto object-contain">
-                    </div>
+                    <img src="{% static 'img/Logo.png' %}" alt="LeftOver Icon" class="h-9 w-auto object-contain">
+                    <img src="{% static 'img/TextLogo.png' %}" alt="LeftOver Wordmark" class="h-8 w-auto object-contain">
                 </div>
                 
-                <!-- Teks deskripsi -->
-                <p class="text-xs sm:text-sm text-[#F4DEA4]/90 leading-relaxed font-sans">
-                Membantu anak kos, mahasiswa, dan keluarga meracik makanan lezat bernutrisi dari sisa bahan kulkas.<br>
-                Hemat uang saku, kurangi sampah organik dapur, dan rawat bumi satu hidangan pada satu waktu.
+                <!-- Teks tagline -->
+                <p class="text-xs sm:text-sm text-[#F4DEA4]/85 leading-relaxed font-normal text-[var(--tertiary-50)]">
+                    Rethink your fridge and turn everyday leftovers into wholesome daily meals. 
+                    Eat well, spend less, and care for the earth with every plate.
                 </p>
             </div>
         </div>
 
         <!-- garis pemisah -->
-        <hr class="border-t border-[#F4DEA4]/20 mb-6">
+        <hr class="border-t border-[var(--tertiary-50)]/20 mb-6">
 
-        <!-- Bagian bawah: copyright dan lokasi kita -->
-        <div class="flex flex-col sm:flex-row items-center justify-between text-xs sm:text-sm text-[#F4DEA4]/80 gap-3">
-            <p>© 2026 LeftOver – PBP A-03</p>
-            <p>Depok, Jawa Barat, Indonesia</p>
+        <!-- Bagian bawah: copyright dan lokasi kami -->
+        <div class="flex flex-col sm:flex-row items-center justify-between text-xs sm:text-sm text-[var(--tertiary-50)] gap-3">
+            <p>© 2026 LeftOver – PBP A-03. All rights reserved.</p>
+            <p>Depok, West Java, Indonesia</p>
         </div>
     </div>
 </footer>

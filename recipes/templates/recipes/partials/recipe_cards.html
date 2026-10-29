@@ -1,11 +1,11 @@
 {% if search_query or category_query or ingredient_query %}
     <div class="mb-5 flex items-center justify-between">
         <p class="text-sm text-[#65756A]">
-            Menampilkan
+            Displaying
             <span class="font-semibold text-[#26382D]">
                 {{ recipes|length }}
             </span>
-            resep
+            recipe
         </p>
 
         <a
@@ -115,7 +115,7 @@
                     class="mt-5 inline-flex items-center text-sm font-semibold
                            text-[#315D47] transition hover:text-[#1F4934]"
                 >
-                    Lihat resep
+                    See recipe
 
                     <span class="ml-1 transition group-hover:translate-x-1">
                         →
@@ -132,11 +132,11 @@
                     shadow-sm ring-1 ring-black/5">
 
             <h2 class="text-xl font-bold text-[#26382D]">
-                Resep tidak ditemukan
+                Recipe not found
             </h2>
 
             <p class="mt-2 text-sm text-[#65756A]">
-                Coba gunakan bahan atau kata kunci lainnya.
+                Try using other ingredients or keywords.
             </p>
 
         </div>

@@ -1,0 +1,332 @@
+/* =========================================================
+   SMART SHOPPING LIST
+   Semua aturan di-scope ke .shop-page supaya tidak bentrok
+   dengan Tailwind (preflight) maupun style.css modul lain.
+   ========================================================= */
+
+.shop-page {
+    --green-900: #264736;
+    --green-500: #76A088;
+    --red-700: #8A1C11;
+    --red-950: #3B0D08;
+    --title: #5D0F08;
+    --cream: #EDE4D3;
+    --item-bg: #F8F6F1;
+    --ink: #2A2522;
+    --muted: #6E6660;
+
+    min-height: 100vh;
+    padding-bottom: 6rem;
+    background-color: #FFFFFF;
+    color: var(--ink);
+    font-family: "Plus Jakarta Sans", -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.shop-page .shop-container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+/* ---------- Header ---------- */
+
+.shop-page .shop-hero {
+    padding: 11rem 0 4.5rem;
+    border-radius: 0 0 3rem 3rem;
+    background:
+        radial-gradient(circle at 95% 0%, rgba(38, 71, 54, 0.9), transparent 40%),
+        linear-gradient(60deg, #F8F5EC 0%, #C9D8C9 30%, #7BA986 60%, #4D7D62 100%);
+}
+
+.shop-page .shop-hero-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+}
+
+.shop-page .shop-title {
+    margin: 0 0 0.75rem;
+    color: var(--title);
+    font-family: "Montserrat", sans-serif;
+    font-size: 2.1rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+.shop-page .shop-subtitle {
+    max-width: 720px;
+    margin: 0;
+    color: #4E4844;
+    font-size: 1.1rem;
+    line-height: 1.5;
+}
+
+/* ---------- Buttons ---------- */
+
+.shop-page .shop-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    border: 0;
+    border-radius: 999px;
+    color: #FFFFFF;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.2s ease, opacity 0.2s ease, transform 0.1s ease;
+}
+
+.shop-page .shop-btn:active { transform: scale(0.97); }
+
+.shop-page .shop-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.shop-page .shop-btn--red {
+    padding: 0.9rem 1.6rem;
+    background-color: var(--red-700);
+    box-shadow: 0 4px 12px rgba(93, 15, 8, 0.25);
+}
+
+.shop-page .shop-btn--red:not(:disabled):hover { background-color: #6E150C; }
+
+.shop-page .shop-btn--green {
+    min-width: 165px;
+    padding: 0.8rem 1.5rem;
+    border-radius: 0.9rem;
+    background-color: var(--green-900);
+    font-size: 1.05rem;
+}
+
+.shop-page .shop-btn--green:hover { background-color: #1B3427; }
+
+.shop-page .shop-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+}
+
+/* ---------- Form tambah ---------- */
+
+.shop-page .shop-body { padding-top: 3rem; }
+
+.shop-page .shop-add {
+    display: flex;
+    gap: 1.25rem;
+    padding: 1rem 1.5rem;
+    border-radius: 1.5rem;
+    background-color: var(--cream);
+}
+
+.shop-page .shop-input {
+    min-width: 0;
+    padding: 0.8rem 1.25rem;
+    border: 1.5px solid transparent;
+    border-radius: 0.9rem;
+    background-color: #FFFFFF;
+    color: var(--ink);
+    font: inherit;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.shop-page .shop-input::placeholder { color: #9C948D; }
+.shop-page .shop-input:focus { border-color: var(--green-500); }
+.shop-page .shop-input.is-invalid { border-color: var(--red-700); }
+.shop-page .shop-input--name { flex: 3; }
+.shop-page .shop-input--qty { flex: 1; }
+
+/* ---------- Tabs ---------- */
+
+.shop-page .shop-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 2rem;
+    padding: 1rem 1.5rem;
+    border-radius: 1.25rem;
+    background-color: var(--red-700);
+}
+
+.shop-page .shop-tab {
+    padding: 0.7rem 1rem;
+    border: 0;
+    border-radius: 0.9rem;
+    background-color: #FFFFFF;
+    color: var(--ink);
+    font: inherit;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.shop-page .shop-tab:hover { background-color: #F3ECEA; }
+
+.shop-page .shop-tab.is-active {
+    background-color: var(--red-950);
+    color: #FFFFFF;
+}
+
+/* ---------- Daftar barang ---------- */
+
+.shop-page .shop-list-card {
+    margin-top: 4rem;
+    padding: 1.6rem 2.5rem;
+    border-radius: 2rem;
+    background: linear-gradient(180deg, #D6E0D6 0%, #A9C3B1 50%, #75A088 100%);
+}
+
+.shop-page .shop-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.shop-page .shop-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.1rem 2rem;
+    border-radius: 1.1rem;
+    background-color: var(--item-bg);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.shop-page .shop-item[hidden] { display: none; }
+
+.shop-page .shop-item.is-leaving {
+    opacity: 0;
+    transform: translateX(16px);
+}
+
+.shop-page .shop-item-check {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    min-width: 0;
+    cursor: pointer;
+}
+
+.shop-page .shop-checkbox {
+    width: 1.2rem;
+    height: 1.2rem;
+    flex-shrink: 0;
+    accent-color: var(--green-900);
+    cursor: pointer;
+}
+
+.shop-page .shop-item-name {
+    font-weight: 500;
+    overflow-wrap: anywhere;
+}
+
+.shop-page .shop-item-qty { color: var(--muted); }
+
+/* Efek coret saat sudah dibeli */
+.shop-page .shop-item.is-purchased .shop-item-name,
+.shop-page .shop-item.is-purchased .shop-item-qty {
+    color: #A39B94;
+    text-decoration: line-through;
+}
+
+.shop-page .shop-delete {
+    display: grid;
+    place-items: center;
+    width: 2.2rem;
+    height: 2.2rem;
+    flex-shrink: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #111111;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.shop-page .shop-delete:hover {
+    background-color: #F1DEDB;
+    color: var(--red-700);
+}
+
+.shop-page .shop-delete svg { width: 1.2rem; height: 1.2rem; }
+
+.shop-page .shop-empty {
+    margin: 0;
+    padding: 2rem 0;
+    color: var(--green-900);
+    font-weight: 500;
+    text-align: center;
+}
+
+.shop-page .shop-empty[hidden] { display: none; }
+
+/* ---------- Toast ---------- */
+
+.shop-page .shop-toast {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    z-index: 200;
+    max-width: calc(100% - 2rem);
+    padding: 0.8rem 1.4rem;
+    border-radius: 999px;
+    background-color: var(--green-900);
+    color: #FFFFFF;
+    font-weight: 500;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+    transform: translateX(-50%);
+}
+
+.shop-page .shop-toast.is-error { background-color: var(--red-700); }
+.shop-page .shop-toast[hidden] { display: none; }
+
+/* ---------- Mobile ---------- */
+
+@media (max-width: 768px) {
+    .shop-page .shop-hero {
+        padding: 8rem 0 3rem;
+        border-radius: 0 0 2rem 2rem;
+    }
+
+    .shop-page .shop-hero-inner {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .shop-page .shop-title { font-size: 1.75rem; }
+    .shop-page .shop-subtitle { font-size: 1rem; }
+
+    .shop-page .shop-btn--red {
+        width: 100%;
+        white-space: normal;
+    }
+
+    .shop-page .shop-add {
+        flex-direction: column;
+        gap: 0.75rem;
+        padding: 1rem;
+    }
+
+    .shop-page .shop-tabs {
+        grid-template-columns: 1fr;
+        gap: 0.6rem;
+        padding: 0.8rem;
+    }
+
+    .shop-page .shop-list-card {
+        margin-top: 2rem;
+        padding: 1rem;
+        border-radius: 1.5rem;
+    }
+
+    .shop-page .shop-list { gap: 0.9rem; }
+    .shop-page .shop-item { padding: 0.9rem 1rem; }
+}

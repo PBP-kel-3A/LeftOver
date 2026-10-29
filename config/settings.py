@@ -28,7 +28,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-8fdw4y1^uv(gikv%d+6q_qj5!s$)vb795jb$b9)3ry5i1-2j2*'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
+
+CSRF_TRUSTED_ORIGINS = ["https://raffa-zia-leftover.pws.cs.ui.ac.id",]
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "raffa-zia-leftover.pws.cs.ui.ac.id"]
 PRODUCTION = os.getenv('PRODUCTION', 'False').lower() == 'true'
@@ -47,6 +49,7 @@ INSTALLED_APPS = [
     'main',
     'pantry',
     'reviews',
+    'shopping',
     'favorites',
 ]
 

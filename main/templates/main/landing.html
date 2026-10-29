@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title %}
-    LeftOver - Kurangi Food Waste
+    LeftOver - Reducing Food Waste
 {% endblock %}
 
 {% block content %}
@@ -15,15 +15,15 @@
         <div class="hero-content">
 
             <h1 class="hero-title">
-                Punya sisa bahan
-                dapur?
-                <span>Jangan buang dulu!</span>
+                Have any leftover
+                kitchen ingredients?
+                <span>Don't throw it away yet!</span>
             </h1>
 
             <p class="hero-description">
-                LeftOver membantu mahasiswa, anak kos, dan keluarga
-                menyulap sisa telur, sayur, atau bumbu dapur menjadi
-                hidangan lezat hangat, hemat pengeluaran, dan ramah lingkungan.
+                LeftOver helps students, those living in rented rooms, and families
+                transform leftover eggs, vegetables, or kitchen seasonings 
+                into delicious, warm meals—saving money while being environmentally friendly.
             </p>
 
             <!-- Search -->
@@ -37,7 +37,7 @@
                 >
 
                 <a href="{% url 'recipes:recipe_list' %}" class="search-button">
-                    Cari resep sekarang
+                    Find a recipe now
                     <span>→</span>
                 </a>
 
@@ -47,23 +47,23 @@
             <div class="popular-ingredients">
 
                 <span class="popular-label">
-                    Bahan populer :
+                    Popular ingredient :
                 </span>
 
                 <a href="#" class="ingredient-pill">
-                    🥚 Telur
+                    🥚 Egg
                 </a>
 
                 <a href="#" class="ingredient-pill">
-                    🍗 Ayam
+                    🍗 Chicken
                 </a>
 
                 <a href="#" class="ingredient-pill">
-                    🧅 Bawang
+                    🧅 Onion
                 </a>
 
                 <a href="#" class="ingredient-pill">
-                    🥔 Kentang
+                    🥔 Potato
                 </a>
 
             </div>
@@ -82,21 +82,21 @@
             <!-- Statistics -->
             <div class="stat-card stat-card-top">
 
-                <p>Total bahan diselamatkan</p>
+                <p>Total ingredients saved</p>
 
                 <h2>1.482 kg</h2>
 
                 <span>
-                    Oleh 840+ mahasiswa & keluarga
+                    By 840+ students and their families
                 </span>
 
             </div>
 
             <div class="stat-card stat-card-bottom">
 
-                <p>Resep Tersedia</p>
+                <p>Recipe available</p>
 
-                <h2>350+ Resep</h2>
+                <h2>100+ Recipe</h2>
 
             </div>
 
@@ -114,16 +114,16 @@
         <div class="features-heading">
 
             <span class="section-badge">
-                Fitur Utama LeftOver
+                Key Features of Leftover
             </span>
 
             <h2>
-                Dirancang Ramah Kantong & Bebas Limbah
+                Designed to Be Budget-Friendly and Waste-Free
             </h2>
 
             <p>
-                Tiga pilar pintar untuk menjaga dapur
-                tetap efisien setiap hari.
+                Three smart pillars for keeping the kitchen
+                efficient every day.
             </p>
 
         </div>
@@ -139,19 +139,19 @@
                 </div>
 
                 <h3>
-                    Katalog Resep
+                    Recipe Catalog
                 </h3>
 
                 <p>
-                    Integrasi TheMealDB API & kreasi komunitas.
-                    Tulis resep kreasi Anda sendiri atau filter
-                    berdasarkan bahan sisa.
+                    Integration with TheMealDB API & community creations.
+                    Write your own original recipes or filter
+                    based on leftover ingredients.
                 </p>
 
                 <a href="{% url 'recipes:recipe_list' %}"
                    class="feature-button">
 
-                    Jelajahi Resep →
+                    Explore Recipes →
                     
                 </a>
 
@@ -170,13 +170,13 @@
                 </h3>
 
                 <p>
-                    Pantau stok dan tanggal kedaluwarsa dengan
-                    indikator warna pintar untuk membantu
-                    mengelola bahan makanan.
+                    Monitor stock and expiration dates with
+                    smart color-coded indicators to help
+                    manage food items.
                 </p>
 
                 <a href="{% url 'pantry:pantry_list' %}" class="feature-button">
-                    Cek Dapur →
+                    Check the kitchen →
                 </a>
 
             </article>
@@ -194,13 +194,13 @@
                 </h3>
 
                 <p>
-                    Coret barang belanjaan secara instan dan
-                    pindahkan langsung ke stok dapur tanpa
-                    reload.
+                    Cross off grocery items instantly and
+                    move them directly to your kitchen stock
+                    without needing to reload.
                 </p>
 
                 <a href="#" class="feature-button">
-                    Kelola Belanjaan →
+                    Manage Groceries →
                 </a>
 
             </article>
@@ -224,18 +224,18 @@
 
                 <div>
                     <h2>
-                        Rekomendasi Berdasarkan Dapurmu
+                        Recommendations Based on Your Kitchen
                     </h2>
 
                     <p>
-                        Temukan resep yang cocok dengan bahan
-                        yang kamu punya.
+                        Find recipes that match the ingredients
+                        you have on hand.
                     </p>
                 </div>
 
                 <a href="{% url 'recipes:recipe_list' %}"
                    class="recommendation-link">
-                    Lihat semua resep →
+                    See all recipes →
                 </a>
 
             </div>
