@@ -1,0 +1,327 @@
+
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}My Favorites | LeftOver{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/favorites.css' %}">
+
+<div class="fav-page">
+
+    <!-- FAVORITES HERO -->
+    <section class="fav-hero">
+        <div class="fav-container fav-hero-inner">
+
+            <div class="fav-hero-copy">
+                <h1 class="fav-title">My Favorite Recipes</h1>
+                <p class="fav-subtitle">
+                    All your saved recipes in one place.
+                </p>
+            </div>
+
+            {% if has_favorites %}
+            <form
+                class="fav-search"
+                method="GET"
+                action="{% url 'favorites:favorite_list' %}"
+                role="search"
+            >
+                <input
+                    type="search"
+                    name="q"
+                    value="{{ search_query }}"
+                    placeholder="Search saved recipes..."
+                    aria-label="Search favorite recipes"
+                >
+
+                <button type="submit" aria-label="Search recipes">
+                    <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        aria-hidden="true"
+                    >
+                        <circle cx="11" cy="11" r="7"></circle>
+                        <path d="m16 16 5 5"></path>
+                    </svg>
+                </button>
+            </form>
+            {% endif %}
+
+        </div>
+    </section>
+
+    <!-- FAVORITES CONTENT -->
+    <main class="fav-container fav-main">
+
+        {% if favorites %}
+
+        <div class="fav-grid">
+
+            {% for favorite in favorites %}
+
+            <article class="fav-card">
+
+                <!-- RECIPE IMAGE -->
+                <div class="fav-image-wrap">
+
+                    {% if favorite.recipe.image_url %}
+                    <img
+                        class="fav-image"
+                        src="{{ favorite.recipe.image_url }}"
+                        alt="{{ favorite.recipe.name }}"
+                        loading="lazy"
+                    >
+                    {% else %}
+                    <div class="fav-image-placeholder">
+                        Recipe image unavailable
+                    </div>
+                    {% endif %}
+
+                    <!-- REMOVE FAVORITE -->
+                    <form
+                        method="POST"
+                        action="{% url 'favorites:favorite_delete' favorite.id %}"
+                        class="fav-remove-form"
+                        data-confirm="Remove this recipe from your favorites?"
+                    >
+                        {% csrf_token %}
+
+                        <button
+                            type="submit"
+                            class="fav-heart"
+                            title="Remove from favorites"
+                            aria-label="Remove {{ favorite.recipe.name }} from favorites"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                aria-hidden="true"
+                            >
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                            </svg>
+                        </button>
+                    </form>
+
+                </div>
+
+                <!-- CARD CONTENT -->
+                <div class="fav-card-body">
+
+                    <!-- RATING & REVIEW COUNT -->
+                    <div class="fav-rating">
+                        {% if favorite.review_count %}
+                            <span class="fav-rating-star" aria-hidden="true">&#9733;</span>
+
+                            <span class="fav-rating-value">
+                                {{ favorite.avg_rating|floatformat:1 }}
+                            </span>
+
+                            <span class="fav-rating-count">
+                                ({{ favorite.review_count }} review{{ favorite.review_count|pluralize }})
+                            </span>
+                        {% else %}
+                            <span
+                                class="fav-rating-star fav-rating-star-empty"
+                                aria-hidden="true"
+                            >&#9733;</span>
+
+                            <span class="fav-rating-count">No reviews yet</span>
+                        {% endif %}
+                    </div>
+
+                    <h2 class="fav-card-title">
+                        {{ favorite.recipe.name }}
+                    </h2>
+
+                    <!-- PERSONAL NOTES -->
+                    <div class="fav-note-box">
+
+                        <div class="fav-note-head">
+                            <h3>Personal Notes</h3>
+
+                            <button
+                                type="button"
+                                class="fav-edit-btn"
+                                data-update-url="{% url 'favorites:favorite_update' favorite.id %}"
+                                data-recipe-name="{{ favorite.recipe.name }}"
+                                data-note-id="note-{{ favorite.id }}"
+                                data-display-id="note-display-{{ favorite.id }}"
+                            >
+                                Edit
+                            </button>
+                        </div>
+
+                        <p
+                            id="note-display-{{ favorite.id }}"
+                            class="fav-note-display"
+                        >{{ favorite.personal_note|default:"No notes yet. Click Edit to add one." }}</p>
+
+                        <!-- Stored note value for the edit modal -->
+                        <textarea
+                            id="note-{{ favorite.id }}"
+                            class="fav-stored-note"
+                            hidden
+                            aria-hidden="true"
+                            tabindex="-1"
+                        >{{ favorite.personal_note }}</textarea>
+
+                    </div>
+
+                    <!-- RECIPE DETAIL LINK -->
+                    <a
+                        class="fav-detail-btn"
+                        href="{% url 'recipes:recipe_detail' favorite.recipe.id %}"
+                    >
+                        View Recipe
+                    </a>
+
+                </div>
+
+            </article>
+
+            {% endfor %}
+
+        </div>
+
+        {% elif has_favorites %}
+
+        <!-- FAVORITES EXIST, BUT SEARCH HAS NO RESULTS -->
+        <section class="fav-empty" aria-live="polite">
+
+            <div class="fav-empty-icon" aria-hidden="true">&#8981;</div>
+
+            <h2>No recipes found</h2>
+
+            <p>
+                No favorite recipes match your search for
+                "{{ search_query }}".
+            </p>
+
+            <a
+                class="fav-empty-link"
+                href="{% url 'favorites:favorite_list' %}"
+            >
+                Clear Search
+            </a>
+
+        </section>
+
+        {% else %}
+
+        <!-- USER HAS NO FAVORITES -->
+        <section class="fav-empty">
+
+            <div class="fav-empty-icon" aria-hidden="true">&#9825;</div>
+
+            <h2>No favorite recipes yet</h2>
+
+            <p>
+                Explore the recipe catalog and save recipes
+                you'd like to cook later!
+            </p>
+
+            <a
+                class="fav-empty-link"
+                href="{% url 'recipes:recipe_list' %}"
+            >
+                Explore Recipes
+            </a>
+
+        </section>
+
+        {% endif %}
+
+    </main>
+
+    <!-- EDIT PERSONAL NOTES MODAL -->
+    <div
+        id="edit-note-modal"
+        class="fav-modal"
+        hidden
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
+    >
+
+        <div class="fav-modal-panel">
+
+            <div class="fav-modal-head">
+
+                <div>
+                    <h2 id="modal-title">Edit Personal Notes</h2>
+                    <p id="modal-recipe-name"></p>
+                </div>
+
+                <button
+                    type="button"
+                    id="close-note-modal"
+                    class="fav-modal-close"
+                    aria-label="Close dialog"
+                >
+                    &times;
+                </button>
+
+            </div>
+
+            <form id="edit-note-form" method="POST">
+                {% csrf_token %}
+
+                <label for="modal-personal-note">
+                    Personal Notes
+                </label>
+
+                <textarea
+                    id="modal-personal-note"
+                    name="personal_note"
+                    rows="5"
+                    placeholder="Example: Use less salt and add a little chili..."
+                ></textarea>
+
+                <p
+                    id="note-error"
+                    class="fav-note-error"
+                    role="alert"
+                    hidden
+                ></p>
+
+                <div class="fav-modal-actions">
+
+                    <button
+                        type="button"
+                        id="cancel-note-modal"
+                        class="fav-btn-cancel"
+                    >
+                        Cancel
+                    </button>
+
+                    <button
+                        type="submit"
+                        id="save-note-btn"
+                        class="fav-btn-save"
+                    >
+                        Save Notes
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/favorites.js' %}" defer></script>
+{% endblock %}

@@ -8,7 +8,7 @@
             {{ page_title }}
         </h1>
         <p class="mb-8 text-gray-600">
-            Lengkapi informasi resep dan bahan-bahan yang diperlukan.
+            Provide the recipe details and the necessary ingredients.
         </p>
 
         <form method="post" class="space-y-5">
@@ -50,14 +50,14 @@
                     type="submit"
                     class="rounded-lg bg-sky-600 px-5 py-3 font-semibold text-white hover:bg-sky-700"
                 >
-                    Simpan Resep
+                    Save Recipe
                 </button>
 
                 <a
                     href="{% if recipe %}{% url 'recipes:recipe_detail' recipe.pk %}{% else %}{% url 'recipes:recipe_list' %}{% endif %}"
                     class="rounded-lg border border-gray-300 px-5 py-3 font-semibold text-gray-700 hover:bg-gray-50"
                 >
-                    Batal
+                    Cancelled
                 </a>
             </div>
         </form>

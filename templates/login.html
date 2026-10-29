@@ -1,50 +1,94 @@
 {% extends 'base.html' %}
+<!-- harus load static karena akan pakai asset foto static -->
+{% load static %}
 
-{% block title %}Login - LeftOver{% endblock %}
+{% block title %}Sign In - LeftOver{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-[#F5F1E3] flex items-center justify-center px-4 pt-20 pb-12">
-    <div class="max-w-md w-full bg-white rounded-3xl shadow-sm ring-1 ring-black/5 p-8 md:p-10">
-        
-        <!-- Heading -->
-        <div class="text-center mb-8">
-            <h1 class="text-3xl font-extrabold text-[#26382D]">Masuk ke LeftOver</h1>
-            <p class="text-sm text-[#65756A] mt-2">Selamat datang kembali! Lanjutkan bersama LeftOver.</p>
-        </div>
 
-        <!-- Form Login -->
-        <form method="POST" class="space-y-6">
-            {% csrf_token %}
+<!-- Wrapper utama : nengahin card pas di tengah layar -->
+<div class="relative min-h-[calc(100vh-80px)] bg-white flex items-center justify-center px-4 py-20 font-jakarta overflow-hidden">
+    
+    <!-- blok gradasi hijau di belakang navbar -->
+    <div class="absolute top-0 left-0 right-0 h-44 rounded-b-[2.5rem] bg-[radial-gradient(circle_at_95%_0%,_rgba(38,71,54,0.9),_transparent_40%),linear-gradient(60deg,#F8F5EC_0%,#C9D8C9_30%,#7BA986_60%,#4D7D62_100%)] pointer-events-none"></div>
+
+    <!-- Split card: pas di layar laptop langsung kebuka 2 kolom (md:grid) -->
+    <div class="relative z-10 max-w-3xl mt-6 -mb-10 bg-white rounded-3xl md:rounded-[36px] shadow-xl overflow-hidden flex flex-col md:grid md:grid-cols-2 border-4 border-[#1F3327]">
+        
+        <!-- Sisi kiri: ini bagian input form sama tombol action login nya-->
+        <div class="p-6 sm:p-8 md:p-12 flex flex-col justify-center order-1">
             
-            <!-- INI UNTUK MENANGKAP ERROR USERNAME/PASSWORD SALAH -->
-            {% if form.non_field_errors %}
-                <div class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-xs mb-4">
-                    {{ form.non_field_errors }}
+            <div class="text-left mb-6">
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-[#1F3327] tracking-tight font-montserrat">
+                    Welcome to LeftOver!
+                </h1>
+                <p class="text-xs sm:text-sm text-[#65756A] mt-1.5 font-jakarta">
+                    Welcome back! Please enter your details.
+                </p>
+            </div>
+
+            <!-- buat feedback notifikasi sukses (misal: user baru kelar bikin akun di register terus di direct ke sini) -->
+            {% if messages %}
+                <div class="space-y-2 mb-4">
+                    {% for message in messages %}
+                        <div class="px-4 py-2.5 rounded-xl text-xs sm:text-sm bg-green-50 border border-green-200 text-green-700">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
                 </div>
             {% endif %}
-            
-            {% for field in form %}
-                <div>
-                    <label class="block text-sm font-semibold text-[#26382D] mb-2">{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.errors %}
-                        <p class="text-xs text-red-600 mt-1">{{ field.errors.0 }}</p>
-                    {% endif %}
+
+            <!-- buat error login dari Django pas username atau password-nya nggak cocok -->
+            {% if form.non_field_errors %}
+                <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-2.5 rounded-xl text-xs sm:text-sm mb-4">
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
                 </div>
-            {% endfor %}
+            {% endif %}
 
-            <!-- tombol submit -->
-            <button type="submit" class="w-full py-3 px-4 rounded-xl bg-[#315D47] text-white font-semibold text-sm transition hover:bg-[#1F4934]">
-                Login
-            </button>
-        </form>
+            <!-- Form login: pake token csrf -->
+            <form method="POST" action="{% url 'main:login' %}" class="space-y-4">
+                {% csrf_token %}
+                
+                <!-- Looping input bawaan AuthenticationForm Django -->
+                {% for field in form %}
+                    <div>
+                        <label for="{{ field.id_for_label }}" class="block text-xs sm:text-sm font-semibold text-[#26382D] mb-1.5">
+                            {{ field.label }}
+                        </label>
+                        <div class="[&>input]:w-full [&>input]:px-3.5 [&>input]:py-2.5 [&>input]:rounded-xl [&>input]:bg-[#E8EAE8]/70 [&>input]:border [&>input]:border-transparent [&>input]:focus:border-[#315D47] [&>input]:focus:bg-white [&>input]:text-sm [&>input]:outline-none [&>input]:transition">
+                            {{ field }}
+                        </div>
+                        
+                        <!-- Pesan error spesifik per-field kalo ada formatnya yang keliru -->
+                        {% for error in field.errors %}
+                            <p class="text-[11px] sm:text-xs text-red-600 mt-1">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
 
-        <!-- link buat ke page register (kalo belum punya akun) -->
-        <p class="text-center text-sm text-[#65756A] mt-6">
-            Belum punya akun? 
-            <a href="#" class="text-[#315D47] font-semibold hover:underline">Daftar di sini</a>
-        </p>
+                <!-- Tombol submit login  -->
+                <button type="submit" class="w-full mt-2 py-3 px-4 rounded-xl bg-[#395646] hover:bg-[#284133] active:scale-[0.99] text-white font-medium text-sm transition shadow-sm font-jakarta">
+                    Sign In
+                </button>
+            </form>
 
+            <!-- Navigasi buat yang ke page login tapi belum punya akun -->
+            <p class="text-center text-xs sm:text-sm text-[#7D8B81] mt-6">
+                Don't have an account? 
+                <a href="{% url 'main:register' %}" class="text-[#26382D] font-bold hover:underline">Sign up for free</a>
+            </p>
+        </div>
+
+        <!-- Sisi kanan: gambar ilustrasi (ini bakal disembunyiin pas di mobile) -->
+        <div class="hidden md:block relative h-full min-h-[460px] bg-[#E2DFD2] order-2 overflow-hidden border-l border-[#4B6858]/15">
+            <img 
+                src="{% static 'img/ilustrasi_cook.jpg' %}" 
+                alt="Cooking illustration" 
+                class="w-full h-full object-cover"
+            >
+        </div>
     </div>
 </div>
 {% endblock %}

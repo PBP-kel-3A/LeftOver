@@ -1,0 +1,16 @@
+<li class="shop-item{% if item.is_purchased %} is-purchased{% endif %}" data-id="{{ item.pk }}">
+    <label class="shop-item-check">
+        <input
+            type="checkbox"
+            class="shop-checkbox"
+            {% if item.is_purchased %}checked{% endif %}
+            aria-label="Tandai {{ item.name }} sudah dibeli"
+        >
+        <span class="shop-item-name">{{ item.name }}</span>
+        {% if item.quantity %}<span class="shop-item-qty">({{ item.quantity }})</span>{% endif %}
+    </label>
+
+    <button type="button" class="shop-delete" aria-label="Hapus {{ item.name }}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+</li>

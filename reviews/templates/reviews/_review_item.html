@@ -1,4 +1,4 @@
-<div id="review-{{ review.id }}" class="review-item p-5 rounded-2xl border border-gray-100 bg-[#FAF8F5] flex flex-col sm:flex-row justify-between items-start gap-4">
+<div id="review-{{ review.id }}" class="review-item p-4 sm:p-5 rounded-2xl border border-gray-100 bg-[#FAF8F5] flex flex-col sm:flex-row justify-between items-start gap-3 sm:gap-4 min-w-0">
     <div class="flex-1">
         <span class="font-bold text-sm text-[#26382D]">{{ review.user.username }}</span>
 
@@ -18,18 +18,18 @@
             <p class="text-sm text-[#26382D]/85 mt-1.5 leading-relaxed">{{ review.comment }}</p>
         {% endif %}
 
-        <!-- Foto Hasil Masakan -->
+        <!-- Foto Hasil masakan dari user -->
         {% if review.images.all %}
             <div class="mt-3 flex flex-wrap gap-2">
                 {% for img in review.images.all %}
-                    <img src="{{ img.image }}" alt="Foto ulasan" onclick="openImageLightbox('{{ img.image }}')" class="w-24 h-24 object-cover rounded-xl border border-gray-200 cursor-pointer hover:opacity-90 transition shadow-xs">
+                    <img src="{{ img.image }}" alt="Review Photo" onclick="openImageLightbox('{{ img.image }}')" class="w-24 h-24 object-cover rounded-xl border border-gray-200 cursor-pointer hover:opacity-90 transition shadow-xs">
                 {% endfor %}
             </div>
         {% endif %}
     </div>
 
-    <!-- Waktu & Tombol -->
-    <div class="text-right text-xs text-[#65756A] flex items-center gap-3 self-end sm:self-start shrink-0">
+    <!-- Menampilkan waktu & tombol untuk edit dan hapus -->
+    <div class="text-right text-xs text-[#65756A] flex items-center gap-3 self-end sm:self-start shrink-0 flex-wrap">
         <div class="flex items-center gap-1.5">
             <span>{{ review.get_time_ago }}</span>
             {% if review.is_edited %}
@@ -42,6 +42,7 @@
                     data-review-id="{{ review.id }}"
                     data-rating="{{ review.rating }}"
                     data-comment="{{ review.comment|default:'' }}"
+                    data-image-count="{{ review.images.count }}"
                     onclick="openEditReviewModal(this)"
                     class="text-[#315D47] font-semibold hover:underline cursor-pointer">
                 Edit

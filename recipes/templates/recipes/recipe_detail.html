@@ -11,15 +11,28 @@
 <section class="min-h-screen bg-[#F5F1E3] px-6 pb-12 pt-28">
     <div class="mx-auto max-w-5xl">
 
-        <!-- Back -->
-        <a
-            href="{% url 'recipes:recipe_list' %}"
-            class="mb-6 inline-flex items-center gap-2 text-sm font-semibold
-                text-[#315D47] transition hover:text-[#1F4934]"
-        >
-            <span class="text-lg">←</span>
-            Kembali ke Katalog
-        </a>
+        
+        <!-- Back to Catalog -->
+        <div class="mb-6">
+            <a
+                href="{% url 'recipes:recipe_list' %}"
+                class="inline-flex items-center gap-2 rounded-full
+                    border border-[#D9E4D9] bg-white/90
+                    px-4 py-2.5 text-sm font-semibold
+                    text-[#315D47] shadow-sm
+                    transition-all duration-200
+                    hover:-translate-x-1 hover:border-[#315D47]
+                    hover:bg-[#E5EEE6]
+                    focus-visible:outline-none
+                    focus-visible:ring-2
+                    focus-visible:ring-[#315D47]
+                    focus-visible:ring-offset-2"
+            >
+                <span aria-hidden="true" class="text-lg">←</span>
+                Back to Catalog
+            </a>
+        </div>
+
 
         <!-- Recipe Card -->
         <article class="overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-black/5">
@@ -80,7 +93,7 @@
                         {% empty %}
 
                             <p class="text-sm text-[#65756A]">
-                                Belum ada informasi bahan.
+                                There is no information yet regarding the ingredients.
                             </p>
 
                         {% endfor %}
@@ -101,11 +114,11 @@
                 {% if recipe.youtube_url %}
                     <div class="mt-10">
                         <h2 class="text-xl font-bold text-[#26382D]">
-                            Tutorial Video
+                            Video Tutorial
                         </h2>
 
                         <p class="mt-2 text-sm text-[#65756A]">
-                            Lihat tutorial pembuatan resep ini melalui video.
+                            Watch the tutorial for this recipe in the video.
                         </p>
 
                         <a
@@ -126,16 +139,23 @@
                         <div class="mt-6 flex flex-wrap gap-3">
                             <a
                                 href="{% url 'recipes:recipe_update' recipe.pk %}"
-                                class="rounded-lg bg-amber-500 px-5 py-3 font-semibold text-white hover:bg-amber-600"
+                                class="rounded-lg bg-[#335F49] px-5 py-3
+                                        font-semibold text-white
+                                        transition-colors duration-200
+                                        hover:bg-[#264736]
+                                        focus-visible:outline-none
+                                        focus-visible:ring-2
+                                        focus-visible:ring-[#335F49]
+                                        focus-visible:ring-offset-2"
                             >
-                                Edit Resep
+                                Edit recipe
                             </a>
 
                             <a
                                 href="{% url 'recipes:recipe_delete' recipe.pk %}"
                                 class="rounded-lg bg-red-600 px-5 py-3 font-semibold text-white hover:bg-red-700"
                             >
-                                Hapus Resep
+                                Delete recipe
                             </a>
                         </div>
                     {% endif %}

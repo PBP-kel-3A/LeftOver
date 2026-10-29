@@ -3,11 +3,13 @@ from functools import wraps
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Q, Avg, Count, Exists, OuterRef
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import RecipeForm
 from .models import Ingredient, Recipe, RecipeIngredient
+
+from favorites.models import Favorite
 
 #Membatasi akses hanya untuk staff atau superuser.
 def admin_required(view_func):
@@ -18,7 +20,6 @@ def admin_required(view_func):
 
 #parse bahan dengan format satu bahan per baris yang dipisahkan oleh "|" -> nama | takaran
 def parse_ingredients(ingredients_text):
-    """Parse bahan dengan format satu bahan per baris: nama | takaran."""
     ingredients = []
     seen = set()
 
@@ -78,9 +79,13 @@ def save_recipe_ingredients(recipe, ingredients):
         )
 
 
-@login_required
+
 def recipe_list(request):
-    recipes = Recipe.objects.all().order_by("name")
+    # Ambil rata-rata rating dan jumlah ulasan langsung dari database
+    recipes = Recipe.objects.annotate(
+        avg_rating=Avg('reviews__rating'),
+        review_count=Count('reviews', distinct=True)
+    ).order_by("name")
 
     search_query = request.GET.get("search", "").strip()
     category_query = request.GET.get("category", "").strip()
@@ -108,6 +113,16 @@ def recipe_list(request):
         )
 
     recipes = recipes.distinct()
+    # Menentukan status favorit setiap resep untuk user yang sedang login
+    if request.user.is_authenticated:
+        user_favorites = Favorite.objects.filter(
+            user=request.user,
+            recipe_id=OuterRef("pk"),
+        )
+
+        recipes = recipes.annotate(
+            is_favorited=Exists(user_favorites)
+        )
 
     categories = (
         Recipe.objects.exclude(category__isnull=True)
@@ -133,16 +148,27 @@ def recipe_list(request):
     return render(request, "recipes/recipe_list.html", context)
 
 
-@login_required
+
 def recipe_detail(request, pk):
-    recipe = get_object_or_404(Recipe, pk=pk)
+    # Optimasi ambil relasi bahan, ulasan, user, dan foto sekaligus di awal
+    # hitung rating rata-rata dan total ulasan
+    recipe = get_object_or_404(
+        Recipe.objects.annotate(
+            avg_rating=Avg('reviews__rating'),
+            review_count=Count('reviews', distinct=True)
+        ).prefetch_related(
+            'recipe_ingredients__ingredient',
+            'reviews__user',
+            'reviews__images'
+        ),
+        pk=pk
+    )
 
     return render(
         request,
         "recipes/recipe_detail.html",
         {"recipe": recipe},
     )
-
 
 @login_required
 def recipe_create(request):
