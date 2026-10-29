@@ -1,11 +1,18 @@
+from urllib.parse import urlparse
+
 from django import forms
+from django.core.exceptions import ValidationError
+
 from .models import Recipe
+
+
 
 
 class RecipeForm(forms.ModelForm):
     ingredients_text = forms.CharField(
         label="Bahan dan Takaran",
         required=True,
+        max_length=10000,
         help_text=(
             "Masukkan satu bahan per baris dengan format: "
             "nama bahan | takaran. Contoh: Chicken | 200 g"
@@ -20,6 +27,34 @@ class RecipeForm(forms.ModelForm):
             ),
         }),
     )
+
+    def clean_youtube_url(self):
+        url = self.cleaned_data.get("youtube_url")
+
+        if not url:
+            return url
+
+        parsed_url = urlparse(url)
+        hostname = (parsed_url.hostname or "").lower()
+
+        allowed_hosts = {
+            "youtube.com",
+            "www.youtube.com",
+            "m.youtube.com",
+            "youtu.be",
+            "www.youtube-nocookie.com",
+            "youtube-nocookie.com",
+        }
+
+        if (
+            parsed_url.scheme != "https"
+            or hostname not in allowed_hosts
+        ):
+            raise ValidationError(
+                "Masukkan URL video dari domain YouTube yang valid."
+            )
+
+        return url
     
     class Meta:
         model = Recipe
