@@ -3,13 +3,12 @@ from functools import wraps
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Q, Avg, Count, Exists, OuterRef
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import RecipeForm
 from .models import Ingredient, Recipe, RecipeIngredient
 
-from django.db.models import Exists, OuterRef
 from favorites.models import Favorite
 
 #Membatasi akses hanya untuk staff atau superuser.
@@ -82,7 +81,11 @@ def save_recipe_ingredients(recipe, ingredients):
 
 
 def recipe_list(request):
-    recipes = Recipe.objects.all().order_by("name")
+    # Ambil rata-rata rating dan jumlah ulasan langsung dari database
+    recipes = Recipe.objects.annotate(
+        avg_rating=Avg('reviews__rating'),
+        review_count=Count('reviews', distinct=True)
+    ).order_by("name")
 
     search_query = request.GET.get("search", "").strip()
     category_query = request.GET.get("category", "").strip()

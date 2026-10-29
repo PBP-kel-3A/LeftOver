@@ -85,6 +85,18 @@
             <!-- Content -->
             <div class="flex flex-1 flex-col p-5">
 
+                <!-- Rating & Jumlah Ulasan (Elisia's) -->
+                <div class="flex items-center gap-1.5 text-xs mb-2">
+                    {% if recipe.review_count and recipe.review_count > 0 %}
+                        <span class="text-amber-500 font-bold">★</span>
+                        <span class="font-bold text-[#26382D]">{{ recipe.avg_rating|floatformat:1 }}</span>
+                        <span class="text-[#65756A]">({{ recipe.review_count }} review{{ recipe.review_count|pluralize }})</span>
+                    {% else %}
+                        <span class="text-gray-300">★</span>
+                        <span class="text-[#65756A] italic">No reviews yet</span>
+                    {% endif %}
+                </div>
+
                 <h2 class="line-clamp-2 min-h-[3.5rem] text-lg font-bold text-[#26382D]">
                     {{ recipe.name }}
                 </h2>
