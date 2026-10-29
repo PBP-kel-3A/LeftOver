@@ -150,9 +150,12 @@ def recipe_list(request):
 
 
 def recipe_detail(request, pk):
-    # Optimasi ambil relasi bahan, ulasan, user, dan foto sekaligus di awal
+    # hitung rating rata-rata dan total ulasan
     recipe = get_object_or_404(
-        Recipe.objects.prefetch_related(
+        Recipe.objects.annotate(
+            avg_rating=Avg('reviews__rating'),
+            review_count=Count('reviews', distinct=True)
+        ).prefetch_related(
             'recipe_ingredients__ingredient',
             'reviews__user',
             'reviews__images'
