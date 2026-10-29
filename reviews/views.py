@@ -44,14 +44,17 @@ def add_review(request, recipe_id):
 
         # Maksimal 3 foto per ulasan
         images = request.FILES.getlist('images')
-        # loop foto 3 kali
+        # Loop foto 3 kali
         for img in images[:3]:
-            # Upload ke Cloudinary
-            upload_result = cloudinary.uploader.upload(img)
-            image_url = upload_result.get('secure_url')
-            
-            # Simpan URL Cloudinary ke database
-            ReviewImage.objects.create(review=review, image=image_url)
+            try:
+                # Upload ke Cloudinary
+                upload_result = cloudinary.uploader.upload(img)
+                image_url = upload_result.get('secure_url')
+                # Simpan URL Cloudinary ke database
+                ReviewImage.objects.create(review=review, image=image_url)
+            except Exception as e:
+                print(f"Cloudinary upload error: {e}")
+                continue  # Lewati foto yang gagal, proses ulasan tetap lanjut tersimpan
 
         # Kirim potongan HTML ulasan baru supaya JS bisa langsung menampilkannya
         html = render_to_string('reviews/_review_item.html', {'review': review}, request=request)
@@ -83,15 +86,18 @@ def edit_review(request, review_id):
         images = request.FILES.getlist('images')
         if images:
             current_count = review.images.count()
-            allowed_slots = 3 - current_count  # Menghitung sisa slot yang tersedia
+            allowed_slots = max(0, 3 - current_count) # menghitung sisa slot yang tersedia -> mencegah negatif
             
             for img in images[:allowed_slots]:
-                # Upload ke Cloudinary dan ambil secure_url-nya
-                upload_result = cloudinary.uploader.upload(img)
-                image_url = upload_result.get('secure_url')
-                
-                # Simpan URL Cloudinary ke model ReviewImage
-                ReviewImage.objects.create(review=review, image=image_url)
+                try:
+                    # Upload ke Cloudinary dan ambil secure_url-nya
+                    upload_result = cloudinary.uploader.upload(img)
+                    image_url = upload_result.get('secure_url')
+                    # Simpan URL Cloudinary ke model ReviewImage
+                    ReviewImage.objects.create(review=review, image=image_url)
+                except Exception as e:
+                    print(f"Cloudinary upload error: {e}")
+                    continue  # Lewati foto yang gagal
 
         # Kirim HTML ulasan yang sudah diperbarui untuk menggantikan kartu lama di halaman
         html = render_to_string('reviews/_review_item.html', {'review': review}, request=request)

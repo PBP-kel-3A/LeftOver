@@ -28,11 +28,12 @@
         {% empty %}
             <p id="noReviewMsg" class="text-center text-sm text-[#65756A] py-8">No reviews yet for this recipe. Be the first to leave a review!</p>
         {% endfor %}
+    </div>
 </div>
 
 <!-- MODAL POPUP INPUT / EDIT ULASAN -->
 <div id="reviewModal" class="fixed inset-0 bg-black/50 backdrop-blur-xs hidden items-center justify-center z-50 px-4">
-    <div class="bg-white rounded-3xl max-w-md w-full max-h-[90vh] overflow-y-auto overscroll-contain p-4 sm:p-6 md:p-7 shadow-2xl border border-[#26382D]/10">
+    <div class="bg-white rounded-3xl max-w-md w-full max-h-[90vh] overflow-y-auto overscroll-contain p-4 sm:6 md:p-7 shadow-2xl border border-[#26382D]/10">
         <h3 id="reviewModalTitle" class="text-lg font-extrabold text-[#26382D] mb-1">Share Your Cooking Experience</h3>
         <p class="text-xs text-[#65756A] mb-5">Leave a star rating and share your cooking tips or photos.</p>
 
@@ -323,41 +324,48 @@
                         closeReviewModal();
                         showFloatingToast(data.error || "Failed to save the review.");
                     }
+                })
+                .catch(err => {
+                    console.error("Fetch error:", err);
+                    showFloatingToast("An unexpected error occurred. Please check your connection.");
                 });
             });
         }
     });
 
     const deleteForm = document.getElementById("deleteReviewForm");
-        if (deleteForm) {
-            deleteForm.addEventListener("submit", function (e) {
-                e.preventDefault();
-                fetch(`/reviews/delete/${deletingReviewId}/`, {
-                    method: "POST",
-                    headers: { "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value }
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        closeDeleteReviewModal();
-                        document.getElementById('review-' + deletingReviewId).remove();
-                        showFloatingToast("Review deleted successfully!", "success");
+    if (deleteForm) {
+        deleteForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+            fetch(`/reviews/delete/${deletingReviewId}/`, {
+                method: "POST",
+                headers: { "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    closeDeleteReviewModal();
+                    document.getElementById('review-' + deletingReviewId).remove();
+                    showFloatingToast("Review deleted successfully!");
 
-                        // Munculkan kembali pesan kosong jika semua ulasan sudah terhapus
-                        if (!document.querySelector('#reviewListContainer .review-item')) {
-                            const noReviewMsg = document.getElementById('noReviewMsg');
-                            if (noReviewMsg) {
-                                noReviewMsg.classList.remove('hidden');
-                            }
+                    // Munculkan kembali pesan kosong jika semua ulasan sudah terhapus
+                    if (!document.querySelector('#reviewListContainer .review-item')) {
+                        const noReviewMsg = document.getElementById('noReviewMsg');
+                        if (noReviewMsg) {
+                            noReviewMsg.classList.remove('hidden');
                         }
-                    } else {
-                        showFloatingToast(data.error || "Failed to delete the review.", "error");
                     }
-                });
+                } else {
+                    showFloatingToast(data.error || "Failed to delete the review.");
+                }
+            })
+            .catch(err => {
+                console.error("Delete fetch error:", err);
+                showFloatingToast("Failed to delete review. Please check your connection.");
             });
-        }
+        });
+    }
 
-        
     // Ganti fungsi showFloatingToast dengan z-index lebih tinggi (z-[100])
     function showFloatingToast(message) {
         let container = document.querySelector('.toast-container');
