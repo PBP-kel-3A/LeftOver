@@ -11,18 +11,19 @@
     --light-green: #D2FFE2;
     --light-pink: #F9CFCA;
 
-    min-height: 100vh;
-    padding: 7rem 1.5rem 4rem;
-    background-color: #F5F1E3;
-    --deep-red-ink: #5D140B;    
-    --deep-red-night: #360C07;  
-    --panel: #ECE5D3;           
-    --line: #E2D9BD;         
+    --deep-red-ink: #5D140B;
+    --deep-red-night: #360C07;
+    --panel: #ECE5D3;
+    --line: #E2D9BD;
     --card-green: #DDFEE1;
     --card-pink: #FFE9E6;
     --tile-green: #3E7458;
     --ink: #1E1B19;
     --muted: #6B665E;
+
+    /* Panah dropdown (chevron) untuk semua <select>. Digambar sebagai background
+       supaya jaraknya dari tepi kanan bisa diatur lewat background-position. */
+    --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235A4F47' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
 
     padding-bottom: 5rem;
     color: var(--ink);
@@ -38,6 +39,8 @@
 /* ---------- Hero ---------- */
 
 .pantry-page .pantry-hero {
+    /* Navbar melayang di atas hero (lihat .navbar di style.css), jadi
+       padding atas dibuat besar agar judul berada di bawah navbar. */
     padding: clamp(8rem, 13vw, 11.5rem) 0 4.25rem;
     background: linear-gradient(24deg, #F9F7F1 0%, #74A480 60%, #274636 100%);
     border-radius: 0 0 56px 56px;
@@ -332,9 +335,14 @@
 
 .pantry-page select.pantry-input {
     cursor: pointer;
-    appearance: none;
+    /* Sembunyikan panah bawaan browser, lalu pakai panah sendiri (--select-arrow) */
     -webkit-appearance: none;
-    background-image: none;
+    appearance: none;
+    padding-right: 2.75rem;
+    background-image: var(--select-arrow);
+    background-repeat: no-repeat;
+    background-position: right 1.1rem center;
+    background-size: 1rem;
 }
 
 .pantry-page .pantry-error {
@@ -456,22 +464,133 @@
 .pantry-page .pantry-cta:focus-visible,
 .pantry-page .pantry-btn:focus-visible,
 .pantry-page .pantry-chip:focus-visible,
+.pantry-page .pantry-search-btn:focus-visible,
 .pantry-page .pantry-icon-btn:focus-visible,
 .pantry-page .pantry-check:focus-visible {
     outline: 3px solid rgba(116, 164, 128, 0.7);
     outline-offset: 2px;
 }
 
-/* ---------- Toolbar filter kategori ---------- */
+/* ---------- Tombol cari resep (di atas toolbar) ---------- */
+
+.pantry-page .pantry-cta-row {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    margin-bottom: 16px;
+}
+
+/* ---------- Toolbar: pencarian, urutan, filter kategori ---------- */
 
 .pantry-page .pantry-toolbar {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.55rem;
+    flex-direction: column;
+    gap: 0.9rem;
     margin-bottom: 1.1rem;
     padding: 1rem 1.1rem;
     background: var(--deep-red);
     border-radius: 28px;
+}
+
+.pantry-page .pantry-filters {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.pantry-page .pantry-search {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+}
+
+.pantry-page .pantry-search-input {
+    width: 100%;
+    height: 2.75rem;
+    padding: 0 3rem 0 1.1rem;
+    border: 0;
+    border-radius: 16px;
+    background: #fff;
+    color: var(--ink);
+    font: inherit;
+    font-size: 0.88rem;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.pantry-page .pantry-search-input::placeholder {
+    color: #9B948C;
+}
+
+.pantry-page .pantry-search-input:focus,
+.pantry-page .pantry-sort-select:focus-visible {
+    box-shadow: 0 0 0 3px rgba(249, 247, 241, 0.55);
+}
+
+.pantry-page .pantry-search-btn {
+    position: absolute;
+    top: 50%;
+    right: 0.45rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    transform: translateY(-50%);
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: color 0.15s, background-color 0.15s;
+}
+
+.pantry-page .pantry-search-btn:hover {
+    background: #F4EFE0;
+    color: var(--deep-red);
+}
+
+.pantry-page .pantry-search-btn svg {
+    width: 1.05rem;
+    height: 1.05rem;
+}
+
+.pantry-page .pantry-sort {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 0.75rem;
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.pantry-page .pantry-sort-select {
+    height: 2.75rem;
+    padding: 0 2.75rem 0 1.1rem;
+    border: 0;
+    border-radius: 16px;
+    background-color: #fff;
+    background-image: var(--select-arrow);
+    background-repeat: no-repeat;
+    background-position: right 1.1rem center;
+    background-size: 1rem;
+    color: var(--ink);
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 500;
+    cursor: pointer;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.pantry-page .pantry-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
 }
 
 .pantry-page .pantry-chip {
@@ -677,6 +796,12 @@
     color: var(--ink);
 }
 
+.pantry-page .pantry-link {
+    color: var(--deep-red);
+    font-weight: 600;
+    text-decoration: underline;
+}
+
 .pantry-page .pantry-hint {
     margin: 0.9rem 0.4rem 0;
     font-size: 0.78rem;
@@ -747,7 +872,10 @@
     }
 
     .pantry-page .pantry-container {
-        width: calc(100% - 2rem);
+        width: calc(100% - 240px);
+        max-width: none;
+        margin-left: auto;
+        margin-right: auto;
     }
 
     .pantry-page .pantry-summary {
@@ -757,5 +885,24 @@
 
     .pantry-page .pantry-panel {
         padding: 1.3rem;
+    }
+
+    /* Tombol cari resep selebar kolom, pencarian dan urutan menumpuk */
+    .pantry-page .pantry-cta {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .pantry-page .pantry-filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .pantry-page .pantry-sort {
+        justify-content: space-between;
+    }
+
+    .pantry-page .pantry-sort-select {
+        flex: 1;
     }
 }
