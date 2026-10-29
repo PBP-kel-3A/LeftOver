@@ -139,7 +139,14 @@
                         <div class="mt-6 flex flex-wrap gap-3">
                             <a
                                 href="{% url 'recipes:recipe_update' recipe.pk %}"
-                                class="rounded-lg bg-amber-500 px-5 py-3 font-semibold text-white hover:bg-amber-600"
+                                class="rounded-lg bg-[#335F49] px-5 py-3
+                                        font-semibold text-white
+                                        transition-colors duration-200
+                                        hover:bg-[#264736]
+                                        focus-visible:outline-none
+                                        focus-visible:ring-2
+                                        focus-visible:ring-[#335F49]
+                                        focus-visible:ring-offset-2"
                             >
                                 Edit recipe
                             </a>
