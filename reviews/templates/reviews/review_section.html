@@ -93,7 +93,7 @@
         <h3 id="reviewModalTitle" class="text-lg font-extrabold text-[#26382D] mb-1">Share Your Cooking Experience</h3>
         <p class="text-xs text-[#65756A] mb-5">Leave a star rating and share your cooking tips or photos.</p>
 
-        <form id="reviewForm" method="POST" action="{% url 'reviews:add_review' recipe.id %}" enctype="multipart/form-data" onsubmit="return validateReviewForm()">
+        <form id="reviewForm" method="POST" action="{% url 'reviews:add_review' recipe.id %}" enctype="multipart/form-data">
             {% csrf_token %}
             <input type="hidden" name="rating" id="ratingInput" value="0">
 
