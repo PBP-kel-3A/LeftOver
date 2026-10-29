@@ -150,6 +150,7 @@ def recipe_list(request):
 
 
 def recipe_detail(request, pk):
+    # Optimasi ambil relasi bahan, ulasan, user, dan foto sekaligus di awal
     # hitung rating rata-rata dan total ulasan
     recipe = get_object_or_404(
         Recipe.objects.annotate(
