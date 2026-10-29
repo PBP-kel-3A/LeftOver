@@ -2,6 +2,7 @@ from urllib.parse import urlencode
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db.models.functions import Lower
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -21,6 +22,23 @@ CATEGORY_CHIPS = [
     for value, label in PantryItem.Category.choices
     if value != PantryItem.Category.OTHER
 ]
+
+# Pilihan "Sort by": kode di URL -> (label di UI, argumen order_by).
+# Urutan default sama dengan Meta.ordering di model.
+SORT_OPTIONS = {
+    "expiry": ("Nearest Expiry", ("expiry_date", "name")),
+    "expiry_desc": ("Furthest Expiry", ("-expiry_date", "name")),
+    "name": ("Name (A-Z)", (Lower("name"), "expiry_date")),
+    "recent": ("Recently Added", ("-created_at",)),
+}
+DEFAULT_SORT = "expiry"
+
+
+def _list_url(**params):
+    """URL halaman pantry + query string; parameter kosong dibuang agar URL tetap bersih."""
+    query = urlencode({key: value for key, value in params.items() if value})
+    base = reverse("pantry:pantry_list")
+    return f"{base}?{query}" if query else base
 
 
 def _first_error(form):
@@ -54,7 +72,32 @@ def pantry_list(request):
     active_category = request.GET.get("category", "")
     if active_category not in category_labels:
         active_category = ""
-    items = all_items.filter(category=active_category) if active_category else all_items
+
+    # Pencarian nama bahan lewat ?q=...
+    query = request.GET.get("q", "").strip()[:100]
+
+    # Urutan lewat ?sort=...; nilai yang tidak dikenal -> urutan default
+    active_sort = request.GET.get("sort", "")
+    if active_sort not in SORT_OPTIONS:
+        active_sort = DEFAULT_SORT
+
+    items = all_items
+    if active_category:
+        items = items.filter(category=active_category)
+    if query:
+        items = items.filter(name__icontains=query)
+    items = items.order_by(*SORT_OPTIONS[active_sort][1])
+
+    # Chip, pencarian, dan urutan saling mempertahankan parameter satu sama lain
+    sort_param = "" if active_sort == DEFAULT_SORT else active_sort
+    category_chips = [
+        {
+            "label": label,
+            "url": _list_url(category=value, q=query, sort=sort_param),
+            "is_active": value == active_category,
+        }
+        for value, label in CATEGORY_CHIPS
+    ]
 
     context = {
         "form": form,
@@ -64,9 +107,15 @@ def pantry_list(request):
         "total_items": all_items.count(),
         "expiring_soon_count": all_items.expiring_soon().count(),
         # Chip filter
-        "category_chips": CATEGORY_CHIPS,
+        "category_chips": category_chips,
+        "all_items_url": _list_url(q=query, sort=sort_param),
         "active_category": active_category,
         "active_category_label": category_labels.get(active_category, ""),
+        # Pencarian & urutan
+        "query": query,
+        "clear_search_url": _list_url(category=active_category, sort=sort_param),
+        "sort_options": [(code, label) for code, (label, _) in SORT_OPTIONS.items()],
+        "active_sort": active_sort,
         # Saran untuk kolom nama: bahan yang ada di katalog resep
         "catalog_ingredients": catalog_ingredient_names(),
     }
