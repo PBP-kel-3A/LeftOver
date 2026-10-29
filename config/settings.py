@@ -14,21 +14,22 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 
-# Load environment variables from .env files
-load_dotenv()
+# Load environment variables from .env files (pindah kebawah)
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / ".env")
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-8fdw4y1^uv(gikv%d+6q_qj5!s$)vb795jb$b9)3ry5i1-2j2*'
+SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
 CSRF_TRUSTED_ORIGINS = ["https://raffa-zia-leftover.pws.cs.ui.ac.id",]
 
@@ -160,8 +161,8 @@ import cloudinary.uploader
 import cloudinary.utils
 
 cloudinary.config(
-    cloud_name='okjpcj3h',
-    api_key='256931589853396',
-    api_secret='Hfl2NHgYgb818OYtLUXfKUunhkk',
+    cloud_name=os.environ["CLOUDINARY_CLOUD_NAME"],
+    api_key=os.environ["CLOUDINARY_API_KEY"],
+    api_secret=os.environ["CLOUDINARY_API_SECRET"],
     secure=True
 )
