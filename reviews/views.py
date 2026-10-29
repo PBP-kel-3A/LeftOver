@@ -9,6 +9,14 @@ import cloudinary.uploader
 # Semua tindakan di cakupan "Reviews" hanya bisa dilakukan akun yang sudah login --> @login_required
 # Semua view di bawah mengembalikan JSON untuk dipakai AJAX.
 
+def _valid_rating(value):
+    # membatasi nilai bintang hanya di rentang 1 sampai 5
+    try:
+        rating = int(value)
+    except (TypeError, ValueError):
+        return None
+    return rating if 1 <= rating <= 5 else None
+
 # Tambah ulasan baru ke sebuah resep (dipanggil lewat AJAX)
 @login_required(login_url='main:login')
 def add_review(request, recipe_id):
@@ -20,12 +28,12 @@ def add_review(request, recipe_id):
         if Review.objects.filter(recipe=recipe, user=request.user).exists():
             return JsonResponse({'success': False, 'error': 'You have already reviewed this recipe!'}, status=400)
 
-        rating = request.POST.get('rating')
-        comment = request.POST.get('comment')
-
         # Rating wajib diisi, komentar dan foto boleh kosong
-        if not rating:
-            return JsonResponse({'success': False, 'error': 'Rating is required!'}, status=400)
+        rating = _valid_rating(request.POST.get('rating'))
+        if rating is None:
+            return JsonResponse({'success': False, 'error': 'Rating must be between 1 and 5 stars!'}, status=400)
+
+        comment = request.POST.get('comment', '').strip()
 
         review = Review.objects.create(
             recipe=recipe,
@@ -59,12 +67,15 @@ def edit_review(request, review_id):
     review = get_object_or_404(Review, pk=review_id, user=request.user)
 
     if request.method == 'POST':
-        rating = request.POST.get('rating')
-        comment = request.POST.get('comment')
+        rating_input = request.POST.get('rating')
 
-        if rating:
-            review.rating = int(rating)
-        review.comment = comment
+        if rating_input:
+            valid_rating = _valid_rating(rating_input)
+            if valid_rating is None:
+                return JsonResponse({'success': False, 'error': 'Rating must be between 1 and 5 stars!'}, status=400)
+            review.rating = valid_rating
+
+        review.comment = request.POST.get('comment', '').strip()
         review.is_edited = True  # supaya label "(edited)" muncul
         review.save()
 
