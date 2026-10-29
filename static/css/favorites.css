@@ -1,0 +1,576 @@
+
+/* ==========================================
+   LEFTOVER — FAVORITES PAGE
+   Scoped styling: .fav-page
+   ========================================== */
+
+.fav-page {
+    --green-900: #264736;
+    --green-500: #76A088;
+    --red-700: #8A1C11;
+    --title: #5D0F08;
+    --cream: #EDE4D3;
+    --item-bg: #F8F6F1;
+    --ink: #2A2522;
+    --muted: #6E6660;
+
+    min-height: 100vh;
+    padding-bottom: 6rem;
+    background: #FFFFFF;
+    color: var(--ink);
+
+    font-family:
+        "Plus Jakarta Sans",
+        -apple-system,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
+}
+
+.fav-page *,
+.fav-page *::before,
+.fav-page *::after {
+    box-sizing: border-box;
+}
+
+.fav-page .fav-container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+/* ---------- HERO ---------- */
+
+.fav-page .fav-hero {
+    padding: 11rem 0 4.5rem;
+    border-radius: 0 0 3rem 3rem;
+
+    background:
+        radial-gradient(
+            circle at 95% 0%,
+            rgba(38, 71, 54, 0.9),
+            transparent 40%
+        ),
+        linear-gradient(
+            60deg,
+            #F8F5EC 0%,
+            #C9D8C9 30%,
+            #7BA986 60%,
+            #4D7D62 100%
+        );
+}
+
+.fav-page .fav-hero-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+}
+
+.fav-page .fav-hero-copy {
+    min-width: 0;
+}
+
+.fav-page .fav-title {
+    margin: 0 0 0.75rem;
+    color: var(--title);
+    font-family: "Montserrat", sans-serif;
+    font-size: 2.1rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+.fav-page .fav-subtitle {
+    margin: 0;
+    color: #4E4844;
+    font-size: 1.1rem;
+    line-height: 1.5;
+}
+
+/* ---------- SEARCH ---------- */
+
+.fav-page .fav-search {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+
+    width: min(100%, 410px);
+    padding: 0.65rem 1rem 0.65rem 1.3rem;
+
+    border: 1px solid #DEDED7;
+    border-radius: 999px;
+    background: #FFFFFF;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.fav-page .fav-search input {
+    min-width: 0;
+    flex: 1;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    font-size: 0.95rem;
+}
+
+.fav-page .fav-search input::placeholder {
+    color: #827B74;
+}
+
+.fav-page .fav-search:focus-within {
+    outline: 2px solid var(--green-900);
+    outline-offset: 2px;
+}
+
+.fav-page .fav-search button {
+    display: grid;
+    place-items: center;
+
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+
+    border: 0;
+    background: transparent;
+    color: var(--green-900);
+    cursor: pointer;
+}
+
+.fav-page .fav-search svg {
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+/* ---------- MAIN CONTENT ---------- */
+
+.fav-page .fav-main {
+    padding-top: 3rem;
+}
+
+.fav-page .fav-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.75rem;
+    align-items: stretch;
+}
+
+/* ---------- RECIPE CARD ---------- */
+
+.fav-page .fav-card {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    overflow: hidden;
+
+    border: 1px solid #E6E2E1;
+    border-radius: 1.5rem;
+    background: #FFFFFF;
+    box-shadow: 0 5px 16px rgba(0, 0, 0, 0.07);
+}
+
+.fav-page .fav-image-wrap {
+    position: relative;
+    height: 215px;
+    overflow: hidden;
+    background: #D6E9DF;
+}
+
+.fav-page .fav-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.fav-page .fav-image-placeholder {
+    display: grid;
+    place-items: center;
+    height: 100%;
+    padding: 1rem;
+    color: var(--green-900);
+    text-align: center;
+}
+
+/* ---------- HEART BUTTON ---------- */
+
+.fav-page .fav-remove-form svg {
+    display: block;
+    width: 26px;
+    height: 26px;
+    fill: currentColor;
+    stroke: currentColor;
+}
+
+.fav-page .fav-heart {
+    display: grid;
+    place-items: center;
+
+    width: 2.6rem;
+    height: 2.6rem;
+
+    border: 0;
+    border-radius: 50%;
+    background: #FFFFFF;
+    color: #A92415;
+
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.13);
+    cursor: pointer;
+    transition: transform 0.15s ease;
+}
+
+.fav-page .fav-heart:hover {
+    transform: scale(1.08);
+}
+
+.fav-page .fav-heart svg {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+/* ---------- CARD CONTENT ---------- */
+
+.fav-page .fav-card-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    padding: 1.5rem;
+}
+
+.fav-page .fav-card-title {
+    margin: 0 0 1.3rem;
+    color: #3F2520;
+    font-size: 1.25rem;
+    font-weight: 750;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+/* ---------- PERSONAL NOTES ---------- */
+
+.fav-page .fav-note-box {
+    margin-bottom: 1.3rem;
+    padding: 1rem;
+    border-radius: 1rem;
+    background: var(--item-bg);
+}
+
+.fav-page .fav-note-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.fav-page .fav-note-head h3 {
+    margin: 0;
+    color: var(--title);
+    font-size: 0.9rem;
+    font-weight: 750;
+}
+
+.fav-page .fav-edit-btn {
+    border: 0;
+    background: transparent;
+    color: var(--green-900);
+    font: inherit;
+    font-size: 0.8rem;
+    font-weight: 750;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.fav-page .fav-note-display {
+    min-height: 3rem;
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.fav-page .fav-stored-note[hidden] {
+    display: none;
+}
+
+/* ---------- BUTTONS ---------- */
+
+.fav-page .fav-detail-btn,
+.fav-page .fav-empty-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 0;
+    border-radius: 999px;
+    background: var(--red-700);
+    color: #FFFFFF;
+
+    font-size: 0.9rem;
+    font-weight: 750;
+    text-decoration: none;
+    transition: background 0.2s ease;
+}
+
+.fav-page .fav-detail-btn {
+    margin-top: auto;
+    padding: 0.85rem 1rem;
+}
+
+.fav-page .fav-detail-btn:hover,
+.fav-page .fav-empty-link:hover {
+    background: #68150D;
+    color: #FFFFFF;
+}
+
+/* ---------- EMPTY STATES ---------- */
+
+.fav-page .fav-empty {
+    margin: 1rem auto 0;
+    padding: 4.5rem 1.5rem;
+    border: 2px dashed #D6D0CE;
+    border-radius: 1.5rem;
+    background: #FFFFFF;
+    text-align: center;
+}
+
+.fav-page .fav-empty-icon {
+    margin-bottom: 1rem;
+    color: #A92415;
+    font-size: 3.5rem;
+    line-height: 1;
+}
+
+.fav-page .fav-empty h2 {
+    margin: 0;
+    color: var(--title);
+    font-size: 1.5rem;
+    font-weight: 800;
+}
+
+.fav-page .fav-empty p {
+    max-width: 28rem;
+    margin: 1rem auto 1.5rem;
+    color: var(--muted);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.fav-page .fav-empty-link {
+    padding: 0.85rem 1.5rem;
+    background: var(--green-900);
+}
+
+.fav-page .fav-empty-link:hover {
+    background: #1B3427;
+}
+
+/* ---------- EDIT MODAL ---------- */
+
+.fav-page .fav-modal[hidden],
+.fav-page .fav-note-error[hidden] {
+    display: none;
+}
+
+.fav-page .fav-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow-y: auto;
+
+    padding: 1.5rem 1rem;
+    background: rgba(0, 0, 0, 0.53);
+}
+
+.fav-page .fav-modal-panel {
+    width: min(100%, 32rem);
+    max-height: calc(100vh - 3rem);
+    overflow-y: auto;
+    padding: 2rem;
+
+    border-radius: 1.5rem;
+    background: #FFF8E7;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+}
+
+.fav-page .fav-modal-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.fav-page .fav-modal-head h2 {
+    margin: 0;
+    color: var(--title);
+    font-size: 1.5rem;
+    font-weight: 800;
+}
+
+.fav-page #modal-recipe-name {
+    margin: 0.5rem 0 0;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.fav-page .fav-modal-close {
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    font-size: 2rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.fav-page #edit-note-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #3F2520;
+    font-size: 0.9rem;
+    font-weight: 650;
+}
+
+.fav-page #modal-personal-note {
+    display: block;
+    width: 100%;
+    padding: 1rem;
+
+    border: 1px solid #D6D0CE;
+    border-radius: 1rem;
+    background: #FFFFFF;
+    color: var(--ink);
+
+    font: inherit;
+    font-size: 0.9rem;
+    resize: vertical;
+}
+
+.fav-page #modal-personal-note:focus {
+    outline: 2px solid var(--green-500);
+    outline-offset: 1px;
+}
+
+.fav-page .fav-note-error {
+    margin: 0.75rem 0 0;
+    color: #A92415;
+    font-size: 0.9rem;
+}
+
+.fav-page .fav-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.75rem;
+}
+
+.fav-page .fav-btn-cancel,
+.fav-page .fav-btn-save {
+    padding: 0.8rem 1.3rem;
+    border-radius: 999px;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 650;
+    cursor: pointer;
+}
+
+.fav-page .fav-btn-cancel {
+    border: 1px solid #D6D0CE;
+    background: transparent;
+    color: #5E544F;
+}
+
+.fav-page .fav-btn-save {
+    border: 1px solid var(--green-900);
+    background: var(--green-900);
+    color: #FFFFFF;
+}
+
+.fav-page .fav-btn-save:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+/* ---------- RESPONSIVE ---------- */
+
+@media (max-width: 960px) {
+    .fav-page .fav-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .fav-page .fav-hero {
+        padding: 8rem 0 3rem;
+        border-radius: 0 0 2rem 2rem;
+    }
+
+    .fav-page .fav-hero-inner {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .fav-page .fav-title {
+        font-size: 1.75rem;
+    }
+
+    .fav-page .fav-subtitle {
+        font-size: 1rem;
+    }
+
+    .fav-page .fav-search {
+        width: 100%;
+    }
+
+    .fav-page .fav-grid {
+        grid-template-columns: 1fr;
+        gap: 1.2rem;
+    }
+
+    .fav-page .fav-main {
+        padding-top: 2rem;
+    }
+
+    .fav-page .fav-modal-panel {
+        padding: 1.5rem;
+    }
+}
+
+
+/* Rating & Review pada Favorite Card */
+.fav-rating {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+    font-size: 13px;
+}
+
+.fav-rating-star {
+    color: #E5A000;
+    font-size: 17px;
+    line-height: 1;
+}
+
+.fav-rating-star-empty {
+    color: #D1D5DB;
+}
+
+.fav-rating-value {
+    color: #3F2520;
+    font-weight: 700;
+}
+
+.fav-rating-count {
+    color: #71655F;
+}

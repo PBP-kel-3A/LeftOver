@@ -45,11 +45,23 @@ def add_favorite(user, recipe):
 @login_required
 @require_GET
 def favorite_list(request):
-    # READ: Tampilkan seluruh resep favorit milik user.
+    # READ: Ambil hanya favorit milik user yang sedang login.
     favorites = user_favorites(request)
+    has_favorites = favorites.exists()
+
+    # Ambil keyword pencarian dari URL, misalnya ?q=nasi.
+    search_query = request.GET.get("q", "").strip()
+
+    # Cari berdasarkan nama resep, tanpa membedakan huruf besar/kecil.
+    if search_query:
+        favorites = favorites.filter(
+            recipe__name__icontains=search_query
+        )
 
     return render(request, "favorites/favorite_list.html", {
         "favorites": favorites,
+        "search_query": search_query,
+        "has_favorites": has_favorites,
     })
 
 
@@ -203,3 +215,4 @@ def favorite_toggle(request, recipe_id):
         "recipe_id": recipe.pk,
         "message": message,
     })
+

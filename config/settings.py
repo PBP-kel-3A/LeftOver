@@ -26,16 +26,24 @@ load_dotenv(BASE_DIR / ".env")
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
+
 SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", "False").lower() == "true"
+# Environment configuration
+PRODUCTION = os.getenv("PRODUCTION", "False").lower() == "true"
 
-CSRF_TRUSTED_ORIGINS = ["https://raffa-zia-leftover.pws.cs.ui.ac.id",]
+# DEBUG hanya aktif jika bukan production dan DEBUG=True
+DEBUG = not PRODUCTION and os.getenv("DEBUG", "False").lower() == "true"
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "raffa-zia-leftover.pws.cs.ui.ac.id"]
-PRODUCTION = os.getenv('PRODUCTION', 'False').lower() == 'true'
+CSRF_TRUSTED_ORIGINS = [
+    "https://raffa-zia-leftover.pws.cs.ui.ac.id",
+]
 
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "raffa-zia-leftover.pws.cs.ui.ac.id",
+]
 
 # Application definition
 
@@ -164,5 +172,5 @@ cloudinary.config(
     cloud_name=os.environ["CLOUDINARY_CLOUD_NAME"],
     api_key=os.environ["CLOUDINARY_API_KEY"],
     api_secret=os.environ["CLOUDINARY_API_SECRET"],
-    secure=True
+    secure=True,
 )
