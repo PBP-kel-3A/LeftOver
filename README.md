@@ -119,34 +119,34 @@ Semua resep yang Anda simpan di satu tempat
 
 Demonstrasi berikut memperlihatkan cara pengguna mencari resep berdasarkan bahan makanan yang tersedia.
 
-![Demonstrasi Pencarian Bahan Makanan](docs/gifs/filtering-recipes.gif)
+![Demonstrasi Pencarian Bahan Makanan](docs/Gifs/filtering-recipes.gif)
 
 ### Menambahkan resep makanan
 
 Demonstrasi berikut memperlihatkan cara pengguna untuk menambahkan resep masakan.
 
-![Demonstrasi menambahkan resep Makanan](docs/gifs/add-recipes.gif)
+![Demonstrasi menambahkan resep Makanan](docs/Gifs/add-recipes.gif)
 
 ### Memberikan review
 
 Demonstrasi berikut memperlihatkan cara pengguna untuk memberikan rating dan review resep masakan.
 
-![Demonstrasi memberikan review Makanan](docs/gifs/reviews.gif)
+![Demonstrasi memberikan review Makanan](docs/Gifs/reviews.gif)
 
 ### Menambahkan bahan bahan yang ada di dapur atau kulkas
 Demonstrasi berikut memperlihatkan cara pengguna untuk memasukkan bahan yang tersedia di dapur yang nantinya akan diperlihatkan berapa sisa waktu bahan tersebut dari estimasi expired date.
 
-![Demonstrasi menambahkan bahan Makanan di dapur](docs/gifs/pantry-tracker.gif)
+![Demonstrasi menambahkan bahan Makanan di dapur](docs/Gifs/pantry-tracker.gif)
 
 ### Menambahkan list bahan untuk belanja
 Demonstrasi berikut memperlihatkan cara pengguna untuk menambahkan berbagai bahan makanan untuk perbelanjaan, serta memperlihatkan bagaimana sistem bisa memasukkan list bahan yang tercoret ke fitur pantry tracker.
 
-![Demonstrasi shopping list](docs/gifs/shopping.gif)
+![Demonstrasi shopping list](docs/Gifs/shopping.gif)
 
 ### Menambahkan menambahkan resep favorite
 Demonstrasi berikut memperlihatkan cara pengguna untuk menambahkan berbagai resep makanan kedalam daftar favorite mereka agar memudahkan saat ingin memasak, bisa disertai dengan notes (misal : ayam diganti dengan bebek, dll).
 
-![Demonstrasi add favorite](docs/gifs/favorite.gif)
+![Demonstrasi add favorite](docs/Gifs/favorite.gif)
 
 
 ## Teknologi dan API
