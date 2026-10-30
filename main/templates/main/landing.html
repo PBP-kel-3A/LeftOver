@@ -294,7 +294,7 @@
                                 </h3>
 
                                 <!-- Category -->
-                                <div class="mt-4 flex flex-wrap gap-2">
+                                <div class="mt-4 mb-4 flex flex-wrap gap-2">
                                     {% if item.recipe.category %}
                                         <span class="rounded-full bg-[#E5EEE6] px-3 py-1 text-xs font-medium text-[#315D47]">
                                             {{ item.recipe.category }}
@@ -309,13 +309,13 @@
                                 </div>
 
                                 <!-- Matching Ingredients -->
-                                <div class="mt-4 rounded-xl bg-[#E5EEE6] px-3 py-2 text-sm text-[#315D47]">
+                                <div class="mt-auto rounded-xl bg-[#E5EEE6] px-3 py-2 text-sm text-[#315D47]">
                                     ✓ {{ item.match_count }} matching ingredients
                                 </div>
 
                                 <!-- Button -->
                                 <a
-                                    href="{% url 'recipes:recipe_list' %}?search={{ item.recipe.name|urlencode }}"
+                                    href="{% url 'recipes:recipe_detail' item.recipe.pk %}"
                                     class="mt-5 block rounded-lg bg-[#8B1E12] px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-[#6F180F]"
                                 >
                                     See recipe →
