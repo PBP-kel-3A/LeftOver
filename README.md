@@ -266,7 +266,7 @@ Pengujian pada modul Ulasan mencakup pemeriksaan hak akses pengguna (otorisasi t
 ## Modul Proyek Bersama
 | Modul | Anggota Tim | Deskripsi Fitur Utama |
 |---|---|---|
-**Landing Page** (`main`) | Raffa Zia Arya Putra (2506619285), Zulfa Rahmi (2506598324) | Mengembangkan antarmuka *Landing Page* interaktif sebagai beranda utama untuk memperkenalkan fitur-fitur aplikasi LeftOver. |
+**Landing Page** (`main`) | Raffa Zia Arya Putra (2506619285), Zulfa Rahmi (2506598324), Alya Tsabita Imani (2506620192) | Mengembangkan antarmuka *Landing Page* interaktif sebagai beranda utama untuk memperkenalkan fitur-fitur aplikasi LeftOver. |
 **Autentikasi** (`auth`) | Elisia Catherine (2506533570) | Mengimplementasikan sistem keamanan dan manajemen sesi pengguna (Registrasi, Login, dan Logout) untuk melindungi akses fitur aplikasi. |
 
 ## Desain Proyek
