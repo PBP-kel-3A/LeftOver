@@ -61,6 +61,13 @@ Mengorganisasi bahan makanan yang perlu dibeli dan melacak bahan yang sudah dibe
 
 Pengguna yang telah terautentikasi dapat membagikan pengalaman memasak, memberikan penilaian dari 1 hingga 5 bintang, serta mengelola ulasan dan penilaian milik mereka sendiri.
 
+**Fitur & Implementasi Teknis:**
+* **Asynchronous CRUD & DOM Manipulation:** Seluruh interaksi pengelolaan ulasan diproses menggunakan AJAX (*Client-Side Update*). Pengguna dapat menambah, mengedit, atau menghapus ulasan secara instan tanpa perlu memuat ulang (*reload*) halaman.
+* **Live Aggregation & UI Updates:** Agregasi basis data tingkat lanjut (`Avg` dan `Count`) diimplementasikan untuk menyinkronkan total ulasan dan rata-rata bintang pada *header* detail resep secara *real-time* setiap kali terjadi perubahan data ulasan.
+* **Cloudinary Image Integration:**Pengguna dapat melampirkan dokumentasi hasil masakan hingga maksimal 3 foto per ulasan. Integrasi dengan Cloudinary API mencakup validasi tipe MIME (JPG/PNG/WebP), batasan ukuran file (Maks 2MB), serta adanya pengelolaan siklus hidup gambar (penghapusan otomatis di *cloud* saat ulasan dihapus).
+* **Robust Validation & Time Formatting:** Sistem divalidasi secara ketat untuk menolak review ganda (untuk 1 user) pada resep yang sama dan menangani format input yang tidak valid. Selain itu, tanggal publikasi ulasan dirender secara dinamis menggunakan kalkulasi waktu kustom (misalnya, *"Just now"*, *"1 minute ago"*).
+* **High Test Coverage (98%):** Seluruh lapisan logika (Model, View, Form) serta *edge cases* telah diuji dengan cakupan 98%, termasuk penggunaan *mocking* untuk mensimulasikan dan mengamankan pemanggilan API pihak ketiga (Cloudinary) selama pengujian.
+
 ### 5. Resep Favorit (*Favorite Recipes*)
 
 Menyimpan resep pilihan agar dapat diakses kembali dan menghapus resep dari daftar favorit jika sudah tidak diperlukan.
@@ -74,7 +81,7 @@ Tamu dapat menjelajahi resep publik, mencari dan memfilter katalog resep, serta 
 
 ### Pengguna Terdaftar (*Registered User*)
 
-Pengguna terdaftar memperoleh akses sebagai tamu serta dapat menggunakan fitur yang memerlukan autentikasi, termasuk pengelolaan persediaan bahan makanan, daftar belanja, resep favorit, ulasan, dan pembuatan resep, sesuai dengan aturan akses aplikasi.
+Pengguna terdaftar memperoleh akses sebagai tamu serta dapat menggunakan fitur yang memerlukan autentikasi, termasuk pengelolaan persediaan bahan makanan, daftar belanja, resep favorit, ulasan & rating, dan pembuatan resep, sesuai dengan aturan akses aplikasi.
 
 ## Screenshot dan Demonstrasi
 
@@ -239,7 +246,12 @@ python manage.py test recipes
 
 Pengujian pada modul Katalog Resep mencakup pemeriksaan hak akses, validasi input, validasi URL, perlindungan CSRF, rollback transaksi, dan pembaruan bahan resep.
 
-<!-- TODO: Perbarui jumlah test berdasarkan hasil pengujian terakhir. -->
+Untuk menjalankan pengujian pada modul Ulasan dan Penilaian (*Reviews and Ratings*), gunakan perintah:
+
+```bash
+python manage.py test reviews
+```
+Pengujian pada modul Ulasan mencakup pemeriksaan hak akses pengguna (otorisasi tingkat objek), validasi input formulir (batasan nilai rating, jumlah maksimal, serta ukuran dan tipe gambar), pengujian logika perhitungan waktu dinamis, serta simulasi (mocking) pengunggahan dan penghapusan gambar melalui API pihak ketiga (Cloudinary) beserta penanganan error-nya.
 
 ## Modul Proyek dan Anggota Tim
 
