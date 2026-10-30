@@ -368,3 +368,13 @@ ChatGPT digunakan sebagai alat bantu dalam proses pembelajaran dan pengembangan 
 Link Chat ChatGPT: https://chatgpt.com/share/6ae48e0e-3388-83ec-9e5c-587aef4477b6 dan https://chatgpt.com/share/6ae48e32-f1fc-83ec-8a57-aa0712271586
 
 </details>
+
+<details>
+<summary><h3>KARYN ISABELLE DEXTER -2506656860</h3></summary>
+Pada fitur Smart Shopping List, aku bertanggung jawab menentukan fitur apa saja yang perlu diimplementasikan, bagaimana fitur tersebut seharusnya bekerja, dan kebutuhan apa saja yang diperlukan agar fitur bisa berjalan sesuai tujuan.
+
+Dalam proses pengerjaannya, aku berusaha menulis dan mengimplementasikan kode sendiri berdasarkan pemahamanku terhadap kebutuhan fitur. Ketika menemukan bagian yang belum terlalu aku pahami, aku menggunakan AI untuk bertanya, memahami konsep yang berkaitan, dan mencari arahan mengenai cara menyelesaikan masalah tersebut. Setelah itu, aku mencoba melanjutkan implementasinya berdasarkan pemahaman yang aku dapatkan.
+
+AI juga digunakan untuk membantu membuat unit test pada fitur Smart Shopping List. Secara keseluruhan, AI berperan sebagai alat bantu selama proses pengembangan, sedangkan penentuan kebutuhan fitur dan proses pengerjaan implementasinya tetap aku kerjakan sendiri dengan bantuan AI ketika diperlukan.
+
+</details>
