@@ -7,6 +7,18 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                fontFamily: {
+                    montserrat: ['Montserrat', 'sans-serif'],
+                    jakarta: ['Plus Jakarta Sans', 'sans-serif'],
+                }
+            }
+        }
+    }
+</script>
 {% endblock %}
 
 {% block extra_js %}
@@ -174,10 +186,10 @@
 
         <!-- Header -->
         <div class="mb-10">
-            <h1 class="text-4xl font-bold tracking-tight text-[#7A1A0F] md:text-5xl">
+            <h1 class="font-montserrat text-4xl font-bold tracking-tight text-[#7A1A0F] md:text-5xl">
                 Recipe Catalog
             </h1>
-            <p class="mt-3 max-w-2xl text-base leading-relaxed text-[#65756A]">
+            <p class="mt-3 max-w-2xl font-montserrat text-base leading-relaxed text-[#65756A]">
                 Discover recipes that can help you prepare dishes using the ingredients
                 you already have in your kitchen
             </p>
