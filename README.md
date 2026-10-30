@@ -119,7 +119,7 @@ Semua resep yang Anda simpan di satu tempat
 
 Demonstrasi berikut memperlihatkan cara pengguna mencari resep berdasarkan bahan makanan yang tersedia.
 
-![Demonstrasi Pencarian Bahan Makanan](docs/Gifs/filtering-recipes.gif)
+![Demonstrasi Pencarian Bahan Makanan](docs/Gifs/filtering-recipe.gif)
 
 ### Menambahkan resep makanan
 
