@@ -14,6 +14,21 @@
 <section class="hero">
 
     <div class="hero-container">
+        <div class="hero-food-image">
+
+            <picture>
+                <!--image untuk mobile-->
+                <source 
+                    media="(max-width: 768px)"
+                    srcset="{% static 'img/Hero-mobile.png' %}"
+                >
+                <img
+                    src="{% static 'img/Hero.png' %}"
+                    alt="LeftOver Food"
+                >
+            </picture>
+        </div>
+
 
         <!-- LEFT CONTENT -->
         <div class="hero-content">
@@ -74,36 +89,6 @@
                 <a href="{% url 'recipes:recipe_list' %}?ingredients=Potato" class="ingredient-pill">
                     🥔 Potato
                 </a>
-
-            </div>
-
-        </div>
-
-        <div class="hero-food-image">
-            <img src="{% static 'img/Hero.png' %}" alt="LeftOver Food">
-        </div>
-
-
-        <!-- RIGHT CONTENT -->
-        <div class="hero-visual">
-            <!-- Statistics -->
-            <div class="stat-card stat-card-top">
-
-                <p>Total ingredients saved</p>
-
-                <h2>1.482 kg</h2>
-
-                <span>
-                    By 840+ students and their families
-                </span>
-
-            </div>
-
-            <div class="stat-card stat-card-bottom">
-
-                <p>Recipe available</p>
-
-                <h2>100+ Recipe</h2>
 
             </div>
 

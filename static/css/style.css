@@ -457,20 +457,20 @@ a {
    HERO VISUAL
    ========================= */
 
-.hero-visual {
-    position: relative;
-
+.hero-food-image picture{
+    display: block;
+    width: 100%;
     height: 100%;
 }
 
 .hero-food-image {
     position: absolute;
 
-    top: -110px;
-    right: -200px;
+    top: -130px;
+    right: -140px;
 
-    width: 720px;
-    height: 680px;
+    width: 850px;
+    height: 750px;
 
     
 
@@ -490,64 +490,6 @@ a {
     display: block;
 }
 
-/* =========================
-   STATISTICS
-   ========================= */
-
-.stat-card {
-    position: absolute;
-
-    z-index: 10;
-
-    width: 330px;
-
-    padding: 22px 28px;
-
-    background-color: rgba(34, 76, 57, 0.82);
-
-    border-radius: 18px;
-
-    color: white;
-
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
-
-    backdrop-filter: blur(4px);
-}
-
-.stat-card p {
-    margin: 0 0 10px;
-
-    font-size: 12px;
-}
-
-.stat-card h2 {
-    margin: 0;
-
-    color: #F8E6A8;
-
-    font-size: 30px;
-    line-height: 1;
-
-    font-weight: 800;
-}
-
-.stat-card span {
-    display: block;
-
-    margin-top: 10px;
-
-    font-size: 11px;
-}
-
-.stat-card-top {
-    top: 100px;
-    left: 50px;
-}
-
-.stat-card-bottom {
-    top: 270px;
-    left: 50px;
-}
 
 /* FEATURES SECTION */
 
@@ -1040,6 +982,12 @@ a {
         overflow: hidden;
     }
 
+    .hero-food-image picture {
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
+
     .hero-container {
         width: 100%;
         max-width: 100%;
@@ -1048,13 +996,16 @@ a {
         flex-direction: column;
         align-items: stretch;
         gap: 0;
-        padding: 82px 0 24px;
+        padding: 0 0 24px;
     }
 
     .hero-content {
         width: 100%;
         max-width: none;
-        padding: 0 18px;
+        padding-top: 0px;
+        padding-left: 18px;
+        padding-right: 18px;
+        padding-bottom: 0;
         z-index: 2;
     }
 
@@ -1101,64 +1052,24 @@ a {
     /* Full-width food image */
     .hero-food-image {
         position: relative;
-        top: auto;
+        top: -120px;
         right: auto;
         left: auto;
         width: 100%;
-        height: clamp(220px, 65vw, 300px);
-        margin-top: 12px;
-        overflow: hidden;
+        height: 220px;
+        margin:0 0 -30px;
+        overflow: visible;
         z-index: 1;
     }
 
     .hero-food-image img {
         display: block;
-        width: 100%;
+        width: 130%;
         height: 100%;
-        object-fit: cover;
-        object-position: center 45%;
+        object-fit: contain;
+        object-position: center top;
     }
 
-    /* Statistics below the image */
-    .hero-visual {
-        position: relative;
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        align-items: stretch;
-        gap: 10px;
-        width: 100%;
-        height: auto;
-        margin: 0;
-        padding: 0 18px;
-    }
-
-    .stat-card,
-    .stat-card-top,
-    .stat-card-bottom {
-        position: relative;
-        inset: auto;
-        width: 100%;
-        min-width: 0;
-        height: 100%;
-        padding: 14px 10px;
-        border-radius: 14px;
-        overflow-wrap: anywhere;
-    }
-
-    .stat-card p {
-        font-size: 10px;
-        line-height: 1.4;
-    }
-
-    .stat-card h2 {
-        font-size: clamp(16px, 4.5vw, 21px);
-        line-height: 1.2;
-    }
-
-    .stat-card span {
-        font-size: 9px;
-        line-height: 1.4;
-    }
 }
 
 @media (max-width: 480px) {
@@ -1166,24 +1077,6 @@ a {
         height: 240px;
     }
 
-    .hero-visual {
-        gap: 8px;
-        padding: 0 12px;
-    }
-
-    .stat-card,
-    .stat-card-top,
-    .stat-card-bottom {
-        padding: 12px 9px;
-    }
-
-    .stat-card h2 {
-        font-size: 17px;
-    }
-
-    .stat-card span {
-        font-size: 8px;
-    }
 }
 
 
