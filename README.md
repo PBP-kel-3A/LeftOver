@@ -370,6 +370,42 @@ Link Chat ChatGPT: https://chatgpt.com/share/6ae48e0e-3388-83ec-9e5c-587aef4477b
 </details>
 
 <details>
+<summary><h3>ALYA TSABITA IMANI - 2506620192 </h3></summary>
+
+Selama pengembangan proyek LeftOver, saya menggunakan ChatGPT (OpenAI) sebagai alat bantu pembelajaran, implementasi fitur, debugging, dan pengembangan UI, khususnya pada modul Favorites.
+
+**1. Penggunaan AI**
+
+- Membantu memahami konsep Django, seperti models, views, templates, URL routing, dan relasi database.
+- Memberikan arahan serta rekomendasi kode untuk implementasi fitur Favorites, termasuk tombol favorite dan pengelolaan notes.
+- Membantu menganalisis error serta memberikan alternatif solusi debugging.
+- Memberikan rekomendasi HTML, CSS, dan JavaScript untuk pengembangan tampilan yang responsif.
+- Membantu memahami workflow Git dan GitHub dalam kolaborasi kelompok.
+
+**2. Keterbatasan AI**
+
+- AI tidak selalu memahami keseluruhan struktur proyek, terutama perubahan kode dari anggota kelompok lain yang belum saya sertakan dalam percakapan.
+- Kode yang dihasilkan terkadang memiliki penamaan atau struktur yang tidak sesuai dengan implementasi aktual.
+- Solusi yang diberikan AI tidak selalu langsung menyelesaikan error karena penyebab permasalahan terkadang berkaitan dengan konfigurasi atau dependensi pada file lain.
+- Rekomendasi CSS tidak selalu menghasilkan tampilan sesuai dengan desain yang diinginkan.
+- AI tidak dapat memastikan bahwa implementasi yang disarankan sudah berjalan dengan benar tanpa dilakukan pengujian langsung pada proyek.
+
+**3. Penyesuaian Manual**
+
+- Memeriksa dan menyesuaikan kode AI dengan struktur proyek serta kebutuhan modul Favorites.
+- Melakukan debugging dan pengujian langsung melalui server lokal Django.
+- Menyesuaikan HTML dan CSS secara manual agar tampilan sesuai dengan rancangan UI.
+- Memeriksa kompatibilitas perubahan kode dengan modul lain sebelum integrasi.
+
+**4. Kesimpulan**
+
+ChatGPT digunakan sebagai alat bantu, bukan pengganti developer. Seluruh rekomendasi dan kode yang dihasilkan tetap melalui proses pemeriksaan, penyesuaian, serta pengujian manual agar sesuai dengan kebutuhan proyek LeftOver.
+
+Link chat: https://chatgpt.com/share/6ae4acc6-c5d8-83ec-bd42-5f78b0468427
+
+</details>
+
+<details>
 <summary><h3>KARYN ISABELLE DEXTER -2506656860</h3></summary>
 Pada fitur Smart Shopping List, aku bertanggung jawab menentukan fitur apa saja yang perlu diimplementasikan, bagaimana fitur tersebut seharusnya bekerja, dan kebutuhan apa saja yang diperlukan agar fitur bisa berjalan sesuai tujuan.
 
