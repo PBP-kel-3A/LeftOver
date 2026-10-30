@@ -4,9 +4,6 @@
 {% block title %}Pantry Tracker - LeftOver{% endblock %}
 
 {% block extra_css %}
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'css/pantry.css' %}">
 {% endblock %}
 
@@ -17,8 +14,8 @@
     <header class="pantry-hero">
         <div class="pantry-container pantry-hero-inner">
             <div class="pantry-hero-text">
-                <h1 class="pantry-title">Pantry Tracker</h1>
-                <p class="pantry-subtitle">
+                <h1 class="pantry-title font-montserrat">Pantry Tracker</h1>
+                <p class="pantry-subtitle font-jakarta">
                     Track the shelf life of your ingredients with ease. Get cooking suggestions and early notifications before food goes to waste!
                 </p>
             </div>
@@ -31,12 +28,12 @@
         <section class="pantry-summary" aria-label="Pantry summary">
             <article class="pantry-stat pantry-stat--total">
                 <div class="pantry-stat-head">
-                    <h2 class="pantry-stat-label">Total Ingredients Stored</h2>
+                    <h2 class="pantry-stat-label font-montserrat">Total Ingredients Stored</h2>
                     <span class="pantry-stat-icon pantry-stat-icon--green" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/></svg>
                     </span>
                 </div>
-                <p class="pantry-stat-value">
+                <p class="pantry-stat-value font-jakarta">
                     <strong>{{ total_items }}</strong>
                     <span>{{ total_items|pluralize:"item,items" }}</span>
                 </p>
@@ -45,12 +42,12 @@
 
             <article class="pantry-stat pantry-stat--soon">
                 <div class="pantry-stat-head">
-                    <h2 class="pantry-stat-label">Expiring Soon</h2>
+                    <h2 class="pantry-stat-label font-montserrat">Expiring Soon</h2>
                     <span class="pantry-stat-icon pantry-stat-icon--red" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></svg>
                     </span>
                 </div>
-                <p class="pantry-stat-value">
+                <p class="pantry-stat-value font-jakarta">
                     <strong>{{ expiring_soon_count }}</strong>
                     <span>{{ expiring_soon_count|pluralize:"item,items" }} expiring soon</span>
                 </p>
@@ -62,13 +59,13 @@
 
             <!-- Form tambah bahan -->
             <aside class="pantry-panel pantry-form-card">
-                <h2 class="pantry-panel-title">
+                <h2 class="pantry-panel-title font-montserrat">
                     <span class="pantry-title-icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"/></svg>
                     </span>
                     Log New Ingredient
                 </h2>
-                <p class="pantry-panel-text">
+                <p class="pantry-panel-text font-jakarta">
                     Just restocked? Log it now so its shelf life is tracked automatically.
                 </p>
 
@@ -345,7 +342,7 @@
             <div class="pantry-field">
                 <label for="{{ edit_form.recipe_name.id_for_label }}">{{ edit_form.recipe_name.label }}</label>
                 {{ edit_form.recipe_name }}
-                <p class="pantry-field-hint">
+                <p class="pantry-field-hint font-jakarta">
                     Used by Find recipes from pantry. Leave empty to match automatically.
                 </p>
             </div>
@@ -366,8 +363,8 @@
     <dialog id="delete-dialog" class="pantry-dialog pantry-dialog--small">
         <form method="post" id="delete-form" class="pantry-form">
             {% csrf_token %}
-            <h2 class="pantry-panel-title">Delete ingredient?</h2>
-            <p class="pantry-dialog-text">
+            <h2 class="pantry-panel-title font-montserrat">Delete ingredient?</h2>
+            <p class="pantry-dialog-text font-jakarta">
                 <strong id="delete-name"></strong> will be removed from your pantry.
                 Use this for ingredients you've used up or thrown away.
             </p>

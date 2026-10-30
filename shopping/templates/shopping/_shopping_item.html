@@ -6,8 +6,8 @@
             {% if item.is_purchased %}checked{% endif %}
             aria-label="Mark {{ item.name }} as purchased"
         >
-        <span class="shop-item-name">{{ item.name }}</span>
-        {% if item.quantity %}<span class="shop-item-qty">({{ item.quantity }})</span>{% endif %}
+        <span class="shop-item-name font-jakarta">{{ item.name }}</span>
+        {% if item.quantity %}<span class="shop-item-qty font-jakarta">({{ item.quantity }})</span>{% endif %}
     </label>
 
     <button type="button" class="shop-delete" aria-label="Delete {{ item.name }}">

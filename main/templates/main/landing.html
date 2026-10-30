@@ -6,7 +6,6 @@
 {% endblock %}
 
 {% block extra_css %}
-<script src="https://cdn.tailwindcss.com"></script>
 {% endblock %}
 
 {% block content %}
@@ -33,13 +32,13 @@
         <!-- LEFT CONTENT -->
         <div class="hero-content">
 
-            <h1 class="hero-title">
+            <h1 class="hero-title font-montserrat">
                 Have any leftover
                 kitchen ingredients?
                 <span>Don't throw it away yet!</span>
             </h1>
 
-            <p class="hero-description">
+            <p class="hero-description font-jakarta">
                 LeftOver helps students, those living in rented rooms, and families
                 transform leftover eggs, vegetables, or kitchen seasonings 
                 into delicious, warm meals—saving money while being environmentally friendly.
@@ -109,11 +108,11 @@
                 Key Features of Leftover
             </span>
 
-            <h2>
+            <h2 class="font-montserrat">
                 Designed to Be Budget-Friendly and Waste-Free
             </h2>
 
-            <p>
+            <p class="font-jakarta">
                 Three smart pillars for keeping the kitchen
                 efficient every day.
             </p>
@@ -130,11 +129,11 @@
                     <img src="{% static 'img/Recipe.png' %}" alt="">
                 </div>
 
-                <h3>
+                <h3 class="font-montserrat">
                     Recipe Catalog
                 </h3>
 
-                <p>
+                <p class="font-jakarta">
                     Integration with TheMealDB API & community creations.
                     Write your own original recipes or filter
                     based on leftover ingredients.
@@ -157,11 +156,11 @@
                     <img src="{% static 'img/Pantry.png' %}" alt="">
                 </div>
 
-                <h3>
+                <h3 class="font-montserrat">
                     Pantry Tracker
                 </h3>
 
-                <p>
+                <p class="font-jakarta">
                     Monitor stock and expiration dates with
                     smart color-coded indicators to help
                     manage food items.
@@ -181,11 +180,11 @@
                     <img src="{% static 'img/Shoping.png' %}" alt="">
                 </div>
 
-                <h3>
+                <h3 class="font-montserrat">
                     Smart Shopping List
                 </h3>
 
-                <p>
+                <p class="font-jakarta">
                     Cross off grocery items instantly and
                     move them directly to your kitchen stock
                     without needing to reload.
@@ -213,7 +212,7 @@
             <!-- Header -->
             <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
                 <div>
-                    <h2 class="text-2xl font-bold text-[#7B241C] md:text-3xl">
+                    <h2 class=" font-montserrat text-2xl font-bold text-[#7B241C] md:text-3xl">
                         Recommendations Based on Your Kitchen
                     </h2>
                     <p class="mt-2 text-sm text-gray-500">
@@ -230,7 +229,7 @@
             {% if not has_pantry_items %}
 
                 <div class="rounded-2xl bg-white p-10 text-center shadow-sm">
-                    <h3 class="text-xl font-bold text-[#26382D]">
+                    <h3 class=" font-montserrat text-xl font-bold text-[#26382D]">
                         Your Pantry Is Empty
                     </h3>
                     <p class="mt-2 text-gray-500">
@@ -274,7 +273,7 @@
                                     <span>No reviews yet</span>
                                 </div>
 
-                                <h3 class="text-lg font-bold text-[#26382D]">
+                                <h3 class="font-montserrat text-lg font-bold text-[#26382D]">
                                     {{ item.recipe.name }}
                                 </h3>
 
@@ -316,7 +315,7 @@
             {% else %}
 
                 <div class="rounded-2xl bg-white p-10 text-center shadow-sm">
-                    <h3 class="text-xl font-bold text-[#26382D]">
+                    <h3 class=" font-montserrat text-xl font-bold text-[#26382D]">
                         No Matching Recipes Yet
                     </h3>
                     <p class="mt-2 text-gray-500">
@@ -334,7 +333,7 @@
 
             <!-- Guest -->
             <div class="py-10 text-center">
-                <h2 class="text-2xl font-bold text-[#7B241C]">
+                <h2 class="font-montserrat text-2xl font-bold text-[#7B241C]">
                     Recipe Recommendations
                 </h2>
                 <p class="mt-2 text-gray-500">
