@@ -326,3 +326,45 @@ Walaupun sangat membantu, kode dari AI jelas tidak bisa langsung disalin dan say
 
 Oleh karena itu, saya tetap harus merapikan dan menyesuaikan kodenya secara manual. Saya memperbaiki kerangka kode dan detailnya pada modul resep buatan teman sekelompok (Raffa dan Alta). Saya juga merakit ulang blok pengujian logika waktu secara mandiri menggunakan datetime dan timezone bawaan Django untuk memastikan semua kemungkinan if-else teruji dengan benar. Lalu untuk code demo saya kemarin tidak saya hapus, karena menyadari kode tersebut juga merupakan revisi untuk bug yang ada di modul saya, Thank youuu kak Malikkk!!
 </details>
+
+<details>
+<summary><h3>RAFFA ZIA ARYA PUTRA - 2506619285</h3></summary>
+
+Selama proses pengembangan proyek LeftOver, saya menggunakan AI tools berupa ChatGPT (OpenAI) sebagai alat bantu dalam memahami konsep, mengembangkan fitur, melakukan debugging, serta mengevaluasi implementasi kode, khususnya pada modul Recipe Catalog.
+
+**1. Penggunaan AI**
+
+ChatGPT saya gunakan dalam beberapa tahapan pengembangan proyek, antara lain:
+- Membantu memahami dan mengimplementasikan konsep Django, termasuk penggunaan views, models, templates, URL routing, dan integrasi API.
+- Memberikan arahan dalam mengintegrasikan TheMealDB API untuk memperoleh dan menampilkan data resep pada aplikasi LeftOver.
+- Membantu mengembangkan logika pencarian, filtering resep berdasarkan bahan, serta penyesuaian tampilan Recipe Catalog menggunakan HTML, CSS, dan Tailwind CSS.
+- Membantu mengidentifikasi kesalahan pada kode, menganalisis error, dan memberikan alternatif solusi ketika fitur tidak berjalan sesuai harapan.
+- Memberikan rekomendasi dalam perbaikan UI/UX, responsive design, serta konsistensi tampilan antarmodul.
+- Membantu memahami penggunaan Git, pengelolaan branch, proses integrasi perubahan dari anggota tim, serta strategi deployment aplikasi ke PWS.
+
+**2. Keterbatasan AI**
+
+Meskipun membantu mempercepat proses pengembangan, AI memiliki beberapa keterbatasan:
+- AI tidak selalu memahami keseluruhan struktur proyek dan implementasi yang telah dibuat oleh seluruh anggota tim, sehingga solusi yang diberikan terkadang tidak sesuai dengan kondisi kode aktual.
+- Kode yang dihasilkan AI terkadang menggunakan struktur, nama variabel, URL, atau pendekatan implementasi yang berbeda dari proyek LeftOver.
+- Rekomendasi terkait HTML dan CSS tidak selalu menghasilkan tampilan yang sesuai dengan desain yang diinginkan, sehingga masih diperlukan penyesuaian secara manual.
+- AI terkadang memberikan solusi debugging yang belum menyelesaikan akar permasalahan atau justru memunculkan ketidaksesuaian pada bagian kode lainnya.
+- Rekomendasi implementasi tidak selalu mempertimbangkan keterkaitan antarmodul, sehingga perubahan pada satu bagian aplikasi perlu diperiksa kembali agar tidak mengganggu fungsionalitas modul lain.
+
+**3. Perbaikan yang Dilakukan Secara Manual**
+
+Untuk mengatasi keterbatasan tersebut, saya melakukan pemeriksaan dan penyesuaian secara mandiri, di antaranya:
+- Meninjau kembali kode yang dihasilkan AI dan menyesuaikannya dengan struktur serta kebutuhan aktual proyek LeftOver.
+- Memeriksa implementasi integrasi TheMealDB API, termasuk proses pengambilan data dan penyesuaian data resep agar dapat ditampilkan sesuai kebutuhan aplikasi.
+- Melakukan debugging secara langsung melalui server pengembangan lokal untuk memastikan fitur pencarian, filtering, navigasi, dan tampilan resep berjalan sebagaimana mestinya.
+- Menyesuaikan HTML dan CSS secara manual agar tampilan Recipe Catalog konsisten dengan desain serta responsive pada berbagai ukuran layar.
+- Melakukan pengujian ulang setelah perubahan kode untuk memastikan tidak terdapat error maupun regresi pada fitur yang sebelumnya sudah berjalan.
+- Memeriksa hasil integrasi perubahan dari anggota tim dan memastikan aplikasi tetap berjalan dengan baik sebelum melakukan deployment ke PWS.
+
+**4. Kesimpulan**
+
+ChatGPT digunakan sebagai alat bantu dalam proses pembelajaran dan pengembangan proyek LeftOver, bukan sebagai pengganti pemahaman maupun pengambilan keputusan developer. Setiap rekomendasi dan kode yang dihasilkan AI tetap melalui proses evaluasi, penyesuaian, debugging, serta pengujian secara manual. Dengan demikian, implementasi akhir tetap didasarkan pada kebutuhan proyek, pemahaman terhadap kode, dan keputusan teknis yang dilakukan oleh developer.
+
+Link Chat ChatGPT: https://chatgpt.com/share/6ae48e0e-3388-83ec-9e5c-587aef4477b6 dan https://chatgpt.com/share/6ae48e32-f1fc-83ec-8a57-aa0712271586
+
+</details>
