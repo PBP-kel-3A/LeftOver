@@ -5,6 +5,10 @@
     LeftOver - Reducing Food Waste
 {% endblock %}
 
+{% block extra_css %}
+<script src="https://cdn.tailwindcss.com"></script>
+{% endblock %}
+
 {% block content %}
 
 <section class="hero">
@@ -215,172 +219,152 @@
 </section>
 
 
-<section class="recommendation">
 
-    <div class="recommendation-container">
+<section class="bg-[#F5F1E3] px-6 py-16">
+    <div class="mx-auto max-w-7xl">
 
         {% if user.is_authenticated %}
 
-            <!-- Logged-in User -->
-
-            <div class="recommendation-header">
-
+            <!-- Header -->
+            <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
                 <div>
-                    <h2>
+                    <h2 class="text-2xl font-bold text-[#7B241C] md:text-3xl">
                         Recommendations Based on Your Kitchen
                     </h2>
-
-                    <p>
-                        Find recipes that match the ingredients
-                        you have on hand.
+                    <p class="mt-2 text-sm text-gray-500">
+                        Find recipes that match the ingredients you have on hand.
                     </p>
                 </div>
 
                 <a href="{% url 'recipes:recipe_list' %}"
-                   class="recommendation-link">
+                   class="rounded-full bg-[#315D47] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#264736]">
                     See all recipes →
                 </a>
-
             </div>
 
+            {% if not has_pantry_items %}
 
-            <div class="recipe-preview-grid">
+                <div class="rounded-2xl bg-white p-10 text-center shadow-sm">
+                    <h3 class="text-xl font-bold text-[#26382D]">
+                        Your Pantry Is Empty
+                    </h3>
+                    <p class="mt-2 text-gray-500">
+                        Your pantry is empty. Add some ingredients to get personalized recipe recommendations!
+                    </p>
+                    <a href="{% url 'pantry:pantry_list' %}"
+                       class="mt-5 inline-block rounded-xl bg-[#315D47] px-6 py-3 text-sm font-semibold text-white hover:bg-[#264736]">
+                        Add Ingredients →
+                    </a>
+                </div>
 
-                <!-- Recipe Card 1 -->
-                <article class="recipe-card">
+            {% elif recommendations %}
 
-                    <div class="recipe-image">
-                        <span>Recipe Image</span>
-                    </div>
+                <!-- Recipe Grid -->
+                <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
 
-                    <div class="recipe-card-content">
+                    {% for item in recommendations %}
 
-                        <div class="recipe-meta">
-                            <span>★ 4.9</span>
-                            <span>15 Menit</span>
-                        </div>
+                        <article class="group flex h-full flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-black/5 transition duration-200 hover:-translate-y-1 hover:shadow-lg">
 
-                        <h3>
-                            Nasi Goreng Kampung Sisa Dapur
-                        </h3>
+                            <!-- Recipe Image -->
+                            <div class="h-64 w-full overflow-hidden bg-gray-100">
+                                {% if item.recipe.image_url %}
+                                    <img
+                                        src="{{ item.recipe.image_url }}"
+                                        alt="{{ item.recipe.name }}"
+                                        class="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                                    >
+                                {% else %}
+                                    <div class="flex h-full items-center justify-center text-gray-400">
+                                        No Image Available
+                                    </div>
+                                {% endif %}
+                            </div>
 
-                        <p>
-                            Penyelamat nasi keras malam ini
-                            dengan bahan sederhana.
-                        </p>
+                            <!-- Recipe Content -->
+                            <div class="flex flex-1 flex-col p-5">
 
-                        <div class="recipe-tag">
-                            ✓ Bahan tersedia
-                        </div>
+                                <div class="mb-3 flex items-center gap-2 text-sm text-gray-400">
+                                    <span>★</span>
+                                    <span>No reviews yet</span>
+                                </div>
 
-                        <a href="#" class="recipe-button">
-                            Lihat Resep →
-                        </a>
+                                <h3 class="text-lg font-bold text-[#26382D]">
+                                    {{ item.recipe.name }}
+                                </h3>
 
-                    </div>
+                                <!-- Category -->
+                                <div class="mt-4 flex flex-wrap gap-2">
+                                    {% if item.recipe.category %}
+                                        <span class="rounded-full bg-[#E5EEE6] px-3 py-1 text-xs font-medium text-[#315D47]">
+                                            {{ item.recipe.category }}
+                                        </span>
+                                    {% endif %}
 
-                </article>
+                                    {% if item.recipe.area %}
+                                        <span class="rounded-full bg-[#F1EBDD] px-3 py-1 text-xs font-medium text-[#75664D]">
+                                            {{ item.recipe.area }}
+                                        </span>
+                                    {% endif %}
+                                </div>
 
+                                <!-- Matching Ingredients -->
+                                <div class="mt-4 rounded-xl bg-[#E5EEE6] px-3 py-2 text-sm text-[#315D47]">
+                                    ✓ {{ item.match_count }} matching ingredients
+                                </div>
 
-                <!-- Recipe Card 2 -->
-                <article class="recipe-card">
+                                <!-- Button -->
+                                <a
+                                    href="{% url 'recipes:recipe_list' %}?search={{ item.recipe.name|urlencode }}"
+                                    class="mt-5 block rounded-lg bg-[#8B1E12] px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-[#6F180F]"
+                                >
+                                    See recipe →
+                                </a>
 
-                    <div class="recipe-image">
-                        <span>Recipe Image</span>
-                    </div>
+                            </div>
+                        </article>
 
-                    <div class="recipe-card-content">
+                    {% endfor %}
 
-                        <div class="recipe-meta">
-                            <span>★ 4.8</span>
-                            <span>12 Menit</span>
-                        </div>
+                </div>
 
-                        <h3>
-                            Tumis Tahu Telur Saus Tiram
-                        </h3>
+            {% else %}
 
-                        <p>
-                            Kombinasi tahu dan telur yang
-                            sederhana dan praktis.
-                        </p>
+                <div class="rounded-2xl bg-white p-10 text-center shadow-sm">
+                    <h3 class="text-xl font-bold text-[#26382D]">
+                        No Matching Recipes Yet
+                    </h3>
+                    <p class="mt-2 text-gray-500">
+                        We couldn't find recipes matching your current pantry ingredients. Try adding more ingredients or exploring our Recipe Catalog!
+                    </p>
+                    <a href="{% url 'recipes:recipe_list' %}"
+                       class="mt-5 inline-block rounded-xl bg-[#315D47] px-6 py-3 text-sm font-semibold text-white">
+                        Explore Recipes →
+                    </a>
+                </div>
 
-                        <div class="recipe-tag warning">
-                            ⚠ Kurang 1 bahan
-                        </div>
-
-                        <a href="#" class="recipe-button">
-                            Lihat Resep →
-                        </a>
-
-                    </div>
-
-                </article>
-
-
-                <!-- Recipe Card 3 -->
-                <article class="recipe-card">
-
-                    <div class="recipe-image">
-                        <span>Recipe Image</span>
-                    </div>
-
-                    <div class="recipe-card-content">
-
-                        <div class="recipe-meta">
-                            <span>★ 4.7</span>
-                            <span>20 Menit</span>
-                        </div>
-
-                        <h3>
-                            Sup Ayam Sayur Bening
-                        </h3>
-
-                        <p>
-                            Sup sederhana dengan sayuran
-                            yang ada di dapur.
-                        </p>
-
-                        <div class="recipe-tag">
-                            ✓ Bahan tersedia
-                        </div>
-
-                        <a href="#" class="recipe-button">
-                            Lihat Resep →
-                        </a>
-
-                    </div>
-
-                </article>
-
-            </div>
+            {% endif %}
 
         {% else %}
 
             <!-- Guest -->
-
-            <div class="recommendation-guest">
-
-                <h2>
-                    Rekomendasi Resep
+            <div class="py-10 text-center">
+                <h2 class="text-2xl font-bold text-[#7B241C]">
+                    Recipe Recommendations
                 </h2>
-
-                <p>
-                    Temukan berbagai resep lezat berdasarkan
-                    bahan yang kamu punya.
+                <p class="mt-2 text-gray-500">
+                    Discover delicious recipes based on the ingredients you have.
                 </p>
-
                 <a href="{% url 'recipes:recipe_list' %}"
-                   class="recommendation-link">
-                    Jelajahi resep →
+                   class="mt-5 inline-block rounded-full bg-[#315D47] px-6 py-3 text-sm font-semibold text-white">
+                    Explore Recipes →
                 </a>
-
             </div>
 
         {% endif %}
 
     </div>
-
 </section>
+
 
 {% endblock %}
