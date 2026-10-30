@@ -2,7 +2,9 @@ from urllib.parse import urlencode
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import NON_FIELD_ERRORS
 from django.db.models.functions import Lower
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -41,6 +43,21 @@ def _list_url(**params):
     return f"{base}?{query}" if query else base
 
 
+def _is_ajax(request):
+    """Request dikirim lewat fetch() dari pantry.js (header X-Requested-With)."""
+    return request.headers.get("x-requested-with") == "XMLHttpRequest"
+
+
+def _form_errors(form):
+    """Error form sebagai {nama input di HTML: [pesan, ...]} untuk dikirim sebagai JSON."""
+    return {
+        field if field == NON_FIELD_ERRORS else form.add_prefix(field): [
+            str(message) for message in errors
+        ]
+        for field, errors in form.errors.items()
+    }
+
+
 def _first_error(form):
     """Pesan error pertama dari form, untuk ditampilkan di toast."""
     for errors in form.errors.values():
@@ -59,7 +76,12 @@ def pantry_list(request):
             item.user = request.user
             item.save()
             messages.success(request, f"{item.name} was added to your pantry.")
+            if _is_ajax(request):
+                return JsonResponse({"ok": True, "redirect": reverse("pantry:pantry_list")})
             return redirect("pantry:pantry_list")
+        if _is_ajax(request):
+            # Tidak valid: kirim error sebagai JSON, halaman tidak perlu dimuat ulang
+            return JsonResponse({"ok": False, "errors": _form_errors(form)}, status=400)
     else:
         form = PantryItemForm()
 
@@ -132,7 +154,11 @@ def pantry_edit(request, pk):
     if form.is_valid():
         form.save()
         messages.success(request, f"{item.name} was updated.")
+        if _is_ajax(request):
+            return JsonResponse({"ok": True, "redirect": reverse("pantry:pantry_list")})
     else:
+        if _is_ajax(request):
+            return JsonResponse({"ok": False, "errors": _form_errors(form)}, status=400)
         messages.error(request, f"Couldn't save your changes: {_first_error(form)}")
 
     return redirect("pantry:pantry_list")
