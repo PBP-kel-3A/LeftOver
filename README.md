@@ -286,8 +286,8 @@ LeftOver di-deploy pada platform PWS CS UI.
 LeftOver hadir untuk membantu pengguna memasak dengan lebih bijak melalui pemanfaatan bahan makanan yang sudah tersedia.
 
 ## AI-Diclosure
-
-ZULFA RAHMI NASUTION - 2506598324
+<details>
+<summary><h3>ZULFA RAHMI NASUTION - 2506598324</h3></summary>
 1. Keterbatasan AI
 
 Selama pengembangan LeftOver, AI digunakan untuk membantu penulisan kode, debugging, dan memberikan rekomendasi implementasi. Namun, terdapat beberapa keterbatasan:
@@ -309,3 +309,20 @@ Untuk mengatasi keterbatasan tersebut, dilakukan beberapa penyesuaian dan debugg
 AI (chatGPT) berperan sebagai alat bantu selama proses pengembangan, bukan sebagai pengganti proses pengambilan keputusan developer. Seluruh kode yang dihasilkan tetap memerlukan pemeriksaan, penyesuaian, debugging, dan pengujian manual agar sesuai dengan kebutuhan dan fungsionalitas LeftOver.
 
 Link Chat : https://chatgpt.com/share/6ae4178c-6b24-83ec-9e9d-9e15bdcef85a
+</details>
+
+
+<details>
+<summary><h3>ELISIA CATHERINE - 2506533570</h3></summary>
+Saya menggunakan AI tools berupa Claude. Dengan link chat berikut ini:
+1. Gemini : https://share.gemini.google/Pov6I3DMDJF0
+2. Claude : https://drive.google.com/file/d/1h1Etf1yuhPzJCwE11B5c-mgFLcjJqEjU/view?usp=sharing
+
+Untuk link Claudenya sudah tidak bisa di share, tapi saya sempat screenshot untuk AI Disclosure jadi disertakan dengan link Google docs saja ya kak...
+
+Selama pengembangan projek LeftOver, saya menggunakan source belajar UTS saya dari link Gemini, di sana ada pertanyaan-pertanyaan saya terkait materi UTS PBP yang tentunya menjadi fondasi saya untuk memahami pengerjaan di project ini. Jadi kalau ketika ada pertanyaan yang saya ingat pernah di tanyakan, saya akan buka kembali percakapan itu. Untuk Claude secara garis besar saya gunakan untuk mendeteksi kesalahan pada modul saya, dengan cara saya mengirimkan file file yang dibutuhkan untuk mengecek bug pada modul saya, lalu claude akan membuatkan pdf yang berisikan list revisi yang harus saya lakukan.
+
+Walaupun sangat membantu, kode dari AI jelas tidak bisa langsung disalin dan saya tempel. Misalnya, AI sempat membuatkan kode untuk membenarkan bug yang ada di modul saya, namun yang diberikan belum 100% sesuai karena AI tidak memiliki seluruh data modul saya sehingga saya harus menyesuaikan lagi bagiannya dengan kode saya, lalu dicek secara manual melalui server lokal. Selain itu, AI juga masih tidak mengerti full-context dari model saya sehingga masih banyak code rekomendasi yang missed dan tidak perlu saya implementasikan ke dalam modul saya.
+
+Oleh karena itu, saya tetap harus merapikan dan menyesuaikan kodenya secara manual. Saya memperbaiki kerangka kode dan detailnya pada modul resep buatan teman sekelompok (Raffa dan Alta). Saya juga merakit ulang blok pengujian logika waktu secara mandiri menggunakan datetime dan timezone bawaan Django untuk memastikan semua kemungkinan if-else teruji dengan benar. Lalu untuk code demo saya kemarin tidak saya hapus, karena menyadari kode tersebut juga merupakan revisi untuk bug yang ada di modul saya, Thank youuu kak Malikkk!!
+</details>
