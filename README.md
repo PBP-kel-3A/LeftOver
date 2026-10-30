@@ -106,7 +106,7 @@ Pantau masa simpan bahan-bahan Anda dengan mudah. ​​Dapatkan saran masakan s
 
 Belanja tepat tanpa lapar mata. Sinkronisasi otomatis dari resep yang ingin dimasak dan stok pantry yang menipis.
 
-![Shopping](docs/screenshots/Shopping.png)
+![Shopping](docs/screenshots/shopping.png)
 
 ###  Favorite
 
