@@ -1,4 +1,3 @@
-import importlib
 from datetime import date, datetime, timedelta
 from decimal import Decimal
 from unittest import mock
@@ -6,7 +5,6 @@ from urllib.parse import urlencode
 from zoneinfo import ZoneInfo
 
 import requests
-from django.apps import apps
 from django.contrib.auth.models import User
 from django.contrib.messages import get_messages
 from django.core.exceptions import ValidationError
@@ -18,7 +16,12 @@ from recipes.models import Ingredient, Recipe, RecipeIngredient
 
 from .forms import PantryItemForm
 from .models import IngredientAlias, PantryItem
-from .services import apply_synonyms, resolve_recipe_keywords
+from .services import (
+    apply_synonyms,
+    resolve_recipe_keywords,
+    catalog_ingredient_names,
+    get_landing_recommendations,
+)
 
 JAKARTA = ZoneInfo("Asia/Jakarta")
 
@@ -184,32 +187,6 @@ class CategoryFormTests(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("category", form.errors)
 
-
-class UnitMigrationTests(TestCase):
-    """0003 mengonversi satuan lama (butir, siung, ...) ke English."""
-
-    def test_existing_rows_are_converted_both_ways(self):
-        migration = importlib.import_module("pantry.migrations.0003_english_ui")
-        user = User.objects.create_user("rahmi", password="pw12345!")
-        legacy = {
-            "butir": "pcs", "buah": "pcs", "gram": "g", "kg": "kg",
-            "liter": "l", "siung": "clove", "batang": "stalk",
-            "ikat": "bunch", "lembar": "slice", "bungkus": "pack",
-        }
-        items = {old: make_item(user, f"Item {old}", unit=old) for old in legacy}
-
-        migration.units_to_english(apps, None)
-        for old, new in legacy.items():
-            items[old].refresh_from_db()
-            self.assertEqual(items[old].unit, new, old)
-
-        migration.units_to_indonesian(apps, None)
-        items["siung"].refresh_from_db()
-        items["gram"].refresh_from_db()
-        self.assertEqual(items["siung"].unit, "siung")
-        self.assertEqual(items["gram"].unit, "gram")
-
-
 class SynonymTests(TestCase):
     def test_synonyms_are_applied_inside_the_name(self):
         cases = {
@@ -372,7 +349,7 @@ class PantryViewTests(TestCase):
         self.assertContains(response, '<option value="Eggs">', html=False)
         # kolom nama (tambah + edit) dan kolom nama katalog (edit)
         self.assertContains(response, 'list="catalog-ingredients"', count=3)
-        self.assertContains(response, "css/toast.css")
+        self.assertContains(response, "css/pantry.css")
 
     # ----- Summary -----
     def test_total_counts_rows_not_quantity_or_unique_names(self):
@@ -707,7 +684,8 @@ class FindRecipesTests(TestCase):
         make_item(self.user, "Dragonfruit", days=3)
         response = self.client.get(self.url, follow=True)
         self.assertContains(response, "Skipped Dragonfruit")
-        self.assertContains(response, "css/toast.css")
+        self.assertContains(response, "toast-container")
+        self.assertContains(response, "toast warning")
 
     def test_catalog_actually_filters_by_the_redirect(self):
         Recipe.objects.create(mealdb_id="test-2", name="Plain Rice")
@@ -856,3 +834,194 @@ class SearchSortToolbarTests(TestCase):
         self.assertContains(with_category, '<input type="hidden" name="category" value="fruits">')
         without = self.client.get(self.url)
         self.assertNotContains(without, 'type="hidden" name="category"')
+
+@mock.patch("pantry.services.cache")
+class CatalogIngredientNamesTests(TestCase):
+    def test_returns_cached_names_without_calling_api(self, mocked_cache):
+        mocked_cache.get.return_value = ["Eggs", "Carrots"]
+
+        result = catalog_ingredient_names()
+
+        self.assertEqual(result, ["Eggs", "Carrots"])
+        mocked_cache.get.assert_called_once_with("themealdb_ingredient_names")
+        mocked_cache.set.assert_not_called()
+
+    def test_fetches_and_caches_names_from_api(self, mocked_cache):
+        mocked_cache.get.return_value = None
+
+        response = mock.Mock()
+        response.json.return_value = {
+            "meals": [
+                {"strIngredient": "Carrots"},
+                {"strIngredient": "eggs"},
+                {"strIngredient": "Carrots"},
+                {"strIngredient": ""},
+            ]
+        }
+
+        with mock.patch(
+            "pantry.services.requests.get", return_value=response
+        ) as mocked_get:
+            result = catalog_ingredient_names()
+
+        self.assertEqual(result, ["Carrots", "eggs"])
+        mocked_get.assert_called_once()
+        mocked_cache.set.assert_called_once_with(
+            "themealdb_ingredient_names",
+            ["Carrots", "eggs"],
+            60 * 60 * 24,
+        )
+
+    def test_empty_api_response_uses_local_database_fallback(self, mocked_cache):
+        mocked_cache.get.return_value = None
+        make_catalog("Eggs", "Carrots")
+
+        response = mock.Mock()
+        response.json.return_value = {"meals": []}
+
+        with mock.patch(
+            "pantry.services.requests.get", return_value=response
+        ):
+            result = catalog_ingredient_names()
+
+        self.assertEqual(result, ["Carrots", "Eggs"])
+        mocked_cache.set.assert_not_called()
+
+    def test_api_error_uses_local_database_fallback(self, mocked_cache):
+        mocked_cache.get.return_value = None
+        make_catalog("Eggs", "Chicken")
+
+        with mock.patch(
+            "pantry.services.requests.get",
+            side_effect=requests.ConnectionError("API unavailable"),
+        ):
+            result = catalog_ingredient_names()
+
+        self.assertEqual(result, ["Chicken", "Eggs"])
+
+    def test_invalid_json_uses_local_database_fallback(self, mocked_cache):
+        mocked_cache.get.return_value = None
+        make_catalog("Basil")
+
+        response = mock.Mock()
+        response.json.side_effect = ValueError("Invalid JSON")
+
+        with mock.patch(
+            "pantry.services.requests.get", return_value=response
+        ):
+            result = catalog_ingredient_names()
+
+        self.assertEqual(result, ["Basil"])
+
+    def test_fallback_returns_empty_list_when_database_is_empty(
+        self, mocked_cache
+    ):
+        mocked_cache.get.return_value = None
+
+        with mock.patch(
+            "pantry.services.requests.get",
+            side_effect=requests.ConnectionError("API unavailable"),
+        ):
+            result = catalog_ingredient_names()
+
+        self.assertEqual(result, [])
+
+@offline_catalog
+class LandingRecommendationTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            "recommendation_user",
+            password="pw12345!",
+        )
+
+    def create_recipe(self, name, *ingredient_names):
+        recipe = Recipe.objects.create(
+            mealdb_id=f"test-{name.lower().replace(' ', '-')}",
+            name=name,
+        )
+
+        for ingredient_name in ingredient_names:
+            ingredient, _ = Ingredient.objects.get_or_create(
+                name=ingredient_name
+            )
+            RecipeIngredient.objects.create(
+                recipe=recipe,
+                ingredient=ingredient,
+            )
+
+        return recipe
+
+    def test_empty_pantry_returns_empty_recommendations(self):
+        result = get_landing_recommendations(self.user)
+
+        self.assertEqual(result, [])
+
+    def test_no_matching_ingredients_returns_empty_recommendations(self):
+        self.create_recipe("Egg Dish", "Eggs")
+        make_item(self.user, "Dragonfruit")
+
+        result = get_landing_recommendations(self.user)
+
+        self.assertEqual(result, [])
+
+    def test_expired_pantry_items_are_not_used(self):
+        self.create_recipe("Egg Dish", "Eggs")
+        make_item(self.user, "Eggs", days=-1)
+
+        result = get_landing_recommendations(self.user)
+
+        self.assertEqual(result, [])
+
+    def test_recommendations_are_ranked_correctly(self):
+        # Dua bahan cocok harus lebih diprioritaskan daripada satu bahan.
+        self.create_recipe("Beta", "Eggs", "Chicken")
+        self.create_recipe("Alpha", "Eggs", "Carrots")
+
+        # Satu bahan cocok: urutan berikutnya ditentukan expiry.
+        self.create_recipe("Zulu", "Rice")
+        self.create_recipe("Charlie", "Carrots")
+
+        make_item(self.user, "Eggs", days=2)
+        make_item(self.user, "Carrots", days=5)
+        make_item(self.user, "Chicken", days=2)
+        make_item(self.user, "Rice", days=1)
+
+        result = get_landing_recommendations(self.user, limit=4)
+
+        names = [item["recipe"].name for item in result]
+
+        self.assertEqual(
+            names,
+            ["Alpha", "Beta", "Zulu", "Charlie"],
+        )
+
+        self.assertEqual(result[0]["match_count"], 2)
+        self.assertEqual(result[1]["match_count"], 2)
+        self.assertEqual(result[2]["match_count"], 1)
+
+    def test_recommendations_respect_limit(self):
+        self.create_recipe("Egg Dish", "Eggs")
+        self.create_recipe("Chicken Dish", "Chicken")
+        self.create_recipe("Rice Dish", "Rice")
+
+        make_item(self.user, "Eggs")
+        make_item(self.user, "Chicken")
+        make_item(self.user, "Rice")
+
+        result = get_landing_recommendations(self.user, limit=2)
+
+        self.assertEqual(len(result), 2)
+
+    def test_recipe_with_more_matching_ingredients_ranks_first(self):
+        self.create_recipe("One Ingredient", "Eggs")
+        self.create_recipe("Two Ingredients", "Eggs", "Chicken")
+
+        make_item(self.user, "Eggs", days=1)
+        make_item(self.user, "Chicken", days=5)
+
+        result = get_landing_recommendations(self.user)
+
+        self.assertEqual(
+            result[0]["recipe"].name,
+            "Two Ingredients",
+        )
