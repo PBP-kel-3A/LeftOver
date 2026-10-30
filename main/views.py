@@ -3,10 +3,29 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib import messages
+from django.utils import timezone
+from pantry.models import PantryItem
+from pantry.services import get_landing_recommendations
 
 # Landing page view
 def landing(request):
-    return render(request, "main/landing.html")
+    context = {
+        "has_pantry_items": False,
+        "recommendations": [],
+    }
+
+    if request.user.is_authenticated:
+        active_pantry = PantryItem.objects.filter(
+            user=request.user,
+            expiry_date__gte=timezone.localdate()
+        )
+
+        context["has_pantry_items"] = active_pantry.exists()
+        context["recommendations"] = get_landing_recommendations(
+            request.user
+        )
+
+    return render(request, "main/landing.html", context)
 
 # Code untuk register
 def register_user(request):

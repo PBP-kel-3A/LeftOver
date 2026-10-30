@@ -19,9 +19,11 @@ ingredient cannot empty the whole search (the catalog filter is an AND).
 import re
 import requests
 from dataclasses import dataclass, field
-from recipes.models import RecipeIngredient
-from .models import IngredientAlias
+from recipes.models import RecipeIngredient, Recipe
+from .models import IngredientAlias, PantryItem
 from django.core.cache import cache
+from django.core.cache import cache
+from django.utils import timezone
 
 # What people type -> how TheMealDB usually words it. Keys are singular (a
 # trailing "s" is matched automatically) and are replaced inside the name, so
@@ -190,3 +192,100 @@ def resolve_recipe_keywords(items):
             result.skipped.append(item.name)
 
     return result
+
+def get_landing_recommendations(user, limit=3):
+    """
+    Recommend recipes based on the user's non-expired pantry items.
+
+    Ranking:
+    1. Most matching ingredients
+    2. Nearest expiry date among matched ingredients
+    3. Recipe name A-Z
+    """
+
+    # Ambil bahan user yang belum kedaluwarsa.
+    pantry_items = list(
+        PantryItem.objects.filter(
+            user=user,
+            expiry_date__gte=timezone.localdate()
+        )
+    )
+
+    if not pantry_items:
+        return []
+
+    # Petakan keyword katalog ke tanggal kedaluwarsa terdekat.
+    keyword_expiries = {}
+
+    for item in pantry_items:
+        result = resolve_recipe_keywords([item])
+
+        for keyword in result.keywords:
+            if (
+                keyword not in keyword_expiries
+                or item.expiry_date < keyword_expiries[keyword]
+            ):
+                keyword_expiries[keyword] = item.expiry_date
+
+    if not keyword_expiries:
+        return []
+
+    # Ambil seluruh relasi resep dan bahan.
+    recipe_ingredients = RecipeIngredient.objects.select_related(
+        "recipe", "ingredient"
+    )
+
+    # Simpan bahan yang cocok untuk setiap resep.
+    matches = {}
+
+    for relation in recipe_ingredients:
+        ingredient_name = relation.ingredient.name.lower()
+
+        matched_expiries = [
+            expiry
+            for keyword, expiry in keyword_expiries.items()
+            if keyword in ingredient_name
+        ]
+
+        if not matched_expiries:
+            continue
+
+        recipe_id = relation.recipe_id
+        ingredient_id = relation.ingredient_id
+        nearest_expiry = min(matched_expiries)
+
+        if recipe_id not in matches:
+            matches[recipe_id] = {
+                "recipe": relation.recipe,
+                "ingredients": {}
+            }
+
+        # Hindari menghitung bahan yang sama lebih dari sekali.
+        existing_expiry = matches[recipe_id]["ingredients"].get(
+            ingredient_id
+        )
+
+        if existing_expiry is None or nearest_expiry < existing_expiry:
+            matches[recipe_id]["ingredients"][ingredient_id] = nearest_expiry
+
+    # Susun hasil berdasarkan ranking.
+    recommendations = []
+
+    for data in matches.values():
+        ingredient_expiries = list(data["ingredients"].values())
+
+        recommendations.append({
+            "recipe": data["recipe"],
+            "match_count": len(data["ingredients"]),
+            "nearest_expiry": min(ingredient_expiries),
+        })
+
+    recommendations.sort(
+        key=lambda item: (
+            -item["match_count"],
+            item["nearest_expiry"],
+            item["recipe"].name.casefold()
+        )
+    )
+
+    return recommendations[:limit]
