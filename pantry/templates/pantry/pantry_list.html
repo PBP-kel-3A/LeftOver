@@ -72,7 +72,7 @@
                     Just restocked? Log it now so its shelf life is tracked automatically.
                 </p>
 
-                <form method="post" action="{% url 'pantry:pantry_list' %}" class="pantry-form" novalidate>
+                <form method="post" action="{% url 'pantry:pantry_list' %}" class="pantry-form" novalidate data-ajax-form>
                     {% csrf_token %}
 
                     <div class="pantry-field">
@@ -312,7 +312,7 @@
 
     <!-- Dialog edit -->
     <dialog id="edit-dialog" class="pantry-dialog">
-        <form method="post" id="edit-form" class="pantry-form" novalidate>
+        <form method="post" id="edit-form" class="pantry-form" novalidate data-ajax-form>
             {% csrf_token %}
             <h2 class="pantry-panel-title">Edit Ingredient</h2>
 
