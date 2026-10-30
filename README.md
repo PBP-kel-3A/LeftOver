@@ -289,6 +289,7 @@ LeftOver hadir untuk membantu pengguna memasak dengan lebih bijak melalui pemanf
 
 ZULFA RAHMI NASUTION - 2506598324
 1. Keterbatasan AI
+
 Selama pengembangan LeftOver, AI digunakan untuk membantu penulisan kode, debugging, dan memberikan rekomendasi implementasi. Namun, terdapat beberapa keterbatasan:
 - AI terkadang menghasilkan kode yang tidak sepenuhnya sesuai dengan struktur project dan kebutuhan aplikasi.
 - AI kurang memahami perbedaan penamaan bahan antara input pengguna dan katalog resep TheMealDB, sehingga pencocokan bahan tidak selalu akurat.
@@ -296,6 +297,7 @@ Selama pengembangan LeftOver, AI digunakan untuk membantu penulisan kode, debugg
 - Solusi debugging dari AI terkadang hanya mengatasi gejala error tanpa menyelesaikan akar permasalahannya.
 
 2. Perbaikan yang Dilakukan Secara Manual
+
 Untuk mengatasi keterbatasan tersebut, dilakukan beberapa penyesuaian dan debugging secara manual:
 - Mengembangkan sistem ingredient alias, synonym mapping, dan pencocokan singular/plural agar pencarian resep lebih akurat.
 - Menambahkan API timeout, exception handling, caching, dan fallback menggunakan data resep lokal ketika TheMealDB tidak dapat diakses.
@@ -303,6 +305,7 @@ Untuk mengatasi keterbatasan tersebut, dilakukan beberapa penyesuaian dan debugg
 - Melakukan pemeriksaan ulang terhadap validasi form, relasi database, dan hasil operasi CRUD untuk memastikan data tersimpan dan ditampilkan dengan benar.
 
 3. Kesimpulan
+
 AI (chatGPT) berperan sebagai alat bantu selama proses pengembangan, bukan sebagai pengganti proses pengambilan keputusan developer. Seluruh kode yang dihasilkan tetap memerlukan pemeriksaan, penyesuaian, debugging, dan pengujian manual agar sesuai dengan kebutuhan dan fungsionalitas LeftOver.
 
 Link Chat : https://chatgpt.com/share/6ae4178c-6b24-83ec-9e9d-9e15bdcef85a
