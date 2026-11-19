@@ -42,6 +42,7 @@ CSRF_TRUSTED_ORIGINS = [
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
+    "10.0.2.2",
     "raffa-zia-leftover.pws.cs.ui.ac.id",
 ]
 
@@ -64,6 +65,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -175,3 +177,13 @@ cloudinary.config(
     api_secret=os.environ["CLOUDINARY_API_SECRET"],
     secure=True,
 )
+
+
+# untuk keperluan Tugas Akhir mobile with Flutter
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+
+CSRF_COOKIE_SECURE = PRODUCTION
+SESSION_COOKIE_SECURE = PRODUCTION
+CSRF_COOKIE_SAMESITE = 'None' if PRODUCTION else 'Lax'
+SESSION_COOKIE_SAMESITE = 'None' if PRODUCTION else 'Lax'
