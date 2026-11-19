@@ -27,6 +27,7 @@ urlpatterns = [
     path("", include("main.urls")),
     path('reviews/', include('reviews.urls')),
     path("favorites/", include("favorites.urls")),
+    path("api/", include("recipes.api_urls")),
 ]
 
 if settings.DEBUG:
