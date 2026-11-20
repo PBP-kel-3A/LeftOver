@@ -30,6 +30,7 @@ urlpatterns = [
     path("api/", include("recipes.api_urls")),
     path("api/", include("reviews.api_urls")),
     path("api/", include("main.api_urls")),
+    path("api/", include("pantry.api_urls")),
 ]
 
 if settings.DEBUG:
